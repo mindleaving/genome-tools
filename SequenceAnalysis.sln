@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SequenceAnalysis", "SequenceAnalysis\SequenceAnalysis.csproj", "{0FF51782-DB60-4A66-AA42-83C095F292FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastaSplitter", "FastaSplitter\FastaSplitter.csproj", "{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChromosomeImageGenerator", "ChromosomeImageGenerator\ChromosomeImageGenerator.csproj", "{B375B1E6-B286-4B56-814D-8919D4100DE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideAligner", "PeptideAligner\PeptideAligner.csproj", "{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons", "Commons\Commons.csproj", "{D0E6B038-C939-487D-BB5E-A6270A0D18F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExonBoundaryDataExtractor", "ExonBoundaryDataExtractor\ExonBoundaryDataExtractor.csproj", "{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0E6B038-C939-487D-BB5E-A6270A0D18F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0E6B038-C939-487D-BB5E-A6270A0D18F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0E6B038-C939-487D-BB5E-A6270A0D18F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0E6B038-C939-487D-BB5E-A6270A0D18F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
