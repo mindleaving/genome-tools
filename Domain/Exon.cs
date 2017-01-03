@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PeptideAligner
+namespace Domain
 {
     public class Exon
     {

@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commons", "Commons\Commons.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExonBoundaryDataExtractor", "ExonBoundaryDataExtractor\ExonBoundaryDataExtractor.csproj", "{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NucleotideSequenceToDataSet", "NucleotideSequenceToDataSet\NucleotideSequenceToDataSet.csproj", "{3E01CA02-0E29-46DC-9639-9485E2F48B05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{4708C272-3B30-4E50-A16B-479B49B095E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4CF9680-A1C1-4391-BF02-0F3D7D3F1066}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E01CA02-0E29-46DC-9639-9485E2F48B05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E01CA02-0E29-46DC-9639-9485E2F48B05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E01CA02-0E29-46DC-9639-9485E2F48B05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E01CA02-0E29-46DC-9639-9485E2F48B05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4708C272-3B30-4E50-A16B-479B49B095E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4708C272-3B30-4E50-A16B-479B49B095E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4708C272-3B30-4E50-A16B-479B49B095E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4708C272-3B30-4E50-A16B-479B49B095E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

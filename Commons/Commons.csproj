@@ -41,7 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CappedFrequencyCounter.cs" />
     <Compile Include="CircularBuffer.cs" />
+    <Compile Include="Combinatorics.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="EnumExtensions.cs" />
     <Compile Include="GraphAlgorithmClasses.cs" />

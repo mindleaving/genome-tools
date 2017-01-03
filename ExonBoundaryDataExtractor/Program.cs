@@ -13,13 +13,14 @@ namespace ExonBoundaryDataExtractor
         private const int LongSequenceThreshold = 10;
         private const int PromoterLength = 250;
         private const int DownstreamLength = 100;
-        private const int ExonBoundaryLength = 11;
+        private const int ExonBoundaryLength = 25;
 
         public static void Main()
         {
             if (!Directory.Exists(OutputDirectory))
                 Directory.CreateDirectory(OutputDirectory);
 
+            var rng = new Random();
             var peptides = ReadPeptides();
             string lastChromosome = null;
             string chromosomeData = null;
@@ -38,31 +39,61 @@ namespace ExonBoundaryDataExtractor
                 var firstExon = peptide.Exons.First();
                 var lastExon = peptide.Exons.Last();
                 var promoter = chromosomeData.Substring(firstExon.StartBase - 1 - PromoterLength, PromoterLength);
-                File.AppendAllText(Path.Combine(OutputDirectory, "promoter_sequences.txt"), promoter + Environment.NewLine);
+                File.AppendAllText(Path.Combine(OutputDirectory, "promoter_sequences.txt"), SeparateNucelotidesByComma(promoter) + Environment.NewLine);
                 var downstreamEnd = chromosomeData.Substring(lastExon.EndBase, DownstreamLength);
-                File.AppendAllText(Path.Combine(OutputDirectory, "downstream_sequences.txt"), downstreamEnd + Environment.NewLine);
+                File.AppendAllText(Path.Combine(OutputDirectory, "downstream_sequences.txt"), SeparateNucelotidesByComma(downstreamEnd) + Environment.NewLine);
+                string negativePromoter;
+                do
+                {
+                    var negativeStart = rng.Next(chromosomeData.Length - PromoterLength);
+                    negativePromoter = chromosomeData.Substring(negativeStart, PromoterLength);
+                } while (negativePromoter.Contains('N'));
+                File.AppendAllText(Path.Combine(OutputDirectory, "promoter_negatives.txt"), SeparateNucelotidesByComma(negativePromoter) + Environment.NewLine);
+                string negativeDownstream;
+                do
+                {
+                    var negativeStart = rng.Next(chromosomeData.Length - DownstreamLength);
+                    negativeDownstream = chromosomeData.Substring(negativeStart, DownstreamLength);
+                } while (negativeDownstream.Contains('N'));
+                File.AppendAllText(Path.Combine(OutputDirectory, "downstream_negatives.txt"), SeparateNucelotidesByComma(negativeDownstream) + Environment.NewLine);
 
                 var exonLeftBoundaryData = new List<string>();
                 var exonRightBoundaryData = new List<string>();
+                var negativeCases = new List<string>();
                 for (var exonIdx = 0; exonIdx < peptide.Exons.Count-1; exonIdx++)
                 {
                     var currentExon = peptide.Exons[exonIdx];
                     var nextExon = peptide.Exons[exonIdx + 1];
                     if(!currentExon.LongSequence || !nextExon.LongSequence)
                         continue;
-                    var leftBoundary = chromosomeData.Substring(currentExon.EndBase, ExonBoundaryLength);
-                    var rightBoundary = chromosomeData.Substring(nextExon.StartBase - 1 - ExonBoundaryLength, ExonBoundaryLength);
-                    exonLeftBoundaryData.Add(leftBoundary);
-                    exonRightBoundaryData.Add(rightBoundary);
+                    var leftBoundary = chromosomeData.Substring(currentExon.EndBase-ExonBoundaryLength, 2*ExonBoundaryLength);
+                    var rightBoundary = chromosomeData.Substring(nextExon.StartBase - 1 - ExonBoundaryLength, 2*ExonBoundaryLength);
+                    exonLeftBoundaryData.Add(SeparateNucelotidesByComma(leftBoundary));
+                    exonRightBoundaryData.Add(SeparateNucelotidesByComma(rightBoundary));
+                    
+                    // Negative case for training
+                    string negativeCase;
+                    do
+                    {
+                        var negativeStart = rng.Next(chromosomeData.Length - 2 * ExonBoundaryLength);
+                        negativeCase = chromosomeData.Substring(negativeStart, 2 * ExonBoundaryLength);
+                    } while (negativeCase.Contains('N'));
+                    negativeCases.Add(SeparateNucelotidesByComma(negativeCase));
                 }
                 if (exonLeftBoundaryData.Any())
                 {
                     File.AppendAllLines(Path.Combine(OutputDirectory, "exon_boundary_left.txt"), exonLeftBoundaryData);
                     File.AppendAllLines(Path.Combine(OutputDirectory, "exon_boundary_right.txt"), exonRightBoundaryData);
-                    File.AppendAllLines(Path.Combine(OutputDirectory, "exon_boundary_combined.txt"), Enumerable.Range(0,exonLeftBoundaryData.Count)
-                        .Select(idx => exonLeftBoundaryData[idx] + exonRightBoundaryData[idx]));
+                    File.AppendAllLines(Path.Combine(OutputDirectory, "exon_boundary_negatives.txt"), negativeCases);
+                    //File.AppendAllLines(Path.Combine(OutputDirectory, "exon_boundary_combined.txt"), Enumerable.Range(0,exonLeftBoundaryData.Count)
+                    //    .Select(idx => exonLeftBoundaryData[idx] + exonRightBoundaryData[idx]));
                 }
             }
+        }
+
+        private static string SeparateNucelotidesByComma(string promoter)
+        {
+            return promoter.Select(c => c + "").Aggregate((a, b) => a + "," + b);
         }
 
         private static List<Peptide> ReadPeptides()

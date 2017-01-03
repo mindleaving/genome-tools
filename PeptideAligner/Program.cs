@@ -4,18 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Commons;
+using Domain;
 
 namespace PeptideAligner
 {
-    public class Peptide
-    {
-        public string Chromosome { get; set; }
-        public int StartBase { get; set; }
-        public int EndBase { get; set; }
-        public string GeneSymbol { get; set; }
-        public List<char> Sequence { get; } = new List<char>();
-    }
-
     public static class Program
     {
         private const string ChromosomeDataDirectory = @"G:\Projects\HumanGenome\chromosomes";

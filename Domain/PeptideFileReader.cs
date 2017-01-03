@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace PeptideAligner
+namespace Domain
 {
     public static class PeptideFileReader
     {

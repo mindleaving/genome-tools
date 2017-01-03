@@ -16,6 +16,8 @@ namespace Commons
             buffer = new T[bufferSize];
         }
 
+        public bool IsFilled => bufferFilled;
+
         public T Put(T item)
         {
             var removedItem = buffer[nextIndex];
@@ -43,6 +45,12 @@ namespace Commons
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public void Clear()
+        {
+            nextIndex = 0;
+            bufferFilled = false;
         }
     }
 }
