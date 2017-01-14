@@ -103,6 +103,47 @@ namespace Commons
             return sumArray;
         }
 
+        public static double[] Subtract(this double[] a, double[] b)
+        {
+            if (a == null || b == null)
+            {
+                return null;
+            }
+            if (b.Length != a.Length)
+            {
+                throw new ArgumentException("Vectors must have the same length");
+            }
+            var differenceVector = new double[a.Length];
+            for (int i = 0; i < a.Length; i++)
+            {
+                differenceVector[i] = a[i] - b[i];
+            }
+            return differenceVector;
+        }
+
+        public static double[,] Subtract(this double[,] A, double[,] B)
+        {
+            if (A == null || B == null)
+            {
+                return null;
+            }
+            int rows = A.GetLength(0);
+            int cols = A.GetLength(1);
+            if (B.GetLength(0) != rows || B.GetLength(1) != cols)
+            {
+                throw new ArgumentException("Arrays must have the same size");
+            }
+            var differenceArray = new double[rows, cols];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    differenceArray[r, c] = A[r, c] - B[r, c];
+                }
+            }
+            return differenceArray;
+        }
+
         public static double[,] Multiply(this double[,] A, double[,] B)
         {
             int rowsA = A.GetLength(0);
@@ -135,8 +176,8 @@ namespace Commons
         {
             if (A == null) return null;
 
-            int rows = A.GetLength(0);
-            int cols = A.GetLength(1);
+            var rows = A.GetLength(0);
+            var cols = A.GetLength(1);
             var vector = new double[rows * cols];
             for (int r = 0; r < rows; r++)
             {
@@ -146,6 +187,34 @@ namespace Commons
                 }
             }
             return vector;
+        }
+
+        public static double[] Row(this double[,] matrix, int rowIdx)
+        {
+            var rows = matrix.GetLength(0);
+            if(rows >= rowIdx)
+                throw new ArgumentOutOfRangeException(nameof(rowIdx));
+            var cols = matrix.GetLength(1);
+            var row = new double[cols];
+            for (int columnIdx = 0; columnIdx < cols; columnIdx++)
+            {
+                row[columnIdx] = matrix[rowIdx, columnIdx];
+            }
+            return row;
+        }
+
+        public static double[] Column(this double[,] matrix, int columnIdx)
+        {
+            var cols = matrix.GetLength(1);
+            if (cols >= columnIdx)
+                throw new ArgumentOutOfRangeException(nameof(columnIdx));
+            var rows = matrix.GetLength(0);
+            var column = new double[rows];
+            for (int rowIdx = 0; rowIdx < rows; rowIdx++)
+            {
+                column[rowIdx] = matrix[rowIdx, columnIdx];
+            }
+            return column;
         }
 
         public static double[,] ConvertToMatrix(this double[] vector)
@@ -202,10 +271,6 @@ namespace Commons
 
         public static double[,] OuterProduct(this double[] A, double[] B)
         {
-            if (A.Length != B.Length)
-            {
-                return null;
-            }
             var outerProductArray = new double[A.Length, B.Length];
 
             for (int r = 0; r < A.Length; r++)
