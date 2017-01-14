@@ -170,27 +170,49 @@ namespace Commons
 
     public enum Unit
     {
+        // Distances
         Meter,
         Feet,
         StatuteMile,
         NauticalMile,
 
+        // Velocities
         MetersPerSecond,
         FeetPerMinute,
         Knots,
         Mach,
 
+        // Acceleration
         MetersPerSecondSquared,
         KnotsPerSeond,
 
+        // Time
         Second,
 
+        // Temperature
         Kelvin,
         Celcius,
         Fahrenheit,
 
+        // Pressure
         Pascal,
         Bar,
         InchesOfMercury,
+
+        // Area
+        SquareMeter,
+
+        // Volume
+        CubicMeters,
+
+        // Mass
+        Kilogram,
+
+        // Charge,
+        Coulombs,
+
+        // Energy,
+        Joule,
+        ElectronVolts,
     }
 }

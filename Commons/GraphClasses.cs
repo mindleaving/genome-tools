@@ -16,6 +16,11 @@ namespace Commons
             return nextEdgeId++;
         }
 
+        public uint GetUnusedVertexId()
+        {
+            return Vertices.Max(v => v.Key) + 1;
+        }
+
         [DataMember]
         public Dictionary<ulong, Edge> Edges { get; private set; }
         [DataMember]
