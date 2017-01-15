@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AminoAcidLibrary.cs" />
     <Compile Include="Atom.cs" />
     <Compile Include="AtomConnector.cs" />
     <Compile Include="AtomPropertyCalculator.cs" />
@@ -49,6 +50,7 @@
     <Compile Include="ElementMap.cs" />
     <Compile Include="ElementName.cs" />
     <Compile Include="ElementSymbol.cs" />
+    <Compile Include="IsotopeTable.cs" />
     <Compile Include="Molecule.cs" />
     <Compile Include="Orbital.cs" />
     <Compile Include="PeriodicTable.cs" />

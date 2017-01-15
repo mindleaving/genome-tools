@@ -207,9 +207,11 @@ namespace Commons
 
         // Mass
         Kilogram,
+        GramPerMol,
 
         // Charge,
         Coulombs,
+        ElementaryCharge,
 
         // Energy,
         Joule,

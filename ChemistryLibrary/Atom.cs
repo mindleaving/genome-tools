@@ -12,7 +12,11 @@ namespace ChemistryLibrary
         public int Period { get; }
         public ElementName Element { get; }
         public UnitValue Mass { get; }
+        public double ElectroNegativity => PeriodicTable.ElectroNegativity(Element);
+        public UnitValue FormalCharge => (Protons - Electrons.Count())*PhysicalConstants.ElementaryCharge;
+        public UnitValue EffectiveCharge { get; set; }
         public List<Orbital> Orbitals { get; }
+        public Point3D Position { get; set; }
         public IEnumerable<Electron> Electrons => Orbitals.SelectMany(orbital => orbital.Electrons);
         public bool IsExcitated { get { throw new NotImplementedException();} }
 
@@ -26,6 +30,15 @@ namespace ChemistryLibrary
             Orbitals = OrbitalGenerator.Generate(this, Period+1);
 
             PopulateOrbitalsInGroundState();
+            EffectiveCharge = FormalCharge;
+        }
+
+        public static Atom FromStableIsotope(ElementName element)
+        {
+            var isotope = IsotopeTable.GetStableIsotopeOf(element).FirstOrDefault();
+            if(isotope == null)
+                throw new ChemistryException($"No stable isotope known for {element}");
+            return new Atom(isotope.Protons, isotope.Neutrons);
         }
 
         private void PopulateOrbitalsInGroundState()

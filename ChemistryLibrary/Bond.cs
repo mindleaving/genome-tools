@@ -2,6 +2,12 @@
 
 namespace ChemistryLibrary
 {
+    public enum BondMultiplicity
+    {
+        Single,
+        Double,
+        Triple
+    }
     public class Bond
     {
         public Bond(Atom atom1, 

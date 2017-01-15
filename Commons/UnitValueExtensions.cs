@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Commons
 {
@@ -229,6 +231,15 @@ namespace Commons
         public static UnitValue RoundUpToNearest(this UnitValue value, UnitValue resolution)
         {
             return Math.Ceiling(value.ConvertTo(resolution.Unit).Value / resolution.Value) * resolution.Value.To(resolution.Unit);
+        }
+
+        public static UnitValue Sum<T>(this IEnumerable<T> items, Func<T, UnitValue> valueSelector, Unit unit)
+        {
+            return items.Select(valueSelector).Sum(unit);
+        }
+        public static UnitValue Sum(this IEnumerable<UnitValue> items, Unit unit)
+        {
+            return items.Select(item => item.ConvertTo(unit).Value).Sum().To(unit);
         }
     }
 }

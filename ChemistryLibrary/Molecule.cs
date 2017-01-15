@@ -9,43 +9,63 @@ namespace ChemistryLibrary
     {
         public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => (Atom) v.Object);
         public Graph MoleculeStructure { get; } = new Graph();
+        public UnitValue Charge => Atoms.Sum(atom => atom.FormalCharge, Unit.ElementaryCharge);
 
-        public uint AddFirstAtom(Atom atom)
+        public uint AddAtom(Atom atom, uint existingAtomId = uint.MaxValue, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
-            var vertex = new Vertex(MoleculeStructure.GetUnusedVertexId())
+            // If no atoms in the molecule yet, just add the atom
+            if (!MoleculeStructure.Vertices.Any())
             {
-                Object = atom
-            };
-            MoleculeStructure.AddVertex(vertex);
-            return vertex.Id;
-        }
+                var firstVertex = new Vertex(MoleculeStructure.GetUnusedVertexId())
+                {
+                    Object = atom
+                };
+                MoleculeStructure.AddVertex(firstVertex);
+                return firstVertex.Id;
+            }
 
-        public uint AddAtom(Atom atom, uint existingAtomId, Bond bond = null)
-        {
             if(!MoleculeStructure.Vertices.ContainsKey(existingAtomId))
                 throw new KeyNotFoundException("Adding atom to molecule failed, because the reference to an existing atom was not found");
             var existingAtom = (Atom)MoleculeStructure.Vertices[existingAtomId].Object;
-            if (bond != null
-                && ((bond.Atom1 != atom && bond.Atom2 != atom) || (bond.Atom1 != existingAtom && bond.Atom2 != existingAtom)))
-            {
-                throw new ArgumentException("Provided bond doesn't concern one or either of the two atoms being connected");
-            }
             var vertex = new Vertex(MoleculeStructure.GetUnusedVertexId())
             {
                 Object = atom
             };
             MoleculeStructure.AddVertex(vertex);
 
-            if (bond == null)
-            {
-                bond = AtomConnector.CreateBond(existingAtom, atom);
-            }
+            var bond = AtomConnector.CreateBond(atom, existingAtom, bondMultiplicity);
             var edge = new Edge(MoleculeStructure.GetUnusedEdgeId(), existingAtomId, vertex.Id)
             {
                 Object = bond
             };
             MoleculeStructure.AddEdge(edge);
             return vertex.Id;
+        }
+
+        public void AddMolecule(MoleculeReference moleculeReference, uint existingAtomId, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
+        {
+            var mergeInfo = MoleculeStructure.AddGraph(moleculeReference.Molecule.MoleculeStructure);
+            var edge = MoleculeStructure.ConnectVertices(
+                moleculeReference.LastAtomId,
+                mergeInfo.VertexIdMap[existingAtomId]);
+            var atom1 = (Atom)MoleculeStructure.Vertices[edge.Vertex1Id].Object;
+            var atom2 = (Atom)MoleculeStructure.Vertices[edge.Vertex2Id].Object;
+            edge.Object = AtomConnector.CreateBond(atom1, atom2, bondMultiplicity);
+        }
+
+        public void UpdateBondEnergies()
+        {
+            
+        }
+
+        public Atom GetAtom(uint atomId)
+        {
+            return (Atom) MoleculeStructure.Vertices[atomId].Object;
+        }
+
+        public void ConnectAtoms(uint atomId1, uint atomId2)
+        {
+            MoleculeStructure.ConnectVertices(atomId1, atomId2);
         }
     }
 }
