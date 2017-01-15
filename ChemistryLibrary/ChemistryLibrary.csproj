@@ -52,6 +52,9 @@
     <Compile Include="ElementSymbol.cs" />
     <Compile Include="IsotopeTable.cs" />
     <Compile Include="Molecule.cs" />
+    <Compile Include="MoleculeBuilder.cs" />
+    <Compile Include="MoleculeExtensions.cs" />
+    <Compile Include="MoleculeReference.cs" />
     <Compile Include="Orbital.cs" />
     <Compile Include="PeriodicTable.cs" />
     <Compile Include="PhysicalConstants.cs" />

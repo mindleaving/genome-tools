@@ -53,9 +53,19 @@ namespace ChemistryLibrary
             edge.Object = AtomConnector.CreateBond(atom1, atom2, bondMultiplicity);
         }
 
-        public void UpdateBondEnergies()
+        public void UpdateBonds()
         {
             
+        }
+
+        public void PositionAtoms()
+        {
+            var unpositionedAtoms = new Queue<Vertex>(MoleculeStructure.Vertices.Values);
+            while (unpositionedAtoms.Count > 0)
+            {
+                var vertex = unpositionedAtoms.Dequeue();
+
+            }
         }
 
         public Atom GetAtom(uint atomId)
@@ -63,9 +73,13 @@ namespace ChemistryLibrary
             return (Atom) MoleculeStructure.Vertices[atomId].Object;
         }
 
-        public void ConnectAtoms(uint atomId1, uint atomId2)
+        public void ConnectAtoms(uint atomId1, uint atomId2, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
-            MoleculeStructure.ConnectVertices(atomId1, atomId2);
+            var atom1 = GetAtom(atomId1);
+            var atom2 = GetAtom(atomId2);
+            var edge = MoleculeStructure.ConnectVertices(atomId1, atomId2);
+            var bond = AtomConnector.CreateBond(atom1, atom2, bondMultiplicity);
+            edge.Object = bond;
         }
     }
 }
