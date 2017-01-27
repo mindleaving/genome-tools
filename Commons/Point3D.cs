@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Commons
+﻿namespace Commons
 {
     public class Point3D
     {
@@ -14,14 +12,16 @@ namespace Commons
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
+    }
 
-        public double DistanceTo(Point3D otherPoint)
+    public class UnitPoint3D : Point3D
+    {
+        public Unit Unit { get; }
+
+        public UnitPoint3D(Unit unit, double x, double y, double z) 
+            : base(x, y, z)
         {
-            var diffX = X - otherPoint.X;
-            var diffY = Y - otherPoint.Y;
-            var diffZ = Z - otherPoint.Z;
-            var distance = Math.Sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
-            return distance;
+            Unit = unit;
         }
     }
 }

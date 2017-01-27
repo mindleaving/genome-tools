@@ -82,28 +82,37 @@ namespace Commons
             return new ShortestPathLookup(source, shortestPaths);
         }
 
+        public static bool IsGraphConnected(Graph graph)
+        {
+            if (!graph.Vertices.Any())
+                return true;
+            var startVertex = graph.Vertices.Values.First();
+            var connectedVertices = GetConnectedSubgraph(graph, startVertex);
+            return graph.Vertices.Count == connectedVertices.Count();
+        }
+
         public static void ApplyMethodToAllConnectedVertices(Graph graph, Vertex startVertex, Action<Vertex> action)
         {
-            foreach (var connectedVertex in GetConnectedVertices(graph, startVertex))
+            foreach (var connectedVertex in GetConnectedSubgraph(graph, startVertex))
             {
                 action(connectedVertex);
             }
         }
 
-        public static IEnumerable<Vertex> GetConnectedVertices(Graph graph, Vertex startVertex)
+        public static IEnumerable<Vertex> GetConnectedSubgraph(Graph graph, Vertex startVertex)
         {
             // Use depth first search for traversing connected component
             // Initialize graph algorithm data
             graph.Vertices.ForEach(v => v.Value.AlgorithmData = false);
             graph.Edges.Values.ForEach(e => e.AlgorithmData = false);
 
-            foreach (var connectedVertex in GetConnectedVerticesStep(graph, startVertex))
+            foreach (var connectedVertex in GetConnectedSubgraphStep(graph, startVertex))
             {
                 yield return connectedVertex;
             }
         }
 
-        private static IEnumerable<Vertex> GetConnectedVerticesStep(Graph graph, Vertex currentVertex)
+        private static IEnumerable<Vertex> GetConnectedSubgraphStep(Graph graph, Vertex currentVertex)
         {
             // Mark vertex as visited
             currentVertex.AlgorithmData = true;
@@ -118,12 +127,20 @@ namespace Commons
                 if (adjacentVertex.AlgorithmData.Equals(true))
                     continue;
 
-                foreach (var vertex in GetConnectedVerticesStep(graph, adjacentVertex))
+                foreach (var vertex in GetConnectedSubgraphStep(graph, adjacentVertex))
                 {
                     yield return vertex;
                 }
             }
             yield return currentVertex;
+        }
+
+        public static IEnumerable<Vertex> GetAdjacentVertices(Graph graph, Vertex vertex)
+        {
+            return vertex.EdgeIds
+                .Select(edgeId => graph.Edges[edgeId])
+                .Select(edge => edge.Vertex1Id == vertex.Id ? edge.Vertex2Id : edge.Vertex1Id)
+                .Select(vId => graph.Vertices[vId]);
         }
     }
 }

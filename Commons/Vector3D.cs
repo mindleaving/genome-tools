@@ -22,17 +22,18 @@
         public Vector3D(params double[] data) : base(3, data) { }
         public Vector3D(double x, double y, double z) : base(3, x, y, z) { }
 
-        /// <summary>
-        /// Calculate cross product.
-        /// </summary>
-        public static Vector3D operator *(Vector3D u, Vector3D v)
+
+        public static Vector3D operator +(Vector3D v1, Vector3D v2)
         {
-            // Cross product
-            return new Vector3D(
-                u.Y * v.Z - u.Z * u.Y,
-                u.Z * v.X - u.X * v.Z,
-                u.X * v.Y - u.Y * v.X
-                );
+            return new Vector3D(v1.Data.Sum(v2.Data));
+        }
+        public static Vector3D operator -(Vector3D v1, Vector3D v2)
+        {
+            return new Vector3D(v1.Data.Subtract(v2.Data));
+        }
+        public static Vector3D operator *(double scalar, Vector3D v)
+        {
+            return v.Multiply(scalar);
         }
     }
 }

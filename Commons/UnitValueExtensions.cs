@@ -6,7 +6,11 @@ namespace Commons
 {
     public static class UnitValueExtensions
     {
-        private static readonly Unit[] SIStandards = { Unit.Meter, Unit.MetersPerSecond, Unit.Second, Unit.MetersPerSecondSquared, Unit.Kelvin, Unit.Pascal };
+        private static readonly Unit[] SIStandards =
+        {
+            Unit.Meter, Unit.MetersPerSecond, Unit.Second, Unit.MetersPerSecondSquared, Unit.Kelvin, Unit.Pascal,
+            Unit.SquareMeter, Unit.CubicMeters, Unit.Kilogram, Unit.Coulombs, Unit.Joule,
+        };
         public static UnitValue Abs(this UnitValue unitValue)
         {
             return new UnitValue(unitValue.Unit, Math.Abs(unitValue.Value));
@@ -128,6 +132,10 @@ namespace Commons
                     return new UnitValue(Unit.Pascal, unitValue.Value * 100000);
                 case Unit.InchesOfMercury:
                     return new UnitValue(Unit.Pascal, unitValue.Value * 3386.38816);
+                case Unit.ElementaryCharge:
+                    return new UnitValue(Unit.Coulombs, unitValue.Value * 1.60217662 * 1e-19);
+                case Unit.ElectronVolts:
+                    return new UnitValue(Unit.Joule, unitValue.Value * 1.60217662 * 1e-19);
             }
             throw new NotSupportedException($"Conversion of {unitValue.Unit} to standard is not implemented");
         }
@@ -153,6 +161,10 @@ namespace Commons
                 case Unit.Bar:
                 case Unit.InchesOfMercury:
                     return Unit.Pascal;
+                case Unit.ElementaryCharge:
+                    return Unit.Coulombs;
+                case Unit.ElectronVolts:
+                    return Unit.Joule;
             }
             throw new NotSupportedException($"Conversion of {unit} to standard is not implemented");
         }
@@ -195,8 +207,65 @@ namespace Commons
                     return "bar";
                 case Unit.InchesOfMercury:
                     return "inHg";
+                case Unit.SquareMeter:
+                    return "m^2";
+                case Unit.CubicMeters:
+                    return "m^3";
+                case Unit.Kilogram:
+                    return "kg";
+                case Unit.GramPerMol:
+                    return "g/mol";
+                case Unit.Coulombs:
+                    return "C";
+                case Unit.ElementaryCharge:
+                    return "e";
+                case Unit.Joule:
+                    return "J";
+                case Unit.ElectronVolts:
+                    return "eV";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(unit), unit, null);
+            }
+        }
+
+        private static double SIPrefixMultiplier(SIPrefix prefix)
+        {
+            switch (prefix)
+            {
+                case SIPrefix.Femto:
+                    return 1e-15;
+                case SIPrefix.Pico:
+                    return 1e-12;
+                case SIPrefix.Nano:
+                    return 1e-9;
+                case SIPrefix.Micro:
+                    return 1e-6;
+                case SIPrefix.Milli:
+                    return 1e-3;
+                case SIPrefix.Centi:
+                    return 1e-2;
+                case SIPrefix.Deci:
+                    return 1e-1;
+                case SIPrefix.None:
+                    return 1;
+                case SIPrefix.Deca:
+                    return 1e1;
+                case SIPrefix.Hecto:
+                    return 1e2;
+                case SIPrefix.Kilo:
+                    return 1e3;
+                case SIPrefix.Mega:
+                    return 1e6;
+                case SIPrefix.Giga:
+                    return 1e9;
+                case SIPrefix.Tera:
+                    return 1e12;
+                case SIPrefix.Peta:
+                    return 1e15;
+                case SIPrefix.Exa:
+                    return 1e18;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(prefix), prefix, null);
             }
         }
 
@@ -212,12 +281,34 @@ namespace Commons
 
         public static UnitValue To(this float value, Unit unit)
         {
-            return new UnitValue(unit, value);
+            return To((double)value, unit);
         }
 
         public static UnitValue To(this int value, Unit unit)
         {
-            return new UnitValue(unit, value);
+            return To((double) value, unit);
+        }
+
+        public static double In(this UnitValue unitValue, SIPrefix prefix, Unit unit)
+        {
+            var multiplier = SIPrefixMultiplier(prefix);
+            return unitValue.ConvertTo(unit).Value / multiplier;
+        }
+
+        public static UnitValue To(this double value, SIPrefix prefix, Unit unit)
+        {
+            var multiplier = SIPrefixMultiplier(prefix);
+            return new UnitValue(unit, multiplier*value);
+        }
+
+        public static UnitValue To(this float value, SIPrefix prefix, Unit unit)
+        {
+            return To((double)value, prefix, unit);
+        }
+
+        public static UnitValue To(this int value, SIPrefix prefix, Unit unit)
+        {
+            return To((double)value, prefix, unit);
         }
 
         public static UnitValue RoundToNearest(this UnitValue value, UnitValue resolution)

@@ -55,17 +55,36 @@ namespace ChemistryLibrary
 
         public void UpdateBonds()
         {
-            
+            throw new NotImplementedException();
         }
 
         public void PositionAtoms()
         {
-            var unpositionedAtoms = new Queue<Vertex>(MoleculeStructure.Vertices.Values);
-            while (unpositionedAtoms.Count > 0)
-            {
-                var vertex = unpositionedAtoms.Dequeue();
+            MoleculeStructure.Vertices.Values.ForEach(v => ((Atom)v.Object).Position = null);
 
+            var startVertex = MoleculeStructure.Vertices.Values.First();
+            var startAtom = (Atom)startVertex.Object;
+            startAtom.Position = new UnitPoint3D(Unit.Meter, 0,0,0);
+            PositionNeighborAtoms(startVertex);
+            var connectedVertices = GraphAlgorithms.GetConnectedSubgraph(MoleculeStructure, startVertex);
+            foreach (var vertex in connectedVertices)
+            {
+                var neighborAtoms = GraphAlgorithms.GetAdjacentVertices(MoleculeStructure, vertex)
+                    .Select(v => (Atom) v.Object);
+                var positionedNeighbors = neighborAtoms.Where(atom => atom.Position != null).ToList();
+                
+                // Position current vertex
+
+
+
+                // Position neighbors
+                throw new NotImplementedException();
             }
+        }
+
+        private void PositionNeighborAtoms(Vertex startVertex)
+        {
+            throw new NotImplementedException();
         }
 
         public Atom GetAtom(uint atomId)

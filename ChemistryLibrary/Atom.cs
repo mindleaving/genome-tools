@@ -12,13 +12,23 @@ namespace ChemistryLibrary
         public int Period { get; }
         public ElementName Element { get; }
         public UnitValue Mass { get; }
-        public double ElectroNegativity => PeriodicTable.ElectroNegativity(Element);
-        public UnitValue FormalCharge => (Protons - Electrons.Count())*PhysicalConstants.ElementaryCharge;
+        public double ElectroNegativity { get; }
+        public UnitValue FormalCharge { get; }
         public UnitValue EffectiveCharge { get; set; }
         public List<Orbital> Orbitals { get; }
-        public Point3D Position { get; set; }
+        public UnitPoint3D Position { get; set; }
         public IEnumerable<Electron> Electrons => Orbitals.SelectMany(orbital => orbital.Electrons);
-        public bool IsExcitated { get { throw new NotImplementedException();} }
+        public IEnumerable<Electron> ValenceElectrons => OuterOrbitals.SelectMany(o => o.Electrons);
+        public IEnumerable<Orbital> OuterOrbitals => Orbitals.Where(o => o.Period == Period);
+        public IEnumerable<Orbital> OrbitalsAvailableForBonding => OuterOrbitals.Where(o => !o.IsFull && !o.IsEmpty);
+        public bool IsExcitated
+        {
+            get
+            {
+                var highestOccupiedEnergy = Orbitals.OrderBy(o => o.Energy).Last(o => o.Electrons.Any()).Energy;
+                return Orbitals.Any(o => o.Energy < highestOccupiedEnergy && !o.IsFull);
+            }
+        }
 
         public Atom(int protons, int neutrons)
         {
@@ -28,6 +38,8 @@ namespace ChemistryLibrary
             Period = PeriodicTable.GetPeriod(Element);
             Mass = AtomPropertyCalculator.CalculateMass(Protons, Neutrons);
             Orbitals = OrbitalGenerator.Generate(this, Period+1);
+            FormalCharge = (Protons - Electrons.Count()) * PhysicalConstants.ElementaryCharge;
+            ElectroNegativity = PeriodicTable.ElectroNegativity(Element);
 
             PopulateOrbitalsInGroundState();
             EffectiveCharge = FormalCharge;
@@ -43,20 +55,36 @@ namespace ChemistryLibrary
 
         private void PopulateOrbitalsInGroundState()
         {
-            var energySortedOrbitals = Orbitals.OrderBy(x => x, OrbitalComparer.Instance).ToList();
-            if(energySortedOrbitals.Any(orbtial => orbtial.Electrons.Any()))
+            if(Orbitals.Any(o => !o.IsEmpty))
                 throw new InvalidOperationException("Population of orbits only implemented for all orbits being empty");
-            var currentOrbitalidx = 0;
-            var currentOrbital = energySortedOrbitals[currentOrbitalidx];
-            for (int electronIdx = 0; electronIdx < Protons; electronIdx++)
+            var energySortedOrbitals = Orbitals.ToLookup(OrbitalComparer.CalculateOrbitalOrder);
+            var energyGroups = energySortedOrbitals.Select(x => x.Key).Distinct();
+            var electronCount = 0;
+            foreach (var energyGroup in energyGroups)
             {
-                if (currentOrbital.IsFull)
+                var energyEqualOrbitals = energySortedOrbitals[energyGroup].ToList();
+                // Add first electron
+                foreach (var energyEqualOrbital in energyEqualOrbitals)
                 {
-                    currentOrbitalidx++;
-                    currentOrbital = energySortedOrbitals[currentOrbitalidx];
+                    var electron = new Electron();
+                    energyEqualOrbital.AddElectron(electron);
+                    electronCount++;
+                    if(electronCount == Protons)
+                        break;
                 }
-                var electron = new Electron();
-                currentOrbital.AddElectron(electron);
+                if(electronCount == Protons)
+                    break;
+                // Add second electron
+                foreach (var energyEqualOrbital in energyEqualOrbitals)
+                {
+                    var electron = new Electron();
+                    energyEqualOrbital.AddElectron(electron);
+                    electronCount++;
+                    if (electronCount == Protons)
+                        break;
+                }
+                if (electronCount == Protons)
+                    break;
             }
         }
 
@@ -84,7 +112,7 @@ namespace ChemistryLibrary
             return orbtial1Order.CompareTo(orbital2Order);
         }
 
-        private static int CalculateOrbitalOrder(Orbital orbital1)
+        public static int CalculateOrbitalOrder(Orbital orbital1)
         {
             return (orbital1.Period - 1) * orbital1.Period / 2 + (int)orbital1.Type;
         }

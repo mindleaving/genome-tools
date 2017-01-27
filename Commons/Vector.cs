@@ -54,6 +54,11 @@ namespace Commons
             return new Vector(v1.Dimension, subtractionResult);
         }
 
+        public static Vector operator *(double scalar, Vector v2)
+        {
+            return new Vector(v2.Dimension, v2.Data.ScalarMultiply(scalar));
+        }
+
         public double this[int idx]
         {
             get { return Data[idx]; }
