@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "Performa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChemistryLibrary", "ChemistryLibrary\ChemistryLibrary.csproj", "{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoleculeViewer", "MoleculeViewer\MoleculeViewer.csproj", "{07EEAA45-49D0-4915-9104-531F1745BA64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChemistryLibraryTest", "ChemistryLibraryTest\ChemistryLibraryTest.csproj", "{545EB356-3701-48BD-B9A6-2F429DE6162D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,14 @@ Global
 		{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07EEAA45-49D0-4915-9104-531F1745BA64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07EEAA45-49D0-4915-9104-531F1745BA64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07EEAA45-49D0-4915-9104-531F1745BA64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07EEAA45-49D0-4915-9104-531F1745BA64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{545EB356-3701-48BD-B9A6-2F429DE6162D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{545EB356-3701-48BD-B9A6-2F429DE6162D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{545EB356-3701-48BD-B9A6-2F429DE6162D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{545EB356-3701-48BD-B9A6-2F429DE6162D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

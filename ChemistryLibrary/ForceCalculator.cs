@@ -37,31 +37,36 @@ namespace ChemistryLibrary
             }
 
             // Valence electron repulsion
+            var lonePairForceLookup = new Dictionary<Orbital, Vector3D>();
             foreach (var vertex in graph.Vertices.Values)
             {
                 var currentAtom = (Atom) vertex.Object;
                 var filledOuterOrbitals = currentAtom.OuterOrbitals.Where(o => o.IsFull).ToList();
                 foreach (var orbital1 in filledOuterOrbitals)
                 {
+                    var orbital1Vector = currentAtom.Position.VectorTo(orbital1.MaximumElectronDensityPosition);
                     foreach (var orbital2 in filledOuterOrbitals)
                     {
                         if(ReferenceEquals(orbital1, orbital2))
                             continue;
+                        var orbital2Vector = currentAtom.Position.VectorTo(orbital2.MaximumElectronDensityPosition);
                         // TODO: Apply repulsion
                     }
                 }
             }
-            return new ForceCalculatorResult(forceLookup);
+            return new ForceCalculatorResult(forceLookup, lonePairForceLookup);
         }
     }
 
     public class ForceCalculatorResult
     {
-        public ForceCalculatorResult(Dictionary<uint, Vector3D> forceLookup)
+        public ForceCalculatorResult(Dictionary<uint, Vector3D> forceLookup, Dictionary<Orbital, Vector3D> lonePairForceLookup)
         {
             ForceLookup = forceLookup;
+            LonePairForceLookup = lonePairForceLookup;
         }
 
         public Dictionary<uint, Vector3D> ForceLookup { get; }
+        public Dictionary<Orbital, Vector3D> LonePairForceLookup { get; }
     }
 }

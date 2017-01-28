@@ -52,6 +52,7 @@ namespace ChemistryLibrary
                 electronDensityMaximumPosition = value;
             }
         }
+        //public Vector3D Force { get; set; } // Force applied to electron distribution. Used to position lone pairs correctly relative to other bonds
 
         public void AddElectron(Electron electron)
         {
@@ -102,13 +103,18 @@ namespace ChemistryLibrary
             Electrons.ForEach(e => e.AssociatedBond = null);
             AssociatedBond = null;
         }
+
+        public override string ToString()
+        {
+            return $"{Period}{Type}^{Electrons.Count}";
+        }
     }
 
     public enum OrbitalType
     {
-        s,
-        p,
-        d,
-        f
+        s = 1,
+        p = 2,
+        d = 3,
+        f = 4
     }
 }

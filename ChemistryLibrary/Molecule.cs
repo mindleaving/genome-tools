@@ -33,7 +33,7 @@ namespace ChemistryLibrary
             };
             MoleculeStructure.AddVertex(vertex);
 
-            var bond = AtomConnector.CreateBond(atom, existingAtom, bondMultiplicity);
+            var bond = AtomConnector.CreateBonds(atom, existingAtom, bondMultiplicity);
             var edge = new Edge(MoleculeStructure.GetUnusedEdgeId(), existingAtomId, vertex.Id)
             {
                 Object = bond
@@ -45,12 +45,16 @@ namespace ChemistryLibrary
         public void AddMolecule(MoleculeReference moleculeReference, uint existingAtomId, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
             var mergeInfo = MoleculeStructure.AddGraph(moleculeReference.Molecule.MoleculeStructure);
-            var edge = MoleculeStructure.ConnectVertices(
-                moleculeReference.LastAtomId,
-                mergeInfo.VertexIdMap[existingAtomId]);
-            var atom1 = (Atom)MoleculeStructure.Vertices[edge.Vertex1Id].Object;
-            var atom2 = (Atom)MoleculeStructure.Vertices[edge.Vertex2Id].Object;
-            edge.Object = AtomConnector.CreateBond(atom1, atom2, bondMultiplicity);
+            var vertex1 = moleculeReference.LastAtomId;
+            var vertex2 = mergeInfo.VertexIdMap[existingAtomId];
+            var atom1 = (Atom)MoleculeStructure.Vertices[vertex1].Object;
+            var atom2 = (Atom)MoleculeStructure.Vertices[vertex2].Object;
+            var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
+            foreach (var bond in bonds)
+            {
+                var edge = MoleculeStructure.ConnectVertices(vertex1, vertex2);
+                edge.Object = bond;
+            }
         }
 
         public void UpdateBonds()
@@ -96,9 +100,12 @@ namespace ChemistryLibrary
         {
             var atom1 = GetAtom(atomId1);
             var atom2 = GetAtom(atomId2);
-            var edge = MoleculeStructure.ConnectVertices(atomId1, atomId2);
-            var bond = AtomConnector.CreateBond(atom1, atom2, bondMultiplicity);
-            edge.Object = bond;
+            var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
+            foreach (var bond in bonds)
+            {
+                var edge = MoleculeStructure.ConnectVertices(atomId1, atomId2);
+                edge.Object = bond;
+            }
         }
     }
 }

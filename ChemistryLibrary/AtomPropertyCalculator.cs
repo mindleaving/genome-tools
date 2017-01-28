@@ -11,7 +11,7 @@ namespace ChemistryLibrary
 
         public static UnitValue CalculateOrbitalEnergy(Atom atom, Orbital orbital)
         {
-            throw new System.NotImplementedException();
+            return -(1.0/(OrbitalComparer.CalculateOrbitalOrder(orbital) + 1)).To(Unit.ElectronVolts);
         }
     }
 }

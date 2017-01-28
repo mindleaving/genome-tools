@@ -18,6 +18,8 @@ namespace Commons
 
         public uint GetUnusedVertexId()
         {
+            if (!Vertices.Any())
+                return 0;
             return Vertices.Max(v => v.Key) + 1;
         }
 
