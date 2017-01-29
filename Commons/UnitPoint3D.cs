@@ -22,6 +22,12 @@ namespace Commons
             Z = z.To(prefix, unit);
         }
 
+        public UnitPoint3D(CompoundUnit unit, double x, double y, double z)
+        {
+            X = x.To(unit);
+            Y = y.To(unit);
+            Z = z.To(unit);
+        }
         public UnitPoint3D(Unit unit, double x, double y, double z) 
             : this(SIPrefix.None, unit, x, y, z)
         {

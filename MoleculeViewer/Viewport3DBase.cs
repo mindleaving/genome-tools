@@ -6,9 +6,19 @@ using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
 namespace MoleculeViewer
 {
-    public class Viewport3DBase
+    public abstract class Viewport3DBase : ViewModelBase
     {
-        public PerspectiveCamera Camera { get; protected set; }
+        private PerspectiveCamera camera;
+
+        public PerspectiveCamera Camera
+        {
+            get { return camera; }
+            protected set
+            {
+                camera = value; 
+                OnPropertyChanged();
+            }
+        }
 
         public void MoveBackForth(double change)
         {

@@ -6,7 +6,6 @@
         public UnitValue Y { get; set; }
         public UnitValue Z { get; set; }
 
-
         public UnitVector3D(UnitValue x, UnitValue y, UnitValue z)
         {
             X = x;
@@ -18,6 +17,13 @@
             X = x.To(prefix, unit);
             Y = y.To(prefix, unit);
             Z = z.To(prefix, unit);
+        }
+
+        public UnitVector3D(CompoundUnit unit, double x, double y, double z)
+        {
+            X = x.To(unit);
+            Y = y.To(unit);
+            Z = z.To(unit);
         }
 
         public UnitVector3D(Unit unit, double x, double y, double z) 

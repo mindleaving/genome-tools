@@ -1,4 +1,5 @@
-﻿using Commons;
+﻿using System.Collections.Generic;
+using Commons;
 
 namespace ChemistryLibrary
 {
@@ -8,8 +9,10 @@ namespace ChemistryLibrary
         public static UnitValue NeutronMass => 1.674929 * 1e-27.To(Unit.Kilogram);
         public static UnitValue ElectronMass => 9.10938356*1e-31.To(Unit.Kilogram);
         public static UnitValue ElementaryCharge => 1.60217662*1e-19.To(Unit.Coulombs);
-        public static UnitValue 
+        public static UnitValue CoulombsConstant => 8.987551*1e9.To(new CompoundUnit(
+            new[] { SIBaseUnit.Kilogram, SIBaseUnit.Meter, SIBaseUnit.Meter, SIBaseUnit.Meter },
+            new[] { SIBaseUnit.Second, SIBaseUnit.Second, SIBaseUnit.Ampere, SIBaseUnit.Second, SIBaseUnit.Ampere, SIBaseUnit.Second }));
         public static UnitValue SpeedOfLight => 299792458.To(Unit.MetersPerSecond);
-        public static double AvogradrosNumber => 6.02214086*1e23;
+        public static UnitValue AvogradrosNumber => 6.02214086*1e23.To(new CompoundUnit(new List<SIBaseUnit>(), new []{SIBaseUnit.Mole}));
     }
 }

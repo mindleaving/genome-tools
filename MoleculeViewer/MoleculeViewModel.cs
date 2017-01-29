@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 using ChemistryLibrary;
 using Commons;
 using Point3D = System.Windows.Media.Media3D.Point3D;
@@ -11,13 +13,32 @@ namespace MoleculeViewer
 {
     public class MoleculeViewModel : Viewport3DBase
     {
+        private ModelVisual3D moleculeModel;
         // ###############################
         // NOTE ON UNITS: ALL POSITIONS AND SIZES ARE IN PICOMETER
         // ###############################
 
-        public ModelVisual3D MoleculeModel { get; private set; }
+        public Molecule Molecule { get; }
+        public ModelVisual3D MoleculeModel
+        {
+            get { return moleculeModel; }
+            private set
+            {
+                moleculeModel = value;
+                OnPropertyChanged();
+            }
+        }
+        public event EventHandler MoleculeHasChanged;
 
         public MoleculeViewModel(Molecule molecule)
+        {
+            Molecule = molecule;
+
+            BuildModel(molecule);
+            SetCameraPosition(molecule);
+        }
+
+        private void BuildModel(Molecule molecule)
         {
             var modelContent = new Model3DGroup();
             foreach (var atom in molecule.Atoms)
@@ -30,19 +51,30 @@ namespace MoleculeViewer
             modelContent.Children.Add(lightSource1);
             modelContent.Children.Add(lightSource2);
             MoleculeModel = new ModelVisual3D {Content = modelContent};
+        }
 
+        private void SetCameraPosition(Molecule molecule)
+        {
             var moleculeCenter = new Point3D(
                 molecule.Atoms.Average(atom => atom.Position.X.In(SIPrefix.Pico, Unit.Meter)),
                 molecule.Atoms.Average(atom => atom.Position.Y.In(SIPrefix.Pico, Unit.Meter)),
                 molecule.Atoms.Average(atom => atom.Position.Z.In(SIPrefix.Pico, Unit.Meter)));
             var position = new Point3D(moleculeCenter.X, moleculeCenter.Y - 100, moleculeCenter.Z - 1000);
             var lookDirection = new Vector3D(
-                moleculeCenter.X - position.X, 
+                moleculeCenter.X - position.X,
                 moleculeCenter.Y - position.Y,
                 moleculeCenter.Z - position.Z);
             var upDirection = new Vector3D(0, 1, 0);
             var fieldOfView = 60;
             Camera = new PerspectiveCamera(position, lookDirection, upDirection, fieldOfView);
+        }
+
+        public void MoleculeHasBeenUpdated()
+        {
+            if(Application.Current.Dispatcher.HasShutdownStarted)
+                return;
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel(Molecule)));
+            OnMoleculeHasChanged();
         }
 
         private GeometryModel3D ConstructAtom(Atom atom)
@@ -168,6 +200,11 @@ namespace MoleculeViewer
                 default:
                     return Colors.LightGray;
             }
+        }
+
+        private void OnMoleculeHasChanged()
+        {
+            MoleculeHasChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

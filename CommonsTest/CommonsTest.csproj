@@ -48,6 +48,7 @@
     <Compile Include="RestrictedBoltzmannMachineTest.cs" />
     <Compile Include="MNISTDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitValueTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

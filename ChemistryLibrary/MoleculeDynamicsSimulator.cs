@@ -29,16 +29,33 @@ namespace ChemistryLibrary
                     break;
                 var forces = forceCalculator.CalculateForces(molecule);
                 ApplyBondForces(molecule, settings, zeroAtomMomentum, forces);
-                foreach (var lonePairForce in forces.LonePairForceLookup)
-                {
-                    var orbital = lonePairForce.Key;
-                    var atom = orbital.Atom;
-                    var force = 
-                }
+                ApplyLonePairRepulsion(forces);
 
                 OnOneIterationComplete();
             }
             OnSimulationFinished();
+        }
+
+        private static void ApplyLonePairRepulsion(ForceCalculatorResult forces)
+        {
+            foreach (var lonePairForce in forces.LonePairForceLookup)
+            {
+                var orbital = lonePairForce.Key;
+                var atom = orbital.Atom;
+                var force = lonePairForce.Value;
+                var displacementDirection = force.In(Unit.Newton).Normalize();
+                var atomRadius = atom.Radius;
+
+                var lonePairVector = atom.Position.VectorTo(orbital.MaximumElectronDensityPosition);
+                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.In(SIPrefix.Pico, Unit.Meter));
+                var tangentialDisplacement = displacementDirection - displacementNormal;
+                var displacedLonePair = orbital.MaximumElectronDensityPosition
+                                        + atomRadius * tangentialDisplacement;
+                lonePairVector = atom.Position.VectorTo(displacedLonePair);
+                var scaling = lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter)/
+                              atomRadius.In(SIPrefix.Pico, Unit.Meter);
+                orbital.MaximumElectronDensityPosition = atom.Position + scaling*lonePairVector;
+            }
         }
 
         private static void ApplyBondForces(Molecule molecule, MoleculeDynamicsSimulationSettings settings,

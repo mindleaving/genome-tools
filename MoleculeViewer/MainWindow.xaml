@@ -3,15 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:moleculeViewer="clr-namespace:MoleculeViewer"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525"
-        Name="Self"
-        Loaded="Carbon3DView_OnLoaded"
-        MouseWheel="Carbon3DView_OnMouseWheel"
-        MouseMove="Carbon3DView_OnMouseMove"
-        MouseUp="Carbon3DView_OnMouseUp"
-        MouseEnter="Carbon3DView_OnMouseEnter">
-    <Grid DataContext="{Binding ElementName=Self, Path=ViewModel}" Background="GhostWhite">
-        <Viewport3D Name="Viewport3D"/>
-    </Grid>
+        Name="Self">
+    <moleculeViewer:MoleculeView ViewModel="{Binding ElementName=Self, Path=MoleculeViewModel}"/>
 </Window>

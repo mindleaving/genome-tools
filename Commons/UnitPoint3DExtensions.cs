@@ -6,6 +6,10 @@
         {
             return point.To(SIPrefix.None, unit);
         }
+        public static UnitPoint3D To(this Point3D point, CompoundUnit unit)
+        {
+            return new UnitPoint3D(unit, point.X, point.Y, point.Z);
+        }
         public static UnitPoint3D To(this Point3D point, SIPrefix siPrefix, Unit unit)
         {
             return new UnitPoint3D(siPrefix, unit, point.X, point.Y, point.Z);
@@ -14,6 +18,13 @@
         public static Point3D In(this UnitPoint3D unitPoint, Unit targetUnit)
         {
             return unitPoint.In(SIPrefix.None, targetUnit);
+        }
+        public static Point3D In(this UnitPoint3D unitPoint, CompoundUnit targetUnit)
+        {
+            return new Point3D(
+                unitPoint.X.In(targetUnit),
+                unitPoint.Y.In(targetUnit),
+                unitPoint.Z.In(targetUnit));
         }
         public static Point3D In(this UnitPoint3D unitPoint, SIPrefix targetSIPrefix, Unit targetUnit)
         {
