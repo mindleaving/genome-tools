@@ -10,63 +10,115 @@ namespace ChemistryLibrary
         {
             var graph = molecule.MoleculeStructure;
 
-            var forceLookup = new Dictionary<uint, Vector3D>();
+            var forceLookup = CalculateBondForces(graph);
+            var lonePairForceLookup = CalculateLonePairRepulsion(graph, forceLookup);
+            return new ForceCalculatorResult(forceLookup, lonePairForceLookup);
+        }
+
+        private static Dictionary<uint, UnitVector3D> CalculateBondForces(Graph graph)
+        {
+            var forceLookup = graph.Vertices.Keys.ToDictionary(x => x, x => new UnitVector3D(Unit.Newton, 0, 0, 0));
+
+            // Bond force
             foreach (var edge in graph.Edges.Values)
             {
                 var vertex1 = graph.Vertices[edge.Vertex1Id];
                 var vertex2 = graph.Vertices[edge.Vertex2Id];
                 var atom1 = (Atom) vertex1.Object;
-                var atom2 = (Atom)vertex2.Object;
+                var atom2 = (Atom) vertex2.Object;
                 var bond = (Bond) edge.Object;
 
-                if (atom1.Position.Unit != atom2.Position.Unit)
-                    throw new PhysicsException("Atoms do not have same position units");
-
                 var v1v2Vector = atom1.Position.VectorTo(atom2.Position);
-                var atomDistance = v1v2Vector.Magnitude().To(atom1.Position.Unit);
-                var forceStrength = bond.BondEnergy.In(Unit.ElectronVolts)*(atomDistance - bond.BondLength).In(SIPrefix.Pico, Unit.Meter);
+                var atomDistance = v1v2Vector.Magnitude();
+                var forceStrength = bond.BondEnergy.In(Unit.ElectronVolts)*(atomDistance - bond.BondLength)
+                                        .In(SIPrefix.Pico, Unit.Meter);
 
-                if (!forceLookup.ContainsKey(vertex1.Id))
-                    forceLookup.Add(vertex1.Id, forceStrength*v1v2Vector);
-                else
-                    forceLookup[vertex1.Id] += forceStrength*v1v2Vector;
-                if (!forceLookup.ContainsKey(vertex2.Id))
-                    forceLookup.Add(vertex2.Id, forceStrength * v1v2Vector);
-                else
-                    forceLookup[vertex2.Id] += -forceStrength * v1v2Vector;
+                forceLookup[vertex1.Id] += forceStrength*v1v2Vector;
+                forceLookup[vertex2.Id] += -forceStrength*v1v2Vector;
             }
+            return forceLookup;
+        }
 
-            // Valence electron repulsion
-            var lonePairForceLookup = new Dictionary<Orbital, Vector3D>();
+        private static Dictionary<Orbital, UnitVector3D> CalculateLonePairRepulsion(Graph graph, Dictionary<uint, UnitVector3D> forceLookup)
+        {
+            var lonePairForceLookup = new Dictionary<Orbital, UnitVector3D>();
             foreach (var vertex in graph.Vertices.Values)
             {
+                var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).ToList();
                 var currentAtom = (Atom) vertex.Object;
                 var filledOuterOrbitals = currentAtom.OuterOrbitals.Where(o => o.IsFull).ToList();
+                var orbitalNeighborVertexMap = MapBondOrbitalToNeighborVertex(
+                    filledOuterOrbitals, currentAtom, adjacentVertices);
                 foreach (var orbital1 in filledOuterOrbitals)
                 {
-                    var orbital1Vector = currentAtom.Position.VectorTo(orbital1.MaximumElectronDensityPosition);
                     foreach (var orbital2 in filledOuterOrbitals)
                     {
-                        if(ReferenceEquals(orbital1, orbital2))
+                        if (ReferenceEquals(orbital1, orbital2))
                             continue;
-                        var orbital2Vector = currentAtom.Position.VectorTo(orbital2.MaximumElectronDensityPosition);
-                        // TODO: Apply repulsion
+                        var repulsiveForce = CalculateRepulsiveForce(orbital1, orbital2);
+
+                        if (orbital1.IsPartOfBond)
+                        {
+                            var neighborVertex = orbitalNeighborVertexMap[orbital1];
+                            forceLookup[neighborVertex.Id] += repulsiveForce;
+                        }
+                        else
+                        {
+                            lonePairForceLookup[orbital1] += repulsiveForce;
+                        }
+                        if (orbital2.IsPartOfBond)
+                        {
+                            var neighborVertex = orbitalNeighborVertexMap[orbital2];
+                            forceLookup[neighborVertex.Id] += -repulsiveForce;
+                        }
+                        else
+                        {
+                            lonePairForceLookup[orbital2] += -repulsiveForce;
+                        }
                     }
                 }
             }
-            return new ForceCalculatorResult(forceLookup, lonePairForceLookup);
+            return lonePairForceLookup;
+        }
+
+        private static Dictionary<Orbital, Vertex> MapBondOrbitalToNeighborVertex(List<Orbital> filledOuterOrbitals, Atom currentAtom,
+            List<Vertex> adjacentVertices)
+        {
+            var orbitalNeighborVertexMap = filledOuterOrbitals
+                .Where(o => o.IsPartOfBond)
+                .ToDictionary(
+                    o => o,
+                    o => {
+                        var bond = o.AssociatedBond;
+                        var neighborAtom = bond.Atom1.Equals(currentAtom) ? bond.Atom2 : bond.Atom1;
+                        return adjacentVertices.Single(v => v.Object.Equals(neighborAtom));
+                    });
+            return orbitalNeighborVertexMap;
+        }
+
+        private static UnitVector3D CalculateRepulsiveForce(Orbital orbital1, Orbital orbital2)
+        {
+            var distance = orbital1.MaximumElectronDensityPosition
+                .DistanceTo(orbital2.MaximumElectronDensityPosition);
+            var forceVector = orbital1.MaximumElectronDensityPosition.In(Unit.Meter)
+                .VectorTo(orbital2.MaximumElectronDensityPosition.In(Unit.Meter))
+                .Normalize();
+            var 
+            var repulsiveForce = -(1.0/distance.In(SIPrefix.Pico, Unit.Meter))*forceVector;
+            return repulsiveForce.To(Unit.Newton);
         }
     }
 
     public class ForceCalculatorResult
     {
-        public ForceCalculatorResult(Dictionary<uint, Vector3D> forceLookup, Dictionary<Orbital, Vector3D> lonePairForceLookup)
+        public ForceCalculatorResult(Dictionary<uint, UnitVector3D> forceLookup, 
+            Dictionary<Orbital, UnitVector3D> lonePairForceLookup)
         {
             ForceLookup = forceLookup;
             LonePairForceLookup = lonePairForceLookup;
         }
 
-        public Dictionary<uint, Vector3D> ForceLookup { get; }
-        public Dictionary<Orbital, Vector3D> LonePairForceLookup { get; }
+        public Dictionary<uint, UnitVector3D> ForceLookup { get; }
+        public Dictionary<Orbital, UnitVector3D> LonePairForceLookup { get; }
     }
 }

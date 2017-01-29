@@ -32,9 +32,9 @@ namespace MoleculeViewer
             MoleculeModel = new ModelVisual3D {Content = modelContent};
 
             var moleculeCenter = new Point3D(
-                molecule.Atoms.Average(atom => atom.Position.X),
-                molecule.Atoms.Average(atom => atom.Position.Y),
-                molecule.Atoms.Average(atom => atom.Position.Z));
+                molecule.Atoms.Average(atom => atom.Position.X.In(SIPrefix.Pico, Unit.Meter)),
+                molecule.Atoms.Average(atom => atom.Position.Y.In(SIPrefix.Pico, Unit.Meter)),
+                molecule.Atoms.Average(atom => atom.Position.Z.In(SIPrefix.Pico, Unit.Meter)));
             var position = new Point3D(moleculeCenter.X, moleculeCenter.Y - 100, moleculeCenter.Z - 1000);
             var lookDirection = new Vector3D(
                 moleculeCenter.X - position.X, 
@@ -56,9 +56,9 @@ namespace MoleculeViewer
         private MeshGeometry3D BuildAtomSphere(Atom atom)
         {
             var center = atom.Position;
-            var centerX = center.X.To(center.SIPrefix, center.Unit).In(SIPrefix.Pico, Unit.Meter);
-            var centerY = center.Y.To(center.SIPrefix, center.Unit).In(SIPrefix.Pico, Unit.Meter);
-            var centerZ = center.Z.To(center.SIPrefix, center.Unit).In(SIPrefix.Pico, Unit.Meter);
+            var centerX = center.X.In(SIPrefix.Pico, Unit.Meter);
+            var centerY = center.Y.In(SIPrefix.Pico, Unit.Meter);
+            var centerZ = center.Z.In(SIPrefix.Pico, Unit.Meter);
             var radius = atom.Radius.In(SIPrefix.Pico, Unit.Meter);
 
             return BuildSphere(new Point3D(centerX, centerY, centerZ), radius);

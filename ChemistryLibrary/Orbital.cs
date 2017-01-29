@@ -25,8 +25,8 @@ namespace ChemistryLibrary
         public Bond AssociatedBond { get; set; }
         public bool IsPartOfBond => AssociatedBond != null;
 
-        private Point3D electronDensityMaximumPosition;
-        public Point3D MaximumElectronDensityPosition
+        private UnitPoint3D electronDensityMaximumPosition;
+        public UnitPoint3D MaximumElectronDensityPosition
         {
             get
             {
@@ -35,7 +35,7 @@ namespace ChemistryLibrary
                     var atom1 = AssociatedBond.Atom1;
                     var atom2 = AssociatedBond.Atom2;
                     var chargeImbalance = atom1.ElectroNegativity/(atom1.ElectroNegativity + atom2.ElectroNegativity);
-                    return new UnitPoint3D(atom1.Position.Unit,
+                    return new UnitPoint3D(
                         chargeImbalance * atom1.Position.X + (1 - chargeImbalance) * atom2.Position.X,
                         chargeImbalance * atom1.Position.Y + (1 - chargeImbalance) * atom2.Position.Y,
                         chargeImbalance * atom1.Position.Z + (1 - chargeImbalance) * atom2.Position.Z);

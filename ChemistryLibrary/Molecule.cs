@@ -88,10 +88,12 @@ namespace ChemistryLibrary
 
                 var existingPoints = positionedNeighbors
                         .Select(v => (Atom)v.Object)
-                        .Select(a => currentAtom.Position.VectorTo(a.Position))
+                        .Select(a => currentAtom.Position.VectorTo(a.Position).In(SIPrefix.Pico, Unit.Meter))
                         .ToList();
                 var neighborAndLonePairCount = currentAtom.OuterOrbitals.Count(o => o.IsFull);
-                var evenlyDistributedPoints = SpherePointDistributor.EvenlyDistributePointsOnSphere(1.0, neighborAndLonePairCount - existingPoints.Count, existingPoints);
+                var evenlyDistributedPoints = SpherePointDistributor.EvenlyDistributePointsOnSphere(1.0, 
+                    neighborAndLonePairCount - existingPoints.Count,
+                    existingPoints);
                 var evenlySpacePointsQueue = new Queue<Point3D>(evenlyDistributedPoints);
 
                 foreach (var neighbor in unpositionedNeighbors)
@@ -105,23 +107,18 @@ namespace ChemistryLibrary
                     var bonds = connectingEdges.Select(edge => (Bond) edge.Object);
                     var bondLength = bonds.Average(bond => bond.BondLength, SIPrefix.Pico, Unit.Meter);
                     var bondDirection = evenlySpacePointsQueue.Dequeue().ToVector3D();
-                    var neighborPosition = currentAtom.Position + bondLength.In(SIPrefix.Pico, Unit.Meter)*bondDirection;
-                    atom.Position = neighborPosition.To(SIPrefix.Pico, Unit.Meter);
+                    var neighborPosition = currentAtom.Position + bondLength*bondDirection;
+                    atom.Position = neighborPosition;
                 }
                 foreach (var lonePair in lonePairs)
                 {
                     var lonePairDirection = evenlySpacePointsQueue.Dequeue().ToVector3D();
 
                     var lonePairPosition = currentAtom.Position 
-                        + currentAtom.Radius.In(SIPrefix.Pico, Unit.Meter)*lonePairDirection;
+                        + currentAtom.Radius*lonePairDirection;
                     lonePair.MaximumElectronDensityPosition = lonePairPosition;
                 }
             }
-        }
-
-        private void PositionNeighborAtoms(Vertex startVertex)
-        {
-            throw new NotImplementedException();
         }
 
         public Atom GetAtom(uint atomId)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Commons
@@ -168,6 +169,32 @@ namespace Commons
         }
     }
 
+    [DataContract]
+    public class CompoundUnit
+    {
+        public CompoundUnit() { }
+        public CompoundUnit(IEnumerable<SIBaseUnit> nominatorUnits, IEnumerable<SIBaseUnit> denominatorUnits)
+        {
+            foreach (var nominatorUnit in nominatorUnits)
+            {
+                if (!UnitExponents.ContainsKey(nominatorUnit))
+                    UnitExponents.Add(nominatorUnit, 1);
+                else
+                    UnitExponents[nominatorUnit]++;
+            }
+            foreach (var denominatorUnit in denominatorUnits)
+            {
+                if (!UnitExponents.ContainsKey(denominatorUnit))
+                    UnitExponents.Add(denominatorUnit, -1);
+                else
+                    UnitExponents[denominatorUnit]--;
+            }
+        }
+
+        [DataMember]
+        public Dictionary<SIBaseUnit, int> UnitExponents { get; private set; } = new Dictionary<SIBaseUnit, int>();
+    }
+
     public enum SIPrefix
     {
         None,
@@ -190,8 +217,21 @@ namespace Commons
         Exa
     }
 
+    public enum SIBaseUnit
+    {
+        Meter,
+        Kilogram,
+        Second,
+        Ampere,
+        Kelvin,
+        Mole,
+        Candela
+    }
+
     public enum Unit
     {
+        Compound,
+
         // Distances
         Meter,
         Feet,
@@ -238,5 +278,8 @@ namespace Commons
         // Energy,
         Joule,
         ElectronVolts,
+
+        // Force
+        Newton,
     }
 }

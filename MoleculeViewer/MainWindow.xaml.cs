@@ -19,15 +19,9 @@ namespace MoleculeViewer
 
             var aminoAcid = AminoAcidLibrary.Tyrosine;
             aminoAcid.PositionAtoms();
-            //var molecule = new Molecule();
-            //var oxygen1 = molecule.AddAtom(Atom.FromStableIsotope(ElementName.Oxygen));
-            //molecule.AddAtom(Atom.FromStableIsotope(ElementName.Iodine), oxygen1, BondMultiplicity.Double);
-            //molecule.PositionAtoms();
 
             ViewModel = new MoleculeViewModel(aminoAcid);
-            Viewport3D.Children.Add(ViewModel.MoleculeModel);
             Viewport3D.Camera = ViewModel.Camera;
-            Viewport3D.UpdateLayout();
         }
 
         public MoleculeViewModel ViewModel

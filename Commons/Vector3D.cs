@@ -38,5 +38,12 @@
         {
             return v.Multiply(scalar);
         }
+        public static UnitVector3D operator *(UnitValue scalar, Vector3D v)
+        {
+            var x = v.X * scalar;
+            var y = v.Y * scalar;
+            var z = v.Z * scalar;
+            return new UnitVector3D(x, y, z);
+        }
     }
 }

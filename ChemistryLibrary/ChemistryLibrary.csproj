@@ -59,6 +59,7 @@
     <Compile Include="IsotopeTable.cs" />
     <Compile Include="Molecule.cs" />
     <Compile Include="MoleculeBuilder.cs" />
+    <Compile Include="MoleculeDynamicsSimulator.cs" />
     <Compile Include="MoleculeExtensions.cs" />
     <Compile Include="MoleculeReference.cs" />
     <Compile Include="NBodyForceCalculator.cs" />

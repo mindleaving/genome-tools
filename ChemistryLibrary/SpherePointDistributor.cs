@@ -35,8 +35,7 @@ namespace ChemistryLibrary
                 var distance = point1.DistanceTo(point2);
                 return -(1.0/distance)*point1.VectorTo(point2);
             };
-            double maxDisplacement;
-            var iterationPerPoint = 25;
+            const int iterationPerPoint = 25;
             var maxIterations = iterationPerPoint*pointCount;
             var iteration = 0;
             var frozenPoints = new List<Point3D>();
@@ -44,7 +43,7 @@ namespace ChemistryLibrary
             {
                 var forces = NBodyForceCalculator.Calculate(
                     points.Concat(scaledExistingPoints).ToList(), repulsiveForce);
-                maxDisplacement = double.NegativeInfinity;
+                var maxDisplacement = double.NegativeInfinity;
                 var displacementLimit = 0.2 * radius / (0.8*iteration+1);
 
                 // Points are gradually frozen to avoid points chasing each other
