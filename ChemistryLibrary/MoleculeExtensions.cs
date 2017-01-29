@@ -62,7 +62,7 @@ namespace ChemistryLibrary
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
             var sideChainBuilder = new MoleculeBuilder();
             var sideChainReference = sideChainBuilder.Start.Add(sideChainElements);
-            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId, BondMultiplicity.Single);
+            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId);
             return moleculeReference;
         }
 
@@ -71,7 +71,7 @@ namespace ChemistryLibrary
         {
             if (!moleculeReference.IsInitialized)
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
-            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId, BondMultiplicity.Single);
+            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId, bondMultiplicity);
             return moleculeReference;
         }
 
@@ -93,18 +93,21 @@ namespace ChemistryLibrary
 
         public static List<MoleculeReference> AddBenzolRing(this MoleculeReference moleculeReference, params int[] referencePositions)
         {
-            var sideChainBuilder = new MoleculeBuilder();
-            var sideChainReference = sideChainBuilder.Start;
+            var sideChainReference = moleculeReference;
             var references = new List<MoleculeReference>();
-            for (int carbonIdx = 0; carbonIdx < 6; carbonIdx++)
+            MoleculeReference firstCarbonReference = null;
+            for (var carbonIdx = 0; carbonIdx < 6; carbonIdx++)
             {
                 var bondMultiplicity = carbonIdx.IsEven() ? BondMultiplicity.Double : BondMultiplicity.Single;
                 sideChainReference = sideChainReference.Add(ElementName.Carbon, bondMultiplicity);
-                if(referencePositions.Contains(carbonIdx))
+                if (carbonIdx == 0)
+                    firstCarbonReference = sideChainReference;
+                if (referencePositions.Contains(carbonIdx))
                     references.Add(sideChainReference);
+                else
+                    sideChainReference.AddToCurrentAtom(ElementName.Hydrogen);
             }
-            sideChainBuilder.Start.ConnectTo(sideChainReference);
-            moleculeReference.AddSideChain(sideChainBuilder.Start);
+            firstCarbonReference.ConnectTo(sideChainReference);
             return references;
         }
     }

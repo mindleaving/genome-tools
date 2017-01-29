@@ -23,6 +23,7 @@ namespace ChemistryLibrary
         public bool IsEmpty => Electrons.Count == 0;
         public bool IsOuterOrbital => Period >= Atom.Period;
         public Bond AssociatedBond { get; set; }
+        public bool IsPartOfBond => AssociatedBond != null;
 
         private Point3D electronDensityMaximumPosition;
         public Point3D MaximumElectronDensityPosition
@@ -90,10 +91,12 @@ namespace ChemistryLibrary
             if (downSpinElectron != null)
             {
                 Electrons.Remove(downSpinElectron);
+                downSpinElectron.AssociatedOrbital = null;
                 return downSpinElectron;
             }
             var upSpinElectron = Electrons[0];
             Electrons.Remove(upSpinElectron);
+            upSpinElectron.AssociatedOrbital = null;
             return upSpinElectron;
         }
 

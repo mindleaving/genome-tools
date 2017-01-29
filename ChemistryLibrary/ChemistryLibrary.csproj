@@ -49,6 +49,7 @@
     <Compile Include="AtomConnector.cs" />
     <Compile Include="AtomPropertyCalculator.cs" />
     <Compile Include="Bond.cs" />
+    <Compile Include="BondLengthCalculator.cs" />
     <Compile Include="ChemistryException.cs" />
     <Compile Include="Electron.cs" />
     <Compile Include="ElementMap.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="MoleculeExtensions.cs" />
     <Compile Include="MoleculeReference.cs" />
+    <Compile Include="NBodyForceCalculator.cs" />
     <Compile Include="Orbital.cs" />
     <Compile Include="OrbitalComparer.cs" />
     <Compile Include="OrbitalGenerator.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="PhysicalConstants.cs" />
     <Compile Include="PhysicsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpherePointDistributor.cs" />
     <Compile Include="SpinType.cs" />
   </ItemGroup>
   <ItemGroup>

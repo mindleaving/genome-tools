@@ -5,9 +5,9 @@ namespace ChemistryLibrary
 {
     public enum BondMultiplicity
     {
-        Single,
-        Double,
-        Triple
+        Single = 1,
+        Double = 2,
+        Triple = 3
     }
     public class Bond
     {
@@ -33,6 +33,9 @@ namespace ChemistryLibrary
             Atom2 = atom2;
             Orbital1 = orbital1;
             Orbital2 = orbital2;
+
+            BondLength = BondLengthCalculator.Calculate(atom1, orbital1, atom2, orbital2);
+            BondEnergy = BondEnergyCalculator.Calculate(atom1, orbital1, atom2, orbital2);
 
             ShareElectrons(Orbital1, Orbital2);
         }
@@ -74,5 +77,13 @@ namespace ChemistryLibrary
             isBroken = true;
         }
         
+    }
+
+    public static class BondEnergyCalculator
+    {
+        public static UnitValue Calculate(Atom atom1, Orbital orbital1, Atom atom2, Orbital orbital2)
+        {
+            return double.NaN.To(Unit.ElectronVolts);
+        }
     }
 }

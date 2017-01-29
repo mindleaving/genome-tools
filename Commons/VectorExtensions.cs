@@ -60,5 +60,10 @@ namespace Commons
         {
             return Math.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z);
         }
+
+        public static Point3D ToPoint3D(this Vector3D v)
+        {
+            return new Point3D(v.X, v.Y, v.Z);
+        }
     }
 }

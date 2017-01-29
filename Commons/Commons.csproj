@@ -66,6 +66,7 @@
     <Compile Include="StatisticalOperations.cs" />
     <Compile Include="StddevAggregator.cs" />
     <Compile Include="StringExtensions.cs" />
+    <Compile Include="UnitPoint3D.cs" />
     <Compile Include="UnitValue.cs" />
     <Compile Include="UnitValueExtensions.cs" />
     <Compile Include="Vector.cs" />

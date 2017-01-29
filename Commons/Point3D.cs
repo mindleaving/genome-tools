@@ -1,4 +1,6 @@
-﻿namespace Commons
+﻿using System.Globalization;
+
+namespace Commons
 {
     public class Point3D
     {
@@ -12,25 +14,17 @@
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
-    }
 
-    public class UnitPoint3D : Point3D
-    {
-        public SIPrefix SIPrefix { get; }
-        public Unit Unit { get; }
-
-        public UnitPoint3D(SIPrefix prefix, Unit unit, double x, double y, double z)
-            : base(x, y, z)
+        public static Point3D operator +(Point3D point, Vector3D vector)
         {
-            SIPrefix = prefix;
-            Unit = unit;
+            return new Point3D(point.X + vector.X, point.Y + vector.Y, point.Z + vector.Z);
         }
 
-        public UnitPoint3D(Unit unit, double x, double y, double z) 
-            : base(x, y, z)
+        public override string ToString()
         {
-            SIPrefix = SIPrefix.None;
-            Unit = unit;
+            return $"{X.ToString("F6", CultureInfo.InvariantCulture)};" +
+                   $"{Y.ToString("F6", CultureInfo.InvariantCulture)};" +
+                   $"{Z.ToString("F6", CultureInfo.InvariantCulture)}";
         }
     }
 }

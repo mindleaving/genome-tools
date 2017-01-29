@@ -202,7 +202,7 @@ namespace ChemistryLibrary
                 var moduleBuilder = new MoleculeBuilder();
                 moduleBuilder.Start
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
                     .Add(ElementName.Oxygen, ElementName.Hydrogen);
 

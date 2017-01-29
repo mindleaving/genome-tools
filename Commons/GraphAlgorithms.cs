@@ -140,6 +140,7 @@ namespace Commons
             return vertex.EdgeIds
                 .Select(edgeId => graph.Edges[edgeId])
                 .Select(edge => edge.Vertex1Id == vertex.Id ? edge.Vertex2Id : edge.Vertex1Id)
+                .Distinct()
                 .Select(vId => graph.Vertices[vId]);
         }
     }

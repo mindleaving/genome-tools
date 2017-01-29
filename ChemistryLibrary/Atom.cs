@@ -44,6 +44,7 @@ namespace ChemistryLibrary
             ElectroNegativity = PeriodicTable.ElectroNegativity(Element);
 
             PopulateOrbitalsInGroundState();
+            ExcitateForMaximalBondAvailability();
             EffectiveCharge = FormalCharge;
         }
 
@@ -87,6 +88,24 @@ namespace ChemistryLibrary
                 }
                 if (electronCount == Protons)
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Excitates outer orbitals, to achieve as many 
+        /// s- and p-oribtals with one electron
+        /// </summary>
+        private void ExcitateForMaximalBondAvailability()
+        {
+            var emptyOuterSorPOribtals = new Queue<Orbital>(OuterOrbitals
+                .Where(o => o.Type.InSet(OrbitalType.s, OrbitalType.p) && o.IsEmpty));
+            var fullOuterOrbitals = new Queue<Orbital>(OuterOrbitals.Where(o => o.IsFull));
+            while (emptyOuterSorPOribtals.Any() && fullOuterOrbitals.Any())
+            {
+                var fullOrbital = fullOuterOrbitals.Dequeue();
+                var electron = fullOrbital.RemoveElectron();
+                var emptyOrbital = emptyOuterSorPOribtals.Dequeue();
+                emptyOrbital.AddElectron(electron);
             }
         }
 

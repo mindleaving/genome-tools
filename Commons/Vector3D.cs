@@ -22,7 +22,10 @@
         public Vector3D(params double[] data) : base(3, data) { }
         public Vector3D(double x, double y, double z) : base(3, x, y, z) { }
 
-
+        public static Vector3D operator -(Vector3D v)
+        {
+            return -1*v;
+        }
         public static Vector3D operator +(Vector3D v1, Vector3D v2)
         {
             return new Vector3D(v1.Data.Sum(v2.Data));

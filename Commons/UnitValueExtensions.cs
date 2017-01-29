@@ -332,5 +332,15 @@ namespace Commons
         {
             return items.Select(item => item.ConvertTo(unit).Value).Sum().To(unit);
         }
+
+        public static UnitValue Average<T>(this IEnumerable<T> items, Func<T, UnitValue> valueSelector,
+            SIPrefix siPrefix, Unit unit)
+        {
+            return items.Select(valueSelector).Average(siPrefix, unit);
+        }
+        public static UnitValue Average(this IEnumerable<UnitValue> items, SIPrefix siPrefix, Unit unit)
+        {
+            return items.Select(uv => uv.In(siPrefix, unit)).Average().To(siPrefix, unit);
+        }
     }
 }
