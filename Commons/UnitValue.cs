@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Commons
@@ -128,9 +130,24 @@ namespace Commons
         public override string ToString()
         {
             var unit = Unit.ToUnit();
+            var appropriateSIPrefix = SelectSIPrefix(Value);
+            var multiplier = appropriateSIPrefix.GetMultiplier();
+            var valueString = (Value/multiplier).ToString("F2", CultureInfo.InvariantCulture) 
+                + " "
+                + appropriateSIPrefix.StringRepresentation();
             if (unit == Commons.Unit.Compound)
-                return Value + " " + Unit;
-            return Value + " " + unit.StringRepresentation();
+                return valueString + Unit;
+            return valueString + unit.StringRepresentation();
+        }
+
+        private static SIPrefix SelectSIPrefix(double value)
+        {
+            var allPrefixes = ((SIPrefix[]) Enum.GetValues(typeof(SIPrefix)))
+                .ToDictionary(x => x, UnitValueExtensions.GetMultiplier);
+            var multipliersSmallerThanValue = allPrefixes.Where(kvp => kvp.Value < value).ToList();
+            if (!multipliersSmallerThanValue.Any())
+                return allPrefixes.MinimumItem(kvp => kvp.Value).Key;
+            return multipliersSmallerThanValue.MaximumItem(kvp => kvp.Value).Key;
         }
     }
 }

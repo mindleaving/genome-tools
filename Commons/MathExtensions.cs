@@ -26,6 +26,11 @@ namespace Commons
             return !i.IsEven();
         }
 
+        public static bool IsNaN(this double value)
+        {
+            return double.IsNaN(value);
+        }
+
         /// <summary>
         /// Calculates the small angle between two headings
         /// </summary>

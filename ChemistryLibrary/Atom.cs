@@ -121,5 +121,10 @@ namespace ChemistryLibrary
         {
             throw new NotImplementedException();
         }
+
+        public override string ToString()
+        {
+            return Element.ToString();
+        }
     }
 }

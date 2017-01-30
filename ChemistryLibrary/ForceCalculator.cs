@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Commons;
 
@@ -6,12 +7,16 @@ namespace ChemistryLibrary
 {
     public class ForceCalculator
     {
-        public ForceCalculatorResult CalculateForces(Molecule molecule)
+        public static ForceCalculatorResult CalculateForces(Molecule molecule)
         {
             var graph = molecule.MoleculeStructure;
 
             var forceLookup = CalculateBondForces(graph);
             var lonePairForceLookup = CalculateLonePairRepulsion(graph, forceLookup);
+            if(forceLookup.Values.Any(v => v.X.Value.IsNaN()))
+                throw new Exception("Force cannot be 'NaN'");
+            if (lonePairForceLookup.Values.Any(v => v.X.Value.IsNaN()))
+                throw new Exception("Lone pair repulsion cannot be 'NaN'");
             return new ForceCalculatorResult(forceLookup, lonePairForceLookup);
         }
 
@@ -31,8 +36,8 @@ namespace ChemistryLibrary
                 var v1v2Vector = atom1.Position.VectorTo(atom2.Position);
                 var forceDirection = v1v2Vector.In(Unit.Meter).Normalize();
                 var atomDistance = v1v2Vector.Magnitude();
-                var forceStrength = -bond.BondEnergy.In(Unit.ElectronVolts)
-                    *(atomDistance - bond.BondLength).In(SIPrefix.Pico, Unit.Meter)
+                var forceStrength = -1e1*bond.BondEnergy.In(Unit.ElectronVolts)
+                    *(atomDistance - bond.BondLength).In(Unit.Meter)
                     .To(Unit.Newton);
 
                 forceLookup[vertex1.Id] += forceStrength*forceDirection;
@@ -106,6 +111,8 @@ namespace ChemistryLibrary
         {
             var distance = orbital1.MaximumElectronDensityPosition
                 .DistanceTo(orbital2.MaximumElectronDensityPosition);
+            if(distance.Value == 0)
+                return new UnitVector3D(Unit.Newton, 0,0,0);
             var forceVector = orbital1.MaximumElectronDensityPosition.In(Unit.Meter)
                 .VectorTo(orbital2.MaximumElectronDensityPosition.In(Unit.Meter))
                 .Normalize();
@@ -113,7 +120,7 @@ namespace ChemistryLibrary
                 *PhysicalConstants.ElementaryCharge
                 *PhysicalConstants.ElementaryCharge;
             var repulsiveForce = -(chargeProduct / (distance*distance))*forceVector;
-            return repulsiveForce;
+            return 1e-3*repulsiveForce;
         }
     }
 

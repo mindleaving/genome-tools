@@ -42,7 +42,7 @@ namespace ChemistryLibrary
                 }
                 if (!IsOuterOrbital)
                     return Atom.Position;
-                return electronDensityMaximumPosition;
+                return electronDensityMaximumPosition ?? Atom.Position;
             }
             set
             {
@@ -50,10 +50,11 @@ namespace ChemistryLibrary
                     throw new InvalidOperationException("Cannot set electron density maximum position for orbit part of a bond");
                 if(!IsOuterOrbital)
                     throw new InvalidOperationException("Cannot set electron density maximum position for non-outer orbital");
+                if(value.X.Value.IsNaN())
+                    throw new Exception("Setting orbital electron density position to 'NaN' not allowed");
                 electronDensityMaximumPosition = value;
             }
         }
-        //public Vector3D Force { get; set; } // Force applied to electron distribution. Used to position lone pairs correctly relative to other bonds
 
         public void AddElectron(Electron electron)
         {

@@ -68,5 +68,10 @@ namespace Commons
             var z = scalar*point.Z;
             return new UnitPoint3D(x, y, z);
         }
+
+        public override string ToString()
+        {
+            return $"{X};{Y};{Z}";
+        }
     }
 }

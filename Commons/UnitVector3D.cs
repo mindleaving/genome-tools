@@ -86,5 +86,10 @@
             var z = v.Z / scalar;
             return new UnitVector3D(x, y, z);
         }
+
+        public override string ToString()
+        {
+            return $"{X};{Y};{Z}";
+        }
     }
 }

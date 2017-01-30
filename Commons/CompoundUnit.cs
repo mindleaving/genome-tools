@@ -132,7 +132,7 @@ namespace Commons
             var unitString = "";
             foreach (var unitMultiplicity in nominator)
             {
-                unitString += unitMultiplicity.Key.StringRepresentation();
+                unitString += UnitValueExtensions.StringRepresentation(unitMultiplicity.Key);
                 if (unitMultiplicity.Value > 1)
                     unitString += "^" + unitMultiplicity.Value;
                 unitString += " ";
@@ -143,7 +143,7 @@ namespace Commons
                 unitString += "(";
             foreach (var unitMultiplicity in denominator)
             {
-                unitString += unitMultiplicity.Key.StringRepresentation();
+                unitString += UnitValueExtensions.StringRepresentation(unitMultiplicity.Key);
                 if (-unitMultiplicity.Value > 1)
                     unitString += "^" + -unitMultiplicity.Value;
                 unitString += " ";

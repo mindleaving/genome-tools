@@ -3,7 +3,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using System.Windows.Threading;
 using ChemistryLibrary;
 using Commons;
 using Point3D = System.Windows.Media.Media3D.Point3D;
@@ -71,7 +70,8 @@ namespace MoleculeViewer
 
         public void MoleculeHasBeenUpdated()
         {
-            if(Application.Current.Dispatcher.HasShutdownStarted)
+            if(Application.Current?.Dispatcher == null 
+                || Application.Current.Dispatcher.HasShutdownStarted)
                 return;
             Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel(Molecule)));
             OnMoleculeHasChanged();

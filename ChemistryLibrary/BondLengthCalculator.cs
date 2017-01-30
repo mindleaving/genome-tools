@@ -6,7 +6,7 @@ namespace ChemistryLibrary
     {
         public static UnitValue Calculate(Atom atom1, Orbital orbital1, Atom atom2, Orbital orbital2)
         {
-            return 0.9*(atom1.Radius + atom2.Radius);
+            return 1.0*(atom1.Radius + atom2.Radius);
         }
     }
 }

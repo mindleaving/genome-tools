@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using ChemistryLibrary;
 using Commons;
 
 namespace MoleculeViewer
 {
-    public class SimulationViewModel : IDisposable
+    public class SimulationViewModel : ViewModelBase, IDisposable
     {
         private readonly MoleculeViewModel moleculeViewModel;
         private Molecule Molecule => moleculeViewModel.Molecule;
@@ -21,7 +19,7 @@ namespace MoleculeViewer
             moleculeDynamicsSimulator.OneIterationComplete += (sender, args) => moleculeViewModel.MoleculeHasBeenUpdated();
         }
 
-        public UnitValue SimulationTime { get; set; } = 40.To(SIPrefix.Femto, Unit.Second);
+        public UnitValue SimulationTime { get; set; } = 10.To(SIPrefix.Nano, Unit.Second);
         public UnitValue TimeStep { get; set; } = 4.To(SIPrefix.Femto, Unit.Second);
 
         public void RunSimulation()

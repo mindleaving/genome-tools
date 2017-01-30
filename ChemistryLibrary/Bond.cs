@@ -83,7 +83,7 @@ namespace ChemistryLibrary
     {
         public static UnitValue Calculate(Atom atom1, Orbital orbital1, Atom atom2, Orbital orbital2)
         {
-            return double.NaN.To(Unit.ElectronVolts);
+            return -5.To(Unit.ElectronVolts);
         }
     }
 }

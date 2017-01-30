@@ -73,7 +73,7 @@ namespace Commons
         }
         public static double In(this UnitValue unitValue, SIPrefix prefix, Unit unit)
         {
-            var multiplier = SIPrefixMultiplier(prefix);
+            var multiplier = GetMultiplier(prefix);
             return unitValue.In(unit) / multiplier;
         }
 
@@ -99,7 +99,7 @@ namespace Commons
 
         public static UnitValue To(this double value, SIPrefix prefix, Unit unit)
         {
-            var multiplier = SIPrefixMultiplier(prefix);
+            var multiplier = GetMultiplier(prefix);
             return new UnitValue(unit, multiplier * value);
         }
 
@@ -195,7 +195,48 @@ namespace Commons
             }
         }
 
-        private static double SIPrefixMultiplier(SIPrefix prefix)
+        public static string StringRepresentation(this SIPrefix prefix)
+        {
+            switch (prefix)
+            {
+                case SIPrefix.None:
+                    return string.Empty;
+                case SIPrefix.Femto:
+                    return "f";
+                case SIPrefix.Pico:
+                    return "p";
+                case SIPrefix.Nano:
+                    return "n";
+                case SIPrefix.Micro:
+                    return "μ";
+                case SIPrefix.Milli:
+                    return "m";
+                case SIPrefix.Centi:
+                    return "c";
+                case SIPrefix.Deci:
+                    return "d";
+                case SIPrefix.Deca:
+                    return "D";
+                case SIPrefix.Hecto:
+                    return "H";
+                case SIPrefix.Kilo:
+                    return "K";
+                case SIPrefix.Mega:
+                    return "M";
+                case SIPrefix.Giga:
+                    return "G";
+                case SIPrefix.Tera:
+                    return "T";
+                case SIPrefix.Peta:
+                    return "P";
+                case SIPrefix.Exa:
+                    return "E";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(prefix), prefix, null);
+            }
+        }
+
+        public static double GetMultiplier(this SIPrefix prefix)
         {
             switch (prefix)
             {

@@ -14,6 +14,11 @@ namespace Commons
             }
         }
 
+        public static T MaximumItem<T>(this IEnumerable<T> collection, Func<T, double> valueSelector)
+        {
+            Func<T, double> inverseValueSelector = item => -valueSelector(item);
+            return collection.MinimumItem(inverseValueSelector);
+        }
         public static T MinimumItem<T>(this IEnumerable<T> collection, Func<T, double> valueSelector)
         {
             var collectionList = collection.ToList();
