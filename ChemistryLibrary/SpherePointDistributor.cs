@@ -59,7 +59,7 @@ namespace ChemistryLibrary
                 foreach (var point in pointsToMove)
                 {
                     var force = forces[point];
-                    var normalForce = force.ProjectOnto(point.ToVector3D());
+                    var normalForce = force.ProjectOnto(point.ToVector3D().Normalize());
                     var tangentialForce = force - normalForce;
                     var displacement = tangentialForce.Magnitude() > displacementLimit
                         ? displacementLimit / tangentialForce.Magnitude() * tangentialForce

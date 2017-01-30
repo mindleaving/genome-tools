@@ -35,7 +35,7 @@ namespace ChemistryLibrary
                 var forces = ForceCalculator.CalculateForces(molecule);
                 ApplyBondForces(molecule, settings, zeroAtomMomentum, forces);
                 ApplyLonePairRepulsion(forces);
-                WriteDebug(molecule);
+                //WriteDebug(molecule);
 
                 var newAtomPositions = molecule.Atoms.ToDictionary(atom => atom, atom => atom.Position.In(SIPrefix.Pico, Unit.Meter));
                 if (settings.StopSimulationWhenAtomAtRest)
@@ -78,10 +78,10 @@ namespace ChemistryLibrary
                 var atomRadius = atom.Radius;
 
                 var lonePairVector = atom.Position.VectorTo(orbital.MaximumElectronDensityPosition);
-                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.In(SIPrefix.Pico, Unit.Meter));
+                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.In(SIPrefix.Pico, Unit.Meter).Normalize());
                 var tangentialDisplacement = displacementDirection - displacementNormal;
                 var displacedLonePair = orbital.MaximumElectronDensityPosition
-                                        + 1e-2*atomRadius*tangentialDisplacement;
+                                        + atomRadius*tangentialDisplacement;
                 lonePairVector = atom.Position.VectorTo(displacedLonePair);
                 var scaling = atomRadius.In(SIPrefix.Pico, Unit.Meter) /
                     lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter);
