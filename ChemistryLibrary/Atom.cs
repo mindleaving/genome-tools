@@ -22,6 +22,7 @@ namespace ChemistryLibrary
         public IEnumerable<Electron> Electrons => Orbitals.SelectMany(orbital => orbital.Electrons);
         public IEnumerable<Electron> ValenceElectrons => OuterOrbitals.SelectMany(o => o.Electrons);
         public IEnumerable<Orbital> OuterOrbitals => Orbitals.Where(o => o.Period == Period);
+        public IEnumerable<Orbital> LonePairs => OuterOrbitals.Where(o => o.IsFull && !o.IsPartOfBond);
         public IEnumerable<Orbital> OrbitalsAvailableForBonding => OuterOrbitals.Where(o => !o.IsFull && !o.IsEmpty);
         public bool IsExcitated
         {
