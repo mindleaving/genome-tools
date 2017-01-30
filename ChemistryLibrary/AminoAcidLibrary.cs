@@ -4,7 +4,7 @@ namespace ChemistryLibrary
 {
     public static class AminoAcidLibrary
     {
-        public static Molecule Alanine
+        public static MoleculeReference Alanine
         {
             get
             {
@@ -14,32 +14,26 @@ namespace ChemistryLibrary
                     .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Glycin
+        public static MoleculeReference Glycin
         {
             get
             {
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule IsoLeucine
+        public static MoleculeReference IsoLeucine
         {
             get
             {
@@ -55,17 +49,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain2Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Leucine
+        public static MoleculeReference Leucine
         {
             get
             {
@@ -83,17 +74,14 @@ namespace ChemistryLibrary
                     .AddSideChain(sideChain12Builder.Start);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Proline
+        public static MoleculeReference Proline
         {
             get
             {
@@ -104,18 +92,15 @@ namespace ChemistryLibrary
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .AddSideChain(sideChain1Builder.Start)
                     .Add(ElementName.Carbon).ConnectTo(sideChain1End)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Valine
+        public static MoleculeReference Valine
         {
             get
             {
@@ -134,17 +119,14 @@ namespace ChemistryLibrary
                     .AddSideChain(sideChain12Builder.Start);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Phenylalanine
+        public static MoleculeReference Phenylalanine
         {
             get
             {
@@ -154,17 +136,14 @@ namespace ChemistryLibrary
                     .AddBenzolRing();
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Tryptophan
+        public static MoleculeReference Tryptophan
         {
             get
             {
@@ -179,17 +158,14 @@ namespace ChemistryLibrary
                 benzolReferences.Single().ConnectTo(sideChain11End);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Tyrosine
+        public static MoleculeReference Tyrosine
         {
             get
             {
@@ -200,17 +176,14 @@ namespace ChemistryLibrary
                 benzolReferences.Single().Add(ElementName.Oxygen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule AsparticAcid
+        public static MoleculeReference AsparticAcid
         {
             get
             {
@@ -221,17 +194,14 @@ namespace ChemistryLibrary
                     .AddToCurrentAtom(ElementName.Oxygen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule GlutamicAcid
+        public static MoleculeReference GlutamicAcid
         {
             get
             {
@@ -243,17 +213,14 @@ namespace ChemistryLibrary
                     .AddToCurrentAtom(ElementName.Oxygen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Arginine
+        public static MoleculeReference Arginine
         {
             get
             {
@@ -274,17 +241,14 @@ namespace ChemistryLibrary
                     .AddSideChain(sideChain12Builder.Start, BondMultiplicity.Double);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Histidine
+        public static MoleculeReference Histidine
         {
             get
             {
@@ -302,17 +266,14 @@ namespace ChemistryLibrary
                     .AddSideChain(ringBuilder.Start);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Lysine
+        public static MoleculeReference Lysine
         {
             get
             {
@@ -322,20 +283,17 @@ namespace ChemistryLibrary
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Serine
+        public static MoleculeReference Serine
         {
             get
             {
@@ -345,17 +303,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Oxygen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Threonine
+        public static MoleculeReference Threonine
         {
             get
             {
@@ -365,17 +320,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Cysteine
+        public static MoleculeReference Cysteine
         {
             get
             {
@@ -385,17 +337,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Sulfur, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Methionine
+        public static MoleculeReference Methionine
         {
             get
             {
@@ -407,17 +356,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Asparagine
+        public static MoleculeReference Asparagine
         {
             get
             {
@@ -428,17 +374,14 @@ namespace ChemistryLibrary
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
 
-        public static Molecule Glutamine
+        public static MoleculeReference Glutamine
         {
             get
             {
@@ -450,13 +393,10 @@ namespace ChemistryLibrary
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
                 var moduleBuilder = new MoleculeBuilder();
-                moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                return moduleBuilder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
-
-                return moduleBuilder.Molecule;
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
             }
         }
     }

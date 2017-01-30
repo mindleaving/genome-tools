@@ -10,6 +10,7 @@ namespace ChemistryLibrary
         public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => (Atom) v.Object);
         public Graph MoleculeStructure { get; } = new Graph();
         public UnitValue Charge => Atoms.Sum(atom => atom.FormalCharge, Unit.ElementaryCharge);
+        public bool IsPositioned { get; private set; }
 
         public uint AddAtom(Atom atom, uint existingAtomId = uint.MaxValue, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
@@ -45,11 +46,14 @@ namespace ChemistryLibrary
             return vertex.Id;
         }
 
-        public void AddMolecule(MoleculeReference moleculeReference, uint existingAtomId, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
+        public MoleculeReference AddMolecule(MoleculeReference moleculeToBeAdded, 
+            uint firstAtomId,
+            uint connectionAtomId, 
+            BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
-            var mergeInfo = MoleculeStructure.AddGraph(moleculeReference.Molecule.MoleculeStructure);
-            var vertex1 = existingAtomId;
-            var vertex2 = mergeInfo.VertexIdMap[moleculeReference.LastAtomId];
+            var mergeInfo = MoleculeStructure.AddGraph(moleculeToBeAdded.Molecule.MoleculeStructure);
+            var vertex1 = connectionAtomId;
+            var vertex2 = mergeInfo.VertexIdMap[moleculeToBeAdded.FirstAtomId];
             var atom1 = (Atom)MoleculeStructure.Vertices[vertex1].Object;
             var atom2 = (Atom)MoleculeStructure.Vertices[vertex2].Object;
             var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
@@ -58,6 +62,7 @@ namespace ChemistryLibrary
                 var edge = MoleculeStructure.ConnectVertices(vertex1, vertex2);
                 edge.Object = bond;
             }
+            return new MoleculeReference(this, firstAtomId, mergeInfo.VertexIdMap[moleculeToBeAdded.LastAtomId]);
         }
 
         public void UpdateBonds()
@@ -119,6 +124,7 @@ namespace ChemistryLibrary
                     lonePair.MaximumElectronDensityPosition = lonePairPosition;
                 }
             }
+            IsPositioned = true;
         }
 
         public Atom GetAtom(uint atomId)

@@ -17,12 +17,18 @@ namespace MoleculeViewer
         {
             InitializeComponent();
 
-            var water = MoleculeLibrary.H2O;
-            water.PositionAtoms();
-            //var aminoAcid = AminoAcidLibrary.Tyrosine;
-            //aminoAcid.PositionAtoms();
+            //var water = MoleculeLibrary.H2O;
+            //water.PositionAtoms();
+            var aminoAcid = AminoAcidLibrary.Proline
+                .Add(AminoAcidLibrary.Tyrosine)
+                .Add(AminoAcidLibrary.Alanine)
+                .Add(AminoAcidLibrary.Glutamine)
+                .Add(AminoAcidLibrary.Glutamine)
+                .Add(AminoAcidLibrary.Lysine)
+                .Molecule;
+            aminoAcid.PositionAtoms();
 
-            MoleculeViewModel = new MoleculeViewModel(water);
+            MoleculeViewModel = new MoleculeViewModel(aminoAcid);
             SimulationViewModel = new SimulationViewModel(MoleculeViewModel);
 
             SimulationViewModel.RunSimulation();

@@ -7,6 +7,8 @@ namespace ChemistryLibrary
 {
     public class Orbital
     {
+        public string Id { get; } = Guid.NewGuid().ToString();
+
         public Orbital(Atom atom, int period, OrbitalType type)
         {
             Atom = atom;
@@ -106,6 +108,17 @@ namespace ChemistryLibrary
             Electrons.RemoveAll(electron => electron.AssociatedOrbital != this);
             Electrons.ForEach(e => e.AssociatedBond = null);
             AssociatedBond = null;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+                return false;
+            if (ReferenceEquals(obj, this))
+                return true;
+            if (!(obj is Orbital))
+                return false;
+            return Id == ((Orbital) obj).Id;
         }
 
         public override string ToString()

@@ -24,16 +24,6 @@ namespace MoleculeViewer
 
         public void RunSimulation()
         {
-            //Task.Run(() =>
-            //{
-            //    for (int i = 0; i < 1000; i++)
-            //    {
-            //        var firstAtom = Molecule.Atoms.First();
-            //        firstAtom.Position += new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0, 10, 10);
-            //        moleculeViewModel.MoleculeHasBeenUpdated();
-            //        Thread.Sleep(100);
-            //    }
-            //});
             var settings = new MoleculeDynamicsSimulationSettings
             {
                 SimulationTime = SimulationTime,

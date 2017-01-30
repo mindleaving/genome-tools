@@ -44,7 +44,7 @@ namespace ChemistryLibrary
                 var forces = NBodyForceCalculator.Calculate(
                     points.Concat(scaledExistingPoints).ToList(), repulsiveForce);
                 var maxDisplacement = double.NegativeInfinity;
-                var displacementLimit = 0.2 * radius / (0.8*iteration+1);
+                var displacementLimit = 0.3 * radius / (0.8*iteration+1);
 
                 // Points are gradually frozen to avoid points chasing each other
                 var pointsToMove = points.Except(frozenPoints).ToList();
@@ -73,7 +73,7 @@ namespace ChemistryLibrary
                     point.Y = scaling * displacedPoint.Y;
                     point.Z = scaling * displacedPoint.Z;
                 }
-                if(pointsToMove.Count == 1 && maxDisplacement < displacementLimit)
+                if(pointsToMove.Count == 1 && maxDisplacement < 0.2*displacementLimit)
                     break;
 
                 if (pointsToMove.Count > 1)
@@ -88,8 +88,8 @@ namespace ChemistryLibrary
                     var distanceDifference = distanceToOtherPoints
                         .Select((d1, idx) => Math.Abs(d1 - newDistanceToOtherPoints[idx]))
                         .Max();
-                    if ((averagePoint.DistanceTo(new Point3D(0, 0, 0)) < 0.01 * radius
-                        && distanceDifference < 0.01 * radius)
+                    if ((averagePoint.DistanceTo(new Point3D(0, 0, 0)) < 0.005 * radius
+                        && distanceDifference < 0.005 * radius)
                         || iteration > iterationPerPoint * (frozenPoints.Count+1))
                         frozenPoints.Add(pointsToMove.First());
                 }

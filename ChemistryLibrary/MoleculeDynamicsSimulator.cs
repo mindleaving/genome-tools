@@ -15,6 +15,8 @@ namespace ChemistryLibrary
             CancellationToken cancellationToken)
         {
             settings.StopSimulationWhenAtomAtRest = false;
+            settings.RampUp = true;
+            settings.RampUpPeriod = 500*settings.TimeStep;
             return Task.Factory.StartNew(() => Simulate(molecule, settings, cancellationToken, true), cancellationToken);
         }
 
@@ -27,17 +29,26 @@ namespace ChemistryLibrary
         private void Simulate(Molecule molecule, MoleculeDynamicsSimulationSettings settings,
             CancellationToken cancellationToken, bool zeroAtomMomentum = false)
         {
-            var currentAtomPositions = molecule.Atoms.ToDictionary(atom => atom, atom => atom.Position.In(SIPrefix.Pico, Unit.Meter));
+            if (!molecule.IsPositioned)
+                molecule.PositionAtoms();
+            var currentAtomPositions = molecule.MoleculeStructure.Vertices.Keys
+                .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position.In(SIPrefix.Pico, Unit.Meter));
+            var lastNeighborhoodUpdate = 0.To(Unit.Second);
+            var atomNeighborhoodMap = new AtomNeighborhoodMap(molecule);
             for (var t = 0.To(Unit.Second); t < settings.SimulationTime; t += settings.TimeStep)
             {
                 if(cancellationToken.IsCancellationRequested)
                     break;
-                var forces = ForceCalculator.CalculateForces(molecule);
-                ApplyBondForces(molecule, settings, zeroAtomMomentum, forces);
+                if(t - lastNeighborhoodUpdate > 40.To(SIPrefix.Femto, Unit.Second))
+                    atomNeighborhoodMap.Update();
+
+                var forces = ForceCalculator.CalculateForces(molecule, atomNeighborhoodMap);
+                ApplyAtomForces(molecule, forces, t, settings, zeroAtomMomentum);
                 ApplyLonePairRepulsion(forces);
                 //WriteDebug(molecule);
 
-                var newAtomPositions = molecule.Atoms.ToDictionary(atom => atom, atom => atom.Position.In(SIPrefix.Pico, Unit.Meter));
+                var newAtomPositions = molecule.MoleculeStructure.Vertices.Keys
+                    .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position.In(SIPrefix.Pico, Unit.Meter));
                 if (settings.StopSimulationWhenAtomAtRest)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys
@@ -89,17 +100,25 @@ namespace ChemistryLibrary
             }
         }
 
-        private static void ApplyBondForces(Molecule molecule, MoleculeDynamicsSimulationSettings settings,
-            bool zeroAtomMomentum, ForceCalculatorResult forces)
+        private static void ApplyAtomForces(Molecule molecule, 
+            ForceCalculatorResult forces,
+            UnitValue elapsedTime,
+            MoleculeDynamicsSimulationSettings settings, 
+            bool zeroAtomMomentum)
         {
             foreach (var vertexForce in forces.ForceLookup)
             {
-                var vertex = molecule.MoleculeStructure.Vertices[vertexForce.Key];
+                var atom = molecule.GetAtom(vertexForce.Key);
                 var force = vertexForce.Value;
+                if (settings.RampUp && elapsedTime < settings.RampUpPeriod)
+                {
+                    var quotient = elapsedTime.In(SIPrefix.Femto, Unit.Second)/
+                                   settings.RampUpPeriod.In(SIPrefix.Femto, Unit.Second);
+                    force *= quotient;//Math.Pow(10, (int)(-100*quotient));
+                }
                 if (force.Magnitude().Value < ForceLowerCutoff)
                     continue;
-                var atom = (Atom) vertex.Object;
-                atom.Velocity += force/atom.Mass*settings.TimeStep;
+                atom.Velocity += 1e-3*force/atom.Mass*settings.TimeStep;
                 atom.Position += atom.Velocity*settings.TimeStep;
                 if (zeroAtomMomentum)
                     atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
@@ -125,5 +144,7 @@ namespace ChemistryLibrary
         public UnitValue SimulationTime { get; set; }
         public bool StopSimulationWhenAtomAtRest { get; set; }
         public UnitValue MovementDetectionThreshold { get; set; } = 1.To(SIPrefix.Pico, Unit.Meter);
+        public bool RampUp { get; set; }
+        public UnitValue RampUpPeriod { get; set; }
     }
 }

@@ -7,6 +7,8 @@ namespace ChemistryLibrary
 {
     public class Atom
     {
+        public string Id { get; } = Guid.NewGuid().ToString();
+
         public int Protons { get; }
         public int Neutrons { get; }
         public int Period { get; }
@@ -121,6 +123,17 @@ namespace ChemistryLibrary
         public bool TryExcitateAtom(UnitValue ingressEnergy, out UnitValue unconsumedEnergy)
         {
             throw new NotImplementedException();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+                return false;
+            if (ReferenceEquals(obj, this))
+                return true;
+            if (!(obj is Atom))
+                return false;
+            return Id == ((Atom)obj).Id;
         }
 
         public override string ToString()

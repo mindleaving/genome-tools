@@ -15,9 +15,9 @@ namespace ChemistryLibrary
                 var atom = Atom.FromStableIsotope(element);
                 lastAtomId = moleculeReference.Molecule.AddAtom(atom, lastAtomId);
                 if (!moleculeReference.IsInitialized)
-                    moleculeReference.LastAtomId = lastAtomId;
+                    moleculeReference.FirstAtomId = lastAtomId;
             }
-            return new MoleculeReference(moleculeReference.Molecule, lastAtomId);
+            return new MoleculeReference(moleculeReference.Molecule, moleculeReference.FirstAtomId, lastAtomId);
         }
         public static MoleculeReference Add(this MoleculeReference moleculeReference, ElementName element, BondMultiplicity bondMultiplicity)
         {
@@ -25,15 +25,16 @@ namespace ChemistryLibrary
             var atom = Atom.FromStableIsotope(element);
             lastAtomId = moleculeReference.Molecule.AddAtom(atom, lastAtomId);
             if (!moleculeReference.IsInitialized)
-                moleculeReference.LastAtomId = lastAtomId;
-            return new MoleculeReference(moleculeReference.Molecule, lastAtomId);
+                moleculeReference.FirstAtomId = lastAtomId;
+            return new MoleculeReference(moleculeReference.Molecule, moleculeReference.FirstAtomId, lastAtomId);
         }
         public static MoleculeReference Add(this MoleculeReference moleculeReference, MoleculeReference otherMoleculeReference)
         {
             if (!moleculeReference.IsInitialized)
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
-            moleculeReference.Molecule.AddMolecule(otherMoleculeReference, moleculeReference.LastAtomId);
-            return otherMoleculeReference;
+            return moleculeReference.Molecule.AddMolecule(otherMoleculeReference, 
+                moleculeReference.FirstAtomId,
+                moleculeReference.LastAtomId);
         }
 
         public static MoleculeReference AddToCurrentAtom(this MoleculeReference moleculeReference, params ElementName[] elements)
@@ -62,7 +63,9 @@ namespace ChemistryLibrary
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
             var sideChainBuilder = new MoleculeBuilder();
             var sideChainReference = sideChainBuilder.Start.Add(sideChainElements);
-            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId);
+            moleculeReference.Molecule.AddMolecule(sideChainReference, 
+                moleculeReference.FirstAtomId,
+                moleculeReference.LastAtomId);
             return moleculeReference;
         }
 
@@ -71,7 +74,10 @@ namespace ChemistryLibrary
         {
             if (!moleculeReference.IsInitialized)
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
-            moleculeReference.Molecule.AddMolecule(sideChainReference, moleculeReference.LastAtomId, bondMultiplicity);
+            moleculeReference.Molecule.AddMolecule(sideChainReference, 
+                moleculeReference.FirstAtomId,
+                moleculeReference.LastAtomId,
+                bondMultiplicity);
             return moleculeReference;
         }
 
@@ -80,13 +86,23 @@ namespace ChemistryLibrary
         {
             if (!moleculeReference.IsInitialized)
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
-            if (otherReference.Molecule != moleculeReference.Molecule)
+            if (!otherReference.IsInitialized)
+                throw new InvalidOperationException("Cannot add atoms. Side chain molecule reference is not initialized");
+            var lastAtomInOtherReference = otherReference.Molecule.GetAtom(otherReference.LastAtomId);
+            var matchingConnectionAtom = moleculeReference.Molecule.Atoms
+                .SingleOrDefault(a => a.Equals(lastAtomInOtherReference));
+            if (matchingConnectionAtom == null)
             {
-                moleculeReference.Molecule.AddMolecule(otherReference, moleculeReference.LastAtomId, bondMultiplicity);
+                moleculeReference.Molecule.AddMolecule(otherReference, 
+                    moleculeReference.FirstAtomId,
+                    moleculeReference.LastAtomId, 
+                    bondMultiplicity);
             }
             else
             {
-                moleculeReference.Molecule.ConnectAtoms(moleculeReference.LastAtomId, otherReference.LastAtomId, bondMultiplicity);
+                var connectionAtomVertexId = moleculeReference.Molecule.MoleculeStructure.Vertices
+                    .Single(v => ((Atom) v.Value.Object).Equals(matchingConnectionAtom)).Key;
+                moleculeReference.Molecule.ConnectAtoms(moleculeReference.LastAtomId, connectionAtomVertexId, bondMultiplicity);
             }
             return moleculeReference;
         }

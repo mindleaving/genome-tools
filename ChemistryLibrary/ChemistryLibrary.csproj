@@ -47,6 +47,7 @@
     <Compile Include="AminoAcidLibrary.cs" />
     <Compile Include="Atom.cs" />
     <Compile Include="AtomConnector.cs" />
+    <Compile Include="AtomNeighborhoodMap.cs" />
     <Compile Include="AtomPropertyCalculator.cs" />
     <Compile Include="Bond.cs" />
     <Compile Include="BondLengthCalculator.cs" />

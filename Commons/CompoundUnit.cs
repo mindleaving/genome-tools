@@ -103,6 +103,7 @@ namespace Commons
 
         public int[] GetUnitFingerprint()
         {
+            // TODO: Improve performance
             var baseUnits = (SIBaseUnit[]) Enum.GetValues(typeof(SIBaseUnit));
             var fingerprint = new int[baseUnits.Length];
             for (int unitIdx = 0; unitIdx < baseUnits.Length; unitIdx++)
@@ -110,6 +111,11 @@ namespace Commons
                 var siBaseUnit = baseUnits[unitIdx];
                 fingerprint[unitIdx] = UnitExponents.ContainsKey(siBaseUnit) ? UnitExponents[siBaseUnit] : 0;
             }
+            //Parallel.For(0, baseUnits.Length, unitIdx =>
+            //{
+            //    var siBaseUnit = baseUnits[unitIdx];
+            //    fingerprint[unitIdx] = UnitExponents.ContainsKey(siBaseUnit) ? UnitExponents[siBaseUnit] : 0;
+            //});
             return fingerprint;
         }
 
