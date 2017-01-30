@@ -34,7 +34,7 @@ namespace ChemistryLibrary
                     break;
                 var forces = ForceCalculator.CalculateForces(molecule);
                 ApplyBondForces(molecule, settings, zeroAtomMomentum, forces);
-                ApplyLonePairRepulsion(forces);
+                RepositionLonePairs(molecule);
                 WriteDebug(molecule);
 
                 var newAtomPositions = molecule.Atoms.ToDictionary(atom => atom, atom => atom.Position.In(SIPrefix.Pico, Unit.Meter));
@@ -65,27 +65,20 @@ namespace ChemistryLibrary
             File.AppendAllText(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv", output);
         }
 
-        private static void ApplyLonePairRepulsion(ForceCalculatorResult forces)
+        private static void RepositionLonePairs(Molecule molecule)
         {
-            foreach (var lonePairForce in forces.LonePairForceLookup)
+            foreach (var atom in molecule.Atoms)
             {
-                var orbital = lonePairForce.Key;
-                var atom = orbital.Atom;
-                var force = lonePairForce.Value;
-                if(force.Magnitude().Value < ForceLowerCutoff)
-                    continue;
-                var displacementDirection = force.In(Unit.Newton).Normalize();
-                var atomRadius = atom.Radius;
-
-                var lonePairVector = atom.Position.VectorTo(orbital.MaximumElectronDensityPosition);
-                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.In(SIPrefix.Pico, Unit.Meter));
-                var tangentialDisplacement = displacementDirection - displacementNormal;
-                var displacedLonePair = orbital.MaximumElectronDensityPosition
-                                        + 1e-2*atomRadius*tangentialDisplacement;
-                lonePairVector = atom.Position.VectorTo(displacedLonePair);
-                var scaling = atomRadius.In(SIPrefix.Pico, Unit.Meter) /
-                    lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter);
-                orbital.MaximumElectronDensityPosition = atom.Position + scaling*lonePairVector;
+                var lonePairs = atom.LonePairs.ToList();
+                var bonds = atom.OuterOrbitals.Where(o => o.IsPartOfBond);
+                var lonePairPositions = SpherePointDistributor.EvenlyDistributePointsOnSphere(
+                    atom.Radius.In(SIPrefix.Pico, Unit.Meter),
+                    lonePairs.Count,
+                    bonds.Select(bond => atom.Position.VectorTo(bond.MaximumElectronDensityPosition).In(SIPrefix.Pico, Unit.Meter)));
+                for (int lonePairIdx = 0; lonePairIdx < lonePairs.Count; lonePairIdx++)
+                {
+                    lonePairs[lonePairIdx].MaximumElectronDensityPosition = lonePairPositions[lonePairIdx].To(SIPrefix.Pico, Unit.Meter);
+                }
             }
         }
 

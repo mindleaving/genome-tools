@@ -12,12 +12,10 @@ namespace ChemistryLibrary
             var graph = molecule.MoleculeStructure;
 
             var forceLookup = CalculateBondForces(graph);
-            var lonePairForceLookup = CalculateLonePairRepulsion(graph, forceLookup);
+            CalculateLonePairRepulsion(graph, forceLookup);
             if(forceLookup.Values.Any(v => v.X.Value.IsNaN()))
                 throw new Exception("Force cannot be 'NaN'");
-            if (lonePairForceLookup.Values.Any(v => v.X.Value.IsNaN()))
-                throw new Exception("Lone pair repulsion cannot be 'NaN'");
-            return new ForceCalculatorResult(forceLookup, lonePairForceLookup);
+            return new ForceCalculatorResult(forceLookup);
         }
 
         private static Dictionary<uint, UnitVector3D> CalculateBondForces(Graph graph)
@@ -46,9 +44,8 @@ namespace ChemistryLibrary
             return forceLookup;
         }
 
-        private static Dictionary<Orbital, UnitVector3D> CalculateLonePairRepulsion(Graph graph, Dictionary<uint, UnitVector3D> forceLookup)
+        private static void CalculateLonePairRepulsion(Graph graph, IDictionary<uint, UnitVector3D> forceLookup)
         {
-            var lonePairForceLookup = new Dictionary<Orbital, UnitVector3D>();
             foreach (var vertex in graph.Vertices.Values)
             {
                 var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).ToList();
@@ -62,6 +59,8 @@ namespace ChemistryLibrary
                     {
                         if (ReferenceEquals(orbital1, orbital2))
                             continue;
+                        if(!orbital1.IsPartOfBond && !orbital2.IsPartOfBond)
+                            continue;
                         var repulsiveForce = CalculateRepulsiveForce(orbital1, orbital2);
 
                         if (orbital1.IsPartOfBond)
@@ -69,27 +68,14 @@ namespace ChemistryLibrary
                             var neighborVertex = orbitalNeighborVertexMap[orbital1];
                             forceLookup[neighborVertex.Id] += repulsiveForce;
                         }
-                        else
-                        {
-                            if(!lonePairForceLookup.ContainsKey(orbital1))
-                                lonePairForceLookup.Add(orbital1, new UnitVector3D(Unit.Newton, 0,0,0));
-                            lonePairForceLookup[orbital1] += repulsiveForce;
-                        }
                         if (orbital2.IsPartOfBond)
                         {
                             var neighborVertex = orbitalNeighborVertexMap[orbital2];
                             forceLookup[neighborVertex.Id] += -repulsiveForce;
                         }
-                        else
-                        {
-                            if (!lonePairForceLookup.ContainsKey(orbital2))
-                                lonePairForceLookup.Add(orbital2, new UnitVector3D(Unit.Newton, 0, 0, 0));
-                            lonePairForceLookup[orbital2] += -repulsiveForce;
-                        }
                     }
                 }
             }
-            return lonePairForceLookup;
         }
 
         private static Dictionary<Orbital, Vertex> MapBondOrbitalToNeighborVertex(List<Orbital> filledOuterOrbitals, Atom currentAtom,
@@ -126,14 +112,11 @@ namespace ChemistryLibrary
 
     public class ForceCalculatorResult
     {
-        public ForceCalculatorResult(Dictionary<uint, UnitVector3D> forceLookup, 
-            Dictionary<Orbital, UnitVector3D> lonePairForceLookup)
+        public ForceCalculatorResult(Dictionary<uint, UnitVector3D> forceLookup)
         {
             ForceLookup = forceLookup;
-            LonePairForceLookup = lonePairForceLookup;
         }
 
         public Dictionary<uint, UnitVector3D> ForceLookup { get; }
-        public Dictionary<Orbital, UnitVector3D> LonePairForceLookup { get; }
     }
 }
