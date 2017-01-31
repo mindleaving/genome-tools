@@ -43,6 +43,7 @@
     <Compile Include="Exon.cs" />
     <Compile Include="ExonExtractor.cs" />
     <Compile Include="FixedLengthSequenceFrequencyCounter.cs" />
+    <Compile Include="NucleotideSequenceParser.cs" />
     <Compile Include="Peptide.cs" />
     <Compile Include="PeptideFileReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

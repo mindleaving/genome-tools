@@ -11,7 +11,8 @@ namespace ChemistryLibrary
     }
     public class Bond
     {
-        public Bond(Atom atom1, 
+        public Bond(
+            Atom atom1, 
             Orbital orbital1, 
             Atom atom2, 
             Orbital orbital2)
@@ -65,6 +66,10 @@ namespace ChemistryLibrary
 
             electron1.AssociatedBond = this;
             electron2.AssociatedBond = this;
+
+            var electroNegativityDifference = orbital2.Atom.ElectroNegativity - orbital1.Atom.ElectroNegativity;
+            Atom1.EffectiveCharge += (electroNegativityDifference/4.0).To(Unit.ElementaryCharge);
+            Atom2.EffectiveCharge -= (electroNegativityDifference/4.0).To(Unit.ElementaryCharge);
         }
 
         private bool isBroken;
@@ -74,6 +79,10 @@ namespace ChemistryLibrary
                 throw new ChemistryException("Bond cannot be broken twice");
             Orbital1.BreakBond();
             Orbital2.BreakBond();
+            var electroNegativityDifference = Orbital2.Atom.ElectroNegativity - Orbital1.Atom.ElectroNegativity;
+            Atom1.EffectiveCharge -= (electroNegativityDifference / 4.0).To(Unit.ElementaryCharge);
+            Atom2.EffectiveCharge += (electroNegativityDifference / 4.0).To(Unit.ElementaryCharge);
+
             isBroken = true;
         }
         

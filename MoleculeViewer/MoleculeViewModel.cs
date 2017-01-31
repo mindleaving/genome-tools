@@ -36,10 +36,13 @@ namespace MoleculeViewer
         public MoleculeViewModel(Molecule molecule)
         {
             Molecule = molecule;
-            updateModelLatch = new TrapLatch(obj => { }, buildModel =>
-                    Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel((Molecule)buildModel))),
-                obj => { Console.WriteLine("Skipped frame"); })
-            { State = TrapLatch.LatchState.Trapping };
+            updateModelLatch = new TrapLatch(
+                obj => { }, 
+                obj => Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel((Molecule)obj))),
+                obj => { })
+            {
+                State = TrapLatch.LatchState.Trapping
+            };
 
             BuildModel(molecule);
             SetCameraPosition(molecule);
@@ -64,11 +67,12 @@ namespace MoleculeViewer
 
         private void SetCameraPosition(Molecule molecule)
         {
-            var moleculeCenter = new Point3D(
-                molecule.Atoms.Average(atom => atom.Position.X.In(SIPrefix.Pico, Unit.Meter)),
-                molecule.Atoms.Average(atom => atom.Position.Y.In(SIPrefix.Pico, Unit.Meter)),
-                molecule.Atoms.Average(atom => atom.Position.Z.In(SIPrefix.Pico, Unit.Meter)));
-            var position = new Point3D(moleculeCenter.X, moleculeCenter.Y - 100, moleculeCenter.Z - 1000);
+            var atomPositions = molecule.Atoms.Select(atom => atom.Position.In(SIPrefix.Pico, Unit.Meter)).ToList();
+            var xMinMax = new MinMaxMean(atomPositions.Select(p => p.X));
+            var yMinMax = new MinMaxMean(atomPositions.Select(p => p.Y));
+            var zMinMax = new MinMaxMean(atomPositions.Select(p => p.Z));
+            var moleculeCenter = new Point3D(xMinMax.Mean, yMinMax.Mean, zMinMax.Mean);
+            var position = new Point3D(moleculeCenter.X, moleculeCenter.Y, moleculeCenter.Z - xMinMax.Span);
             var lookDirection = new Vector3D(
                 moleculeCenter.X - position.X,
                 moleculeCenter.Y - position.Y,

@@ -68,6 +68,7 @@
     <Compile Include="Orbital.cs" />
     <Compile Include="OrbitalComparer.cs" />
     <Compile Include="OrbitalGenerator.cs" />
+    <Compile Include="PeptideBuilder.cs" />
     <Compile Include="PeriodicTable.cs" />
     <Compile Include="PhysicalConstants.cs" />
     <Compile Include="PhysicsException.cs" />

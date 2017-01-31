@@ -39,7 +39,7 @@ namespace ChemistryLibrary
             {
                 if(cancellationToken.IsCancellationRequested)
                     break;
-                if(t - lastNeighborhoodUpdate > 40.To(SIPrefix.Femto, Unit.Second))
+                if(t - lastNeighborhoodUpdate > 400.To(SIPrefix.Femto, Unit.Second))
                     atomNeighborhoodMap.Update();
 
                 var forces = ForceCalculator.CalculateForces(molecule, atomNeighborhoodMap);

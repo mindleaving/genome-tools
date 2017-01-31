@@ -6,7 +6,7 @@ namespace ChemistryLibrary
 {
     public class AtomNeighborhoodMap
     {
-        private readonly UnitValue distanceThreshold = 300.To(SIPrefix.Pico, Unit.Meter);
+        private readonly UnitValue distanceThreshold = 1000.To(SIPrefix.Pico, Unit.Meter);
         private readonly Molecule molecule;
         private readonly Dictionary<uint, List<uint>> neighborhoodMap = new Dictionary<uint, List<uint>>();
 

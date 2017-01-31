@@ -21,7 +21,7 @@ namespace ChemistryLibrary
             }
         }
 
-        public static MoleculeReference Glycin
+        public static MoleculeReference Glycine
         {
             get
             {
@@ -93,7 +93,7 @@ namespace ChemistryLibrary
 
                 var moduleBuilder = new MoleculeBuilder();
                 return moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                    .Add(ElementName.Nitrogen)
                     .AddSideChain(sideChain1Builder.Start)
                     .Add(ElementName.Carbon).ConnectTo(sideChain1End)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
@@ -229,8 +229,8 @@ namespace ChemistryLibrary
                 sideChain11Builder.Start
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
                 var sideChain12Builder = new MoleculeBuilder();
-                sideChain11Builder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+                sideChain12Builder.Start
+                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
                 sideChain1Builder.Start
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
@@ -255,14 +255,14 @@ namespace ChemistryLibrary
                 var sideChain1Builder = new MoleculeBuilder();
                 var ringBuilder = new MoleculeBuilder();
                 var ringEnd = ringBuilder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                    .Add(ElementName.Carbon)
                     .Add(ElementName.Nitrogen)
                     .Add(ElementName.Carbon, BondMultiplicity.Double)
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen);
                 ringBuilder.Start.ConnectTo(ringEnd, BondMultiplicity.Double);
                 sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
                     .AddSideChain(ringBuilder.Start);
 
                 var moduleBuilder = new MoleculeBuilder();

@@ -158,7 +158,7 @@ namespace PeptideAligner
         private static string NucleotideFromPeptideSequence(string peptideSequence)
         {
             var nucleotides = "";
-            var inverseLookup = ExonExtractor.CordonLookup.ToLookup(x => x.Value, x => x.Key);
+            var inverseLookup = NucleotideSequenceParser.CodonLookup.ToLookup(x => x.Value, x => x.Key);
             foreach (var peptide in peptideSequence)
             {
                 nucleotides += inverseLookup[peptide].First();

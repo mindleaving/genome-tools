@@ -22,7 +22,7 @@ namespace MoleculeViewer
 
         public void MoveBackForth(double change)
         {
-            const double Scaling = 30.0; // Determined from user experience
+            const double Scaling = 60.0; // Determined from user experience
 
             var lookDirection = ToPantoVector3D(Camera.LookDirection);
             var positionChange = lookDirection.Normalize().Multiply(Scaling * change);

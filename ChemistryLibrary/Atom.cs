@@ -44,11 +44,12 @@ namespace ChemistryLibrary
             Mass = AtomPropertyCalculator.CalculateMass(Protons, Neutrons);
             Radius = PeriodicTable.GetRadius(Element);
             Orbitals = OrbitalGenerator.Generate(this, Period+1);
-            FormalCharge = (Protons - Electrons.Count()) * PhysicalConstants.ElementaryCharge;
             ElectroNegativity = PeriodicTable.ElectroNegativity(Element);
 
             PopulateOrbitalsInGroundState();
             ExcitateForMaximalBondAvailability();
+
+            FormalCharge = (Protons - Electrons.Count()) * PhysicalConstants.ElementaryCharge;
             EffectiveCharge = FormalCharge;
         }
 

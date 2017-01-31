@@ -19,21 +19,34 @@ namespace MoleculeViewer
 
             //var water = MoleculeLibrary.H2O;
             //water.PositionAtoms();
-            var aminoAcid = AminoAcidLibrary.Proline
-                .Add(AminoAcidLibrary.Tyrosine)
-                .Add(AminoAcidLibrary.Alanine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Alanine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Alanine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Methionine)
-                .Add(AminoAcidLibrary.Phenylalanine)
-                .Add(AminoAcidLibrary.IsoLeucine)
-                .Add(AminoAcidLibrary.IsoLeucine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Lysine)
-                .Molecule;
+            //var aminoAcid = PeptideBuilder.PeptideFromString(
+            //        "MQRSPLEKASVVSKLFFSWTRPILRKGYRQRLELSDIYQIPSVDSADNLSEKLEREWDRE"
+            //        + "LASKKNPKLINALRRCFFWRFMFYGIFLYLGEVTKAVQPLLLGRIIASYDPDNKEERSIA"
+            //        + "IYLGIGLCLLFIVRTLLLHPAIFGLHHIGMQMRIAMFSLIYKKTLKLSSRVLDKISIGQL"
+            //        + "VSLLSNNLNKFDEGLALAHFVWIAPLQVALLMGLIWELLQASAFCGLGFLIVLALFQAGL"
+            //        + "GRMMMKYRDQRAGKISERLVITSEMIENIQSVKAYCWEEAMEKMIENLRQTELKLTRKAA"
+            //        + "YVRYFNSSAFFFSGFFVVFLSVLPYALIKGIILRKIFTTISFCIVLRMAVTRQFPWAVQT"
+            //        + "WYDSLGAINKIQDFLQKQEYKTLEYNLTTTEVVMENVTAFWEEGFGELFEKAKQNNNNRK"
+            //        + "TSNGDDSLFFSNFSLLGTPVLKDINFKIERGQLLAVAGSTGAGKTSLLMVIMGELEPSEG"
+            //        + "KIKHSGRISFCSQFSWIMPGTIKENIIFGVSYDEYRYRSVIKACQLEEDISKFAEKDNIV"
+            //        + "LGEGGITLSGGQRARISLARAVYKDADLYLLDSPFGYLDVLTEKEIFESCVCKLMANKTR"
+            //        + "ILVTSKMEHLKKADKILILHEGSSYFYGTFSELQNLQPDFSSKLMGCDSFDQFSAERRNS"
+            //        + "ILTETLHRFSLEGDAPVSWTETKKQSFKQTGEFGEKRKNSILNPINSIRKFSIVQKTPLQ"
+            //        + "MNGIEEDSDEPLERRLSLVPDSEQGEAILPRISVISTGPTLQARRRQSVLNLMTHSVNQG"
+            //        + "QNIHRKTTASTRKVSLAPQANLTELDIYSRRLSQETGLEISEEINEEDLKECFFDDMESI"
+            //        + "PAVTTWNTYLRYITVHKSLIFVLIWCLVIFLAEVAASLVVLWLLGNTPLQDKGNSTHSRN"
+            //        + "NSYAVIITSTSSYYVFYIYVGVADTLLAMGFFRGLPLVHTLITVSKILHHKMLHSVLQAP"
+            //        + "MSTLNTLKAGGILNRFSKDIAILDDLLPLTIFDFIQLLLIVIGAIAVVAVLQPYIFVATV"
+            //        + "PVIVAFIMLRAYFLQTSQQLKQLESEGRSPIFTHLVTSLKGLWTLRAFGRQPYFETLFHK"
+            //        + "ALNLHTANWFLYLSTLRWFQMRIEMIFVIFFIAVTFISILTTGEGEGRVGIILTLAMNIM"
+            //        + "STLQWAVNSSIDVDSLMRSVSRVFKFIDMPTEGKPTKSTKPYKNGQLSKVMIIENSHVKK"
+            //        + "DDIWPSGGQMTVKDLTAKYTEGGNAILENISFSISPGQRVGLLGRTGSGKSTLLSAFLRL"
+            //        + "LNTEGEIQIDGVSWDSITLQQWRKAFGVIPQKVFIFSGTFRKNLDPYEQWSDQEIWKVAD"
+            //        + "EVGLRSVIEQFPGKLDFVLVDGGCVLSHGHKQLMCLARSVLSKAKILLLDEPSAHLDPVT"
+            //        + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
+            //        + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL")
+            //    .Molecule;
+            var aminoAcid = PeptideBuilder.PeptideFromString("AI").Molecule;
             aminoAcid.PositionAtoms();
 
             MoleculeViewModel = new MoleculeViewModel(aminoAcid);

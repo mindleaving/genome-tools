@@ -72,11 +72,11 @@ namespace ChemistryLibrary
                     var charge2 = neighborAtom.EffectiveCharge;
                     var r = atom1PositionInPicoMeter
                         .VectorTo(neighborAtom.Position.In(SIPrefix.Pico, Unit.Meter));
-                    var distance = r.Magnitude().To(SIPrefix.Pico, Unit.Meter);
-                    var chargeProduct = PhysicalConstants.CoulombsConstant
-                                        * charge1
-                                        * charge2;
-                    var ionicForce = -(chargeProduct / (distance * distance)) * r.Normalize();
+                    var distance = r.Magnitude();
+                    var chargeProduct = PhysicalConstants.CoulombsConstant.Value
+                                        * charge1.Value
+                                        * charge2.Value;
+                    var ionicForce = (-1e-2*(chargeProduct / (distance * distance)) * r.Normalize()).To(Unit.Newton);
 
                     forceLookup[vertex] += ionicForce;
                     forceLookup[neighborVertex] += -ionicForce;
@@ -190,7 +190,7 @@ namespace ChemistryLibrary
         {
             if(!orbital.IsPartOfBond)
                 throw new InvalidOperationException("Orbital is not part of bond. Cannot get bonded atom");
-            var bondedAtom = orbital.AssociatedBond.Atom1 == currentAtom
+            var bondedAtom = orbital.AssociatedBond.Atom1.Equals(currentAtom)
                 ? orbital.AssociatedBond.Atom2
                 : orbital.AssociatedBond.Atom1;
             return bondedAtom;
@@ -206,8 +206,8 @@ namespace ChemistryLibrary
                 .VectorTo(orbital2.MaximumElectronDensityPosition.In(Unit.Meter))
                 .Normalize();
             var chargeProduct = PhysicalConstants.CoulombsConstant
-                *PhysicalConstants.ElementaryCharge
-                *PhysicalConstants.ElementaryCharge;
+                *(2*PhysicalConstants.ElementaryCharge)
+                *(2*PhysicalConstants.ElementaryCharge);
             var repulsiveForce = -(chargeProduct / (distance*distance))*forceVector;
             return repulsiveForce;
         }
