@@ -2,12 +2,12 @@
 {
     public enum SIBaseUnit
     {
-        Meter,
-        Kilogram,
-        Second,
-        Ampere,
-        Kelvin,
-        Mole,
-        Candela
+        Meter = 0,
+        Kilogram = 1,
+        Second = 2,
+        Ampere = 3,
+        Kelvin = 4,
+        Mole = 5,
+        Candela = 6
     }
 }

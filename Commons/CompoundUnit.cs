@@ -8,73 +8,42 @@ namespace Commons
     [DataContract]
     public class CompoundUnit : IEquatable<CompoundUnit>
     {
-        public CompoundUnit() { }
+        public CompoundUnit()
+        { }
         public CompoundUnit(IEnumerable<SIBaseUnit> nominatorUnits)
             : this(nominatorUnits, Enumerable.Empty<SIBaseUnit>())
         { }
         public CompoundUnit(IEnumerable<SIBaseUnit> nominatorUnits, IEnumerable<SIBaseUnit> denominatorUnits)
         {
+            UnitExponents = new int[siBaseUnits.Count];
+
             foreach (var nominatorUnit in nominatorUnits)
             {
-                if (!UnitExponents.ContainsKey(nominatorUnit))
-                    UnitExponents.Add(nominatorUnit, 1);
-                else
-                    UnitExponents[nominatorUnit]++;
+                var unitIdx = siBaseUnits[nominatorUnit];
+                UnitExponents[unitIdx]++;
             }
             foreach (var denominatorUnit in denominatorUnits)
             {
-                if (!UnitExponents.ContainsKey(denominatorUnit))
-                    UnitExponents.Add(denominatorUnit, -1);
-                else
-                    UnitExponents[denominatorUnit]--;
+                var unitIdx = siBaseUnits[denominatorUnit];
+                UnitExponents[unitIdx]--;
             }
+        }
+        public CompoundUnit(IEnumerable<int> unitExponents)
+        {
+            UnitExponents = unitExponents.ToArray();
         }
 
         [DataMember]
-        public Dictionary<SIBaseUnit, int> UnitExponents { get; private set; } = new Dictionary<SIBaseUnit, int>();
+        public int[] UnitExponents { get; private set; }
 
         public static CompoundUnit operator *(CompoundUnit unit1, CompoundUnit unit2)
         {
-            var multipliedUnit = new CompoundUnit();
-
-            unit1.UnitExponents.ForEach(kvp =>
-            {
-                if (!multipliedUnit.UnitExponents.ContainsKey(kvp.Key))
-                    multipliedUnit.UnitExponents.Add(kvp.Key, kvp.Value);
-                else
-                    multipliedUnit.UnitExponents[kvp.Key] += kvp.Value;
-            });
-            unit2.UnitExponents.ForEach(kvp =>
-            {
-                if (!multipliedUnit.UnitExponents.ContainsKey(kvp.Key))
-                    multipliedUnit.UnitExponents.Add(kvp.Key, kvp.Value);
-                else
-                    multipliedUnit.UnitExponents[kvp.Key] += kvp.Value;
-            });
-
-            return multipliedUnit;
+            return new CompoundUnit(unit1.UnitExponents.PairwiseOperation(unit2.UnitExponents, (a,b) => a + b));
         }
 
         public static CompoundUnit operator /(CompoundUnit unit1, CompoundUnit unit2)
         {
-            var divisionUnit = new CompoundUnit();
-
-            unit1.UnitExponents.ForEach(kvp =>
-            {
-                if (!divisionUnit.UnitExponents.ContainsKey(kvp.Key))
-                    divisionUnit.UnitExponents.Add(kvp.Key, kvp.Value);
-                else
-                    divisionUnit.UnitExponents[kvp.Key] += kvp.Value;
-            });
-            unit2.UnitExponents.ForEach(kvp =>
-            {
-                if (!divisionUnit.UnitExponents.ContainsKey(kvp.Key))
-                    divisionUnit.UnitExponents.Add(kvp.Key, -kvp.Value);
-                else
-                    divisionUnit.UnitExponents[kvp.Key] -= kvp.Value;
-            });
-
-            return divisionUnit;
+            return new CompoundUnit(unit1.UnitExponents.PairwiseOperation(unit2.UnitExponents, (a, b) => a - b));
         }
 
         public static bool operator ==(CompoundUnit unit1, CompoundUnit unit2)
@@ -101,22 +70,11 @@ namespace Commons
             return Equals(other as CompoundUnit);
         }
 
+        private static readonly Dictionary<SIBaseUnit, int> siBaseUnits = ((SIBaseUnit[]) Enum.GetValues(typeof(SIBaseUnit)))
+            .ToDictionary(unit => unit, unit => (int)unit);
         public int[] GetUnitFingerprint()
         {
-            // TODO: Improve performance
-            var baseUnits = (SIBaseUnit[]) Enum.GetValues(typeof(SIBaseUnit));
-            var fingerprint = new int[baseUnits.Length];
-            for (int unitIdx = 0; unitIdx < baseUnits.Length; unitIdx++)
-            {
-                var siBaseUnit = baseUnits[unitIdx];
-                fingerprint[unitIdx] = UnitExponents.ContainsKey(siBaseUnit) ? UnitExponents[siBaseUnit] : 0;
-            }
-            //Parallel.For(0, baseUnits.Length, unitIdx =>
-            //{
-            //    var siBaseUnit = baseUnits[unitIdx];
-            //    fingerprint[unitIdx] = UnitExponents.ContainsKey(siBaseUnit) ? UnitExponents[siBaseUnit] : 0;
-            //});
-            return fingerprint;
+            return UnitExponents;
         }
 
         public bool Equals(CompoundUnit other)
@@ -131,16 +89,26 @@ namespace Commons
         public override string ToString()
         {
             var nominator = UnitExponents
-                .Where(kvp => kvp.Value > 0);
+                .Select((multiplicity, idx) => new
+                {
+                    SIBaseUnit = (SIBaseUnit)idx,
+                    Multiplicity = multiplicity
+                })
+                .Where(kvp => kvp.Multiplicity > 0);
             var denominator = UnitExponents
-                .Where(kvp => kvp.Value < 0)
+                .Select((multiplicity, idx) => new
+                {
+                    SIBaseUnit = (SIBaseUnit)idx,
+                    Multiplicity = multiplicity
+                })
+                .Where(kvp => kvp.Multiplicity < 0)
                 .ToList();
             var unitString = "";
             foreach (var unitMultiplicity in nominator)
             {
-                unitString += UnitValueExtensions.StringRepresentation(unitMultiplicity.Key);
-                if (unitMultiplicity.Value > 1)
-                    unitString += "^" + unitMultiplicity.Value;
+                unitString += unitMultiplicity.SIBaseUnit.StringRepresentation();
+                if (unitMultiplicity.Multiplicity > 1)
+                    unitString += "^" + unitMultiplicity.Multiplicity;
                 unitString += " ";
             }
             if (denominator.Any())
@@ -149,9 +117,9 @@ namespace Commons
                 unitString += "(";
             foreach (var unitMultiplicity in denominator)
             {
-                unitString += UnitValueExtensions.StringRepresentation(unitMultiplicity.Key);
-                if (-unitMultiplicity.Value > 1)
-                    unitString += "^" + -unitMultiplicity.Value;
+                unitString += unitMultiplicity.SIBaseUnit.StringRepresentation();
+                if (-unitMultiplicity.Multiplicity > 1)
+                    unitString += "^" + -unitMultiplicity.Multiplicity;
                 unitString += " ";
             }
             if (denominator.Count > 1)

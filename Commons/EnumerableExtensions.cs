@@ -14,6 +14,18 @@ namespace Commons
             }
         }
 
+        public static IEnumerable<Tout> PairwiseOperation<T1, T2, Tout>(this IList<T1> values1, IList<T2> values2, Func<T1, T2, Tout> operation)
+        {
+            if(values1.Count != values2.Count)
+                throw new InvalidOperationException("Cannot apply pairwise operation to lists of different length");
+            var result = new List<Tout>(values1.Count);
+            for (int idx = 0; idx < values1.Count; idx++)
+            {
+                result.Add(operation(values1[idx],values2[idx]));
+            }
+            return result;
+        }
+
         public static T MaximumItem<T>(this IEnumerable<T> collection, Func<T, double> valueSelector)
         {
             Func<T, double> inverseValueSelector = item => -valueSelector(item);

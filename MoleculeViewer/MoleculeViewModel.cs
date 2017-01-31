@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -29,9 +31,15 @@ namespace MoleculeViewer
         }
         public event EventHandler MoleculeHasChanged;
 
+        private readonly TrapLatch updateModelLatch;
+
         public MoleculeViewModel(Molecule molecule)
         {
             Molecule = molecule;
+            updateModelLatch = new TrapLatch(obj => { }, buildModel =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel((Molecule)buildModel))),
+                obj => { Console.WriteLine("Skipped frame"); })
+            { State = TrapLatch.LatchState.Trapping };
 
             BuildModel(molecule);
             SetCameraPosition(molecule);
@@ -50,6 +58,8 @@ namespace MoleculeViewer
             modelContent.Children.Add(lightSource1);
             modelContent.Children.Add(lightSource2);
             MoleculeModel = new ModelVisual3D {Content = modelContent};
+            OnMoleculeHasChanged();
+            Task.Delay(100).ContinueWith(task => updateModelLatch.State = TrapLatch.LatchState.Trapping);
         }
 
         private void SetCameraPosition(Molecule molecule)
@@ -73,8 +83,7 @@ namespace MoleculeViewer
             if(Application.Current?.Dispatcher == null 
                 || Application.Current.Dispatcher.HasShutdownStarted)
                 return;
-            Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel(Molecule)));
-            OnMoleculeHasChanged();
+            updateModelLatch.Invoke(Molecule);            
         }
 
         private GeometryModel3D ConstructAtom(Atom atom)
