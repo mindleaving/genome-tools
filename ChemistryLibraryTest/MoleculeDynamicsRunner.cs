@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using ChemistryLibrary;
 using Commons;
 using NUnit.Framework;
@@ -18,6 +19,7 @@ namespace ChemistryLibraryTest
                 .Add(AminoAcidLibrary.Glutamine)
                 .Add(AminoAcidLibrary.Lysine)
                 .Molecule;
+            var customForces = new List<CustomAtomForce>();
             var moleculeDynamicsSimulator = new MoleculeDynamicsSimulator();
             var settings = new MoleculeDynamicsSimulationSettings
             {
@@ -25,7 +27,7 @@ namespace ChemistryLibraryTest
                 TimeStep = 4.To(SIPrefix.Femto, Unit.Second)
             };
             var cancellationTokenSource = new CancellationTokenSource();
-            moleculeDynamicsSimulator.MinimizeEnergy(molecule, settings, cancellationTokenSource.Token);
+            moleculeDynamicsSimulator.MinimizeEnergy(molecule, customForces, settings, cancellationTokenSource.Token);
         }
     }
 }

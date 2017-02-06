@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using ChemistryLibrary;
+using Commons;
 
 namespace MoleculeViewer
 {
@@ -46,11 +48,44 @@ namespace MoleculeViewer
             //        + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
             //        + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL")
             //    .Molecule;
-            var aminoAcid = PeptideBuilder.PeptideFromString("AI").Molecule;
+            var aminoAcidBuilder = PeptideBuilder
+                .PeptideFromString("IHTGEKPYKC");
+            //var aminoAcidBuilder = AminoAcidLibrary.Glycine
+            //    .Add(AminoAcidLibrary.Threonine)
+            //    .Add(AminoAcidLibrary.Glycine);
+            var aminoAcid = aminoAcidBuilder.Molecule;
             aminoAcid.PositionAtoms();
 
+            var customForces = new List<CustomAtomForce>
+            {
+                new CustomAtomForce
+                {
+                    AtomVertex = aminoAcidBuilder.FirstAtomId,
+                    ForceFunc = (atom,t) => 1e3*atom.Position
+                        .VectorTo(new UnitPoint3D(Unit.Meter, 0,0,0))
+                        .In(Unit.Meter)
+                        .To(Unit.Newton)
+                },
+                new CustomAtomForce
+                {
+                    AtomVertex = aminoAcidBuilder.LastAtomId,
+                    ForceFunc = (atom,t) => {
+                        if(t > 50.To(SIPrefix.Nano, Unit.Second))
+                            return new UnitVector3D(Unit.Newton, 0,0,0);
+                        return 1e-4/(1 + t.In(SIPrefix.Pico, Unit.Second))*new UnitVector3D(Unit.Newton, 1, 0, 0);
+                    }
+                },
+            };
+
+            //var molecule = new MoleculeBuilder()
+            //    .Start
+            //    .Add(ElementName.Nitrogen)
+            //    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen)
+            //    .Molecule;
+            //molecule.PositionAtoms();
+
             MoleculeViewModel = new MoleculeViewModel(aminoAcid);
-            SimulationViewModel = new SimulationViewModel(MoleculeViewModel);
+            SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);
 
             SimulationViewModel.RunSimulation();
         }

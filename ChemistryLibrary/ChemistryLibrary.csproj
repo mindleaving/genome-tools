@@ -52,6 +52,7 @@
     <Compile Include="Bond.cs" />
     <Compile Include="BondLengthCalculator.cs" />
     <Compile Include="ChemistryException.cs" />
+    <Compile Include="CustomAtomForce.cs" />
     <Compile Include="Electron.cs" />
     <Compile Include="ElementMap.cs" />
     <Compile Include="ElementName.cs" />

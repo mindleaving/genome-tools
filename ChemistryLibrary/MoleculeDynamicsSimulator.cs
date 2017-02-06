@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -11,23 +12,33 @@ namespace ChemistryLibrary
     {
         private const double ForceLowerCutoff = 1e-50;
 
-        public Task MinimizeEnergy(Molecule molecule, MoleculeDynamicsSimulationSettings settings,
+        public Task MinimizeEnergy(Molecule molecule,
+            List<CustomAtomForce> customForces,
+            MoleculeDynamicsSimulationSettings settings, 
             CancellationToken cancellationToken)
         {
             settings.StopSimulationWhenAtomAtRest = false;
             settings.RampUp = true;
             settings.RampUpPeriod = 500*settings.TimeStep;
-            return Task.Factory.StartNew(() => Simulate(molecule, settings, cancellationToken, true), cancellationToken);
+            return Task.Factory.StartNew(() => Simulate(molecule, customForces, settings, cancellationToken, true), cancellationToken);
         }
 
-        public Task RunSimulation(Molecule molecule, MoleculeDynamicsSimulationSettings settings,
+        public Task RunSimulation(Molecule molecule, 
+            List<CustomAtomForce> customForces,
+            MoleculeDynamicsSimulationSettings settings,
             CancellationToken cancellationToken)
         {
-            return Task.Factory.StartNew(() => Simulate(molecule, settings, cancellationToken), cancellationToken);
+            settings.StopSimulationWhenAtomAtRest = false;
+            settings.RampUp = true;
+            settings.RampUpPeriod = 500 * settings.TimeStep;
+            return Task.Factory.StartNew(() => Simulate(molecule, customForces, settings, cancellationToken), cancellationToken);
         }
 
-        private void Simulate(Molecule molecule, MoleculeDynamicsSimulationSettings settings,
-            CancellationToken cancellationToken, bool zeroAtomMomentum = false)
+        private void Simulate(Molecule molecule,
+            List<CustomAtomForce> customForces,
+            MoleculeDynamicsSimulationSettings settings,
+            CancellationToken cancellationToken, 
+            bool zeroAtomMomentum = false)
         {
             if (!molecule.IsPositioned)
                 molecule.PositionAtoms();
@@ -43,25 +54,39 @@ namespace ChemistryLibrary
                     atomNeighborhoodMap.Update();
 
                 var forces = ForceCalculator.CalculateForces(molecule, atomNeighborhoodMap);
-                ApplyAtomForces(molecule, forces, t, settings, zeroAtomMomentum);
+                AddCustomForces(molecule, t, forces.ForceLookup, customForces);
+                ApplyAtomForces(molecule, t, forces, settings, zeroAtomMomentum);
                 ApplyLonePairRepulsion(forces);
                 //WriteDebug(molecule);
 
                 var newAtomPositions = molecule.MoleculeStructure.Vertices.Keys
                     .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position.In(SIPrefix.Pico, Unit.Meter));
-                if (settings.StopSimulationWhenAtomAtRest)
+                if (settings.StopSimulationWhenAtomAtRest && t > settings.RampUpPeriod)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys
                         .Select(atom => currentAtomPositions[atom].DistanceTo(newAtomPositions[atom]))
                         .Max()
                         .To(SIPrefix.Pico, Unit.Meter);
-                    if(maximumPositionChange < settings.MovementDetectionThreshold)
+                    if(maximumPositionChange/settings.TimeStep < settings.MovementDetectionThreshold)
                         break;
                 }
                 currentAtomPositions = newAtomPositions;
                 OnOneIterationComplete();
             }
             OnSimulationFinished();
+        }
+
+        private void AddCustomForces(Molecule molecule,
+            UnitValue elapsedTime,
+            Dictionary<uint, UnitVector3D> forceLookup, 
+            List<CustomAtomForce> customForces)
+        {
+            foreach (var customForce in customForces)
+            {
+                var atom = molecule.GetAtom(customForce.AtomVertex);
+                var force = customForce.ForceFunc(atom, elapsedTime);
+                forceLookup[customForce.AtomVertex] += force;
+            }
         }
 
         private void WriteDebug(Molecule molecule)
@@ -74,6 +99,36 @@ namespace ChemistryLibrary
                 .Aggregate((a,b) => a + ";" + b)
                 + Environment.NewLine;
             File.AppendAllText(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv", output);
+        }
+
+        private static void ApplyAtomForces(Molecule molecule, 
+            UnitValue elapsedTime, 
+            ForceCalculatorResult forces, 
+            MoleculeDynamicsSimulationSettings settings, 
+            bool zeroAtomMomentum)
+        {
+            var maxVelocity = 1e2.To(Unit.MetersPerSecond);
+            foreach (var vertexForce in forces.ForceLookup)
+            {
+                var atom = molecule.GetAtom(vertexForce.Key);
+                var force = vertexForce.Value;
+                if (settings.RampUp && elapsedTime < settings.RampUpPeriod)
+                {
+                    var quotient = elapsedTime.In(SIPrefix.Femto, Unit.Second)/
+                                   settings.RampUpPeriod.In(SIPrefix.Femto, Unit.Second);
+                    force *= quotient;//Math.Pow(10, (int)(-100*quotient));
+                }
+                if (force.Magnitude().Value < ForceLowerCutoff)
+                    continue;
+                atom.Velocity += force/atom.Mass*settings.TimeStep;
+                if (atom.Velocity.Magnitude() > maxVelocity)
+                    atom.Velocity *= maxVelocity / atom.Velocity.Magnitude();
+                atom.Position += atom.Velocity*settings.TimeStep;
+                if (zeroAtomMomentum)
+                    atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
+                else
+                    atom.Velocity *= 0.5;
+            }
         }
 
         private static void ApplyLonePairRepulsion(ForceCalculatorResult forces)
@@ -94,34 +149,9 @@ namespace ChemistryLibrary
                 var displacedLonePair = orbital.MaximumElectronDensityPosition
                                         + atomRadius*tangentialDisplacement;
                 lonePairVector = atom.Position.VectorTo(displacedLonePair);
-                var scaling = atomRadius.In(SIPrefix.Pico, Unit.Meter) /
-                    lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter);
+                var scaling = 0.85*atomRadius.In(SIPrefix.Pico, Unit.Meter) /
+                              lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter);
                 orbital.MaximumElectronDensityPosition = atom.Position + scaling*lonePairVector;
-            }
-        }
-
-        private static void ApplyAtomForces(Molecule molecule, 
-            ForceCalculatorResult forces,
-            UnitValue elapsedTime,
-            MoleculeDynamicsSimulationSettings settings, 
-            bool zeroAtomMomentum)
-        {
-            foreach (var vertexForce in forces.ForceLookup)
-            {
-                var atom = molecule.GetAtom(vertexForce.Key);
-                var force = vertexForce.Value;
-                if (settings.RampUp && elapsedTime < settings.RampUpPeriod)
-                {
-                    var quotient = elapsedTime.In(SIPrefix.Femto, Unit.Second)/
-                                   settings.RampUpPeriod.In(SIPrefix.Femto, Unit.Second);
-                    force *= quotient;//Math.Pow(10, (int)(-100*quotient));
-                }
-                if (force.Magnitude().Value < ForceLowerCutoff)
-                    continue;
-                atom.Velocity += 1e-3*force/atom.Mass*settings.TimeStep;
-                atom.Position += atom.Velocity*settings.TimeStep;
-                if (zeroAtomMomentum)
-                    atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
             }
         }
 
@@ -143,7 +173,7 @@ namespace ChemistryLibrary
         public UnitValue TimeStep { get; set; }
         public UnitValue SimulationTime { get; set; }
         public bool StopSimulationWhenAtomAtRest { get; set; }
-        public UnitValue MovementDetectionThreshold { get; set; } = 1.To(SIPrefix.Pico, Unit.Meter);
+        public UnitValue MovementDetectionThreshold { get; set; } = 150.To(SIPrefix.Milli, Unit.MetersPerSecond);
         public bool RampUp { get; set; }
         public UnitValue RampUpPeriod { get; set; }
     }

@@ -61,6 +61,13 @@ namespace Commons
             var z = point1.Z - v.Z;
             return new UnitPoint3D(x, y, z);
         }
+        public static UnitPoint3D operator *(double scalar, UnitPoint3D point)
+        {
+            var x = scalar * point.X;
+            var y = scalar * point.Y;
+            var z = scalar * point.Z;
+            return new UnitPoint3D(x, y, z);
+        }
         public static UnitPoint3D operator *(UnitValue scalar, UnitPoint3D point)
         {
             var x = scalar*point.X;

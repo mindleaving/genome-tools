@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,9 +28,20 @@ namespace MoleculeViewer
                 OnPropertyChanged();
             }
         }
-        public event EventHandler MoleculeHasChanged;
 
+        public int ModelUpdatedCount
+        {
+            get { return modelUpdatedCount; }
+            private set
+            {
+                modelUpdatedCount = value; 
+                OnPropertyChanged();
+            }
+        }
+
+        public event EventHandler MoleculeHasChanged;
         private readonly TrapLatch updateModelLatch;
+        private int modelUpdatedCount;
 
         public MoleculeViewModel(Molecule molecule)
         {
@@ -87,6 +97,7 @@ namespace MoleculeViewer
             if(Application.Current?.Dispatcher == null 
                 || Application.Current.Dispatcher.HasShutdownStarted)
                 return;
+            ModelUpdatedCount++;
             updateModelLatch.Invoke(Molecule);            
         }
 

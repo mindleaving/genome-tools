@@ -12,6 +12,13 @@
             MouseUp="Carbon3DView_OnMouseUp"
             MouseEnter="Carbon3DView_OnMouseEnter">
     <Grid DataContext="{Binding ElementName=Self, Path=ViewModel}" Background="GhostWhite">
-        <Viewport3D Name="Viewport3D"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <Viewport3D Name="Viewport3D" Grid.Row="0"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <TextBlock Text="{Binding ModelUpdatedCount, Mode=OneWay}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

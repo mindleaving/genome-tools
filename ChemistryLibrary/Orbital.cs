@@ -36,11 +36,17 @@ namespace ChemistryLibrary
                 {
                     var atom1 = AssociatedBond.Atom1;
                     var atom2 = AssociatedBond.Atom2;
-                    var chargeImbalance = atom1.ElectroNegativity/(atom1.ElectroNegativity + atom2.ElectroNegativity);
-                    return new UnitPoint3D(
-                        chargeImbalance * atom1.Position.X + (1 - chargeImbalance) * atom2.Position.X,
-                        chargeImbalance * atom1.Position.Y + (1 - chargeImbalance) * atom2.Position.Y,
-                        chargeImbalance * atom1.Position.Z + (1 - chargeImbalance) * atom2.Position.Z);
+                    var v1V2Vector = atom1.Position.VectorTo(atom2.Position)
+                        .In(SIPrefix.Pico, Unit.Meter)
+                        .Normalize();
+                    var overlapCenter = 0.5*(atom1.Position + atom1.Radius*v1V2Vector)
+                                        + 0.5 * (atom2.Position + atom2.Radius*-v1V2Vector);
+                    return overlapCenter;
+                    //var chargeImbalance = atom1.ElectroNegativity/(atom1.ElectroNegativity + atom2.ElectroNegativity);
+                    //return new UnitPoint3D(
+                    //    chargeImbalance * atom1.Position.X + (1 - chargeImbalance) * atom2.Position.X,
+                    //    chargeImbalance * atom1.Position.Y + (1 - chargeImbalance) * atom2.Position.Y,
+                    //    chargeImbalance * atom1.Position.Z + (1 - chargeImbalance) * atom2.Position.Z);
                 }
                 if (!IsOuterOrbital)
                     return Atom.Position;
