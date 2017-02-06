@@ -38,6 +38,10 @@
         {
             return v.Multiply(scalar);
         }
+        public static Vector3D operator *(Vector3D v, double scalar)
+        {
+            return v.Multiply(scalar);
+        }
         public static UnitVector3D operator *(UnitValue scalar, Vector3D v)
         {
             var x = v.X * scalar;

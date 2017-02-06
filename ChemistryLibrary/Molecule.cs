@@ -79,7 +79,7 @@ namespace ChemistryLibrary
             var startVertex = MoleculeStructure.Vertices.Values.First();
             positionableVertices.Enqueue(startVertex);
             var startAtom = (Atom)startVertex.Object;
-            startAtom.Position = new UnitPoint3D(Unit.Meter, 0,0,0);
+            startAtom.Position = new Point3D(0,0,0);
             while (positionableVertices.Any())
             {
                 var vertex = positionableVertices.Dequeue();
@@ -93,7 +93,7 @@ namespace ChemistryLibrary
 
                 var existingPoints = positionedNeighbors
                         .Select(v => (Atom)v.Object)
-                        .Select(a => currentAtom.Position.VectorTo(a.Position).In(SIPrefix.Pico, Unit.Meter))
+                        .Select(a => currentAtom.Position.VectorTo(a.Position))
                         .ToList();
                 var neighborAndLonePairCount = currentAtom.OuterOrbitals.Count(o => o.IsFull);
                 var evenlyDistributedPoints = SpherePointDistributor.EvenlyDistributePointsOnSphere(1.0, 
@@ -110,7 +110,7 @@ namespace ChemistryLibrary
 
                     var connectingEdges = vertextEdges.Where(edge => edge.HasVertex(neighbor.Id)).ToList();
                     var bonds = connectingEdges.Select(edge => (Bond) edge.Object);
-                    var bondLength = bonds.Average(bond => bond.BondLength, SIPrefix.Pico, Unit.Meter);
+                    var bondLength = bonds.Select(bond => bond.BondLength.In(SIPrefix.Pico, Unit.Meter)).Average();
                     var bondDirection = evenlySpacePointsQueue.Dequeue().ToVector3D();
                     var neighborPosition = currentAtom.Position + bondLength*bondDirection;
                     atom.Position = neighborPosition;
@@ -120,7 +120,7 @@ namespace ChemistryLibrary
                     var lonePairDirection = evenlySpacePointsQueue.Dequeue().ToVector3D();
 
                     var lonePairPosition = currentAtom.Position 
-                        + currentAtom.Radius*lonePairDirection;
+                        + currentAtom.Radius.In(SIPrefix.Pico, Unit.Meter) *lonePairDirection;
                     lonePair.MaximumElectronDensityPosition = lonePairPosition;
                 }
             }

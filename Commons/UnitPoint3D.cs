@@ -28,7 +28,7 @@ namespace Commons
             Y = y.To(unit);
             Z = z.To(unit);
         }
-        public UnitPoint3D(Unit unit, double x, double y, double z) 
+        public UnitPoint3D(Unit unit, double x, double y, double z)
             : this(SIPrefix.None, unit, x, y, z)
         {
         }
@@ -70,9 +70,9 @@ namespace Commons
         }
         public static UnitPoint3D operator *(UnitValue scalar, UnitPoint3D point)
         {
-            var x = scalar*point.X;
-            var y = scalar*point.Y;
-            var z = scalar*point.Z;
+            var x = scalar * point.X;
+            var y = scalar * point.Y;
+            var z = scalar * point.Z;
             return new UnitPoint3D(x, y, z);
         }
 

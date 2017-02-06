@@ -6,7 +6,7 @@ namespace ChemistryLibrary
 {
     public class AtomNeighborhoodMap
     {
-        private readonly UnitValue distanceThreshold = 1000.To(SIPrefix.Pico, Unit.Meter);
+        private readonly UnitValue distanceThreshold = 1.To(SIPrefix.Nano, Unit.Meter);
         private readonly Molecule molecule;
         private readonly Dictionary<uint, List<uint>> neighborhoodMap = new Dictionary<uint, List<uint>>();
 
@@ -27,7 +27,7 @@ namespace ChemistryLibrary
             neighborhoodMap.Clear();
             vertices.ForEach(vertex => neighborhoodMap.Add(vertex, new List<uint>()));
 
-            var thresholdInPicoMeter = distanceThreshold.In(SIPrefix.Pico, Unit.Meter);
+            var threshold = distanceThreshold.Value;
             for (var idx1 = 0; idx1 < vertices.Count-1; idx1++)
             {
                 var vertex1 = vertices[idx1];
@@ -36,10 +36,8 @@ namespace ChemistryLibrary
                 {
                     var vertex2 = vertices[idx2];
                     var atom2 = molecule.GetAtom(vertex2);
-                    var distanceInPicoMeter = atom1.Position
-                        .In(SIPrefix.Pico, Unit.Meter)
-                        .DistanceTo(atom2.Position.In(SIPrefix.Pico, Unit.Meter));
-                    if (distanceInPicoMeter < thresholdInPicoMeter)
+                    var distance = atom1.Position.DistanceTo(atom2.Position);
+                    if (distance < threshold)
                     {
                         neighborhoodMap[vertex1].Add(vertex2);
                         neighborhoodMap[vertex2].Add(vertex1);

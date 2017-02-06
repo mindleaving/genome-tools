@@ -26,7 +26,7 @@
             Z = z.To(unit);
         }
 
-        public UnitVector3D(Unit unit, double x, double y, double z) 
+        public UnitVector3D(Unit unit, double x, double y, double z)
             : this(SIPrefix.None, unit, x, y, z)
         {
         }
@@ -47,7 +47,7 @@
         }
         public static UnitVector3D operator -(UnitVector3D v)
         {
-            return -1.0*v;
+            return -1.0 * v;
         }
         public static UnitVector3D operator *(UnitValue scalar, UnitVector3D v)
         {
@@ -58,19 +58,19 @@
         }
         public static UnitVector3D operator *(int scalar, UnitVector3D v)
         {
-            return (double) scalar*v;
+            return (double)scalar * v;
         }
         public static UnitVector3D operator *(UnitVector3D v, double scalar)
         {
-            return scalar*v;
+            return scalar * v;
         }
         public static UnitVector3D operator *(UnitVector3D v, UnitValue scalar)
         {
-            return scalar*v;
+            return scalar * v;
         }
         public static UnitVector3D operator *(UnitVector3D v, int scalar)
         {
-            return scalar*v;
+            return scalar * v;
         }
         public static UnitVector3D operator *(double scalar, UnitVector3D v)
         {

@@ -27,8 +27,8 @@ namespace ChemistryLibrary
         public Bond AssociatedBond { get; set; }
         public bool IsPartOfBond => AssociatedBond != null;
 
-        private UnitPoint3D electronDensityMaximumPosition;
-        public UnitPoint3D MaximumElectronDensityPosition
+        private Point3D electronDensityMaximumPosition;
+        public Point3D MaximumElectronDensityPosition
         {
             get
             {
@@ -36,11 +36,9 @@ namespace ChemistryLibrary
                 {
                     var atom1 = AssociatedBond.Atom1;
                     var atom2 = AssociatedBond.Atom2;
-                    var v1V2Vector = atom1.Position.VectorTo(atom2.Position)
-                        .In(SIPrefix.Pico, Unit.Meter)
-                        .Normalize();
-                    var overlapCenter = 0.5*(atom1.Position + atom1.Radius*v1V2Vector)
-                                        + 0.5 * (atom2.Position + atom2.Radius*-v1V2Vector);
+                    var v1V2Vector = atom1.Position.VectorTo(atom2.Position).Normalize();
+                    var overlapCenter = 0.5*(atom1.Position + atom1.Radius.Value*v1V2Vector)
+                                        + 0.5*(atom2.Position + atom2.Radius.Value*-v1V2Vector);
                     return overlapCenter;
                     //var chargeImbalance = atom1.ElectroNegativity/(atom1.ElectroNegativity + atom2.ElectroNegativity);
                     //return new UnitPoint3D(
@@ -58,7 +56,7 @@ namespace ChemistryLibrary
                     throw new InvalidOperationException("Cannot set electron density maximum position for orbit part of a bond");
                 if(!IsOuterOrbital)
                     throw new InvalidOperationException("Cannot set electron density maximum position for non-outer orbital");
-                if(value.X.Value.IsNaN())
+                if(value.X.IsNaN())
                     throw new Exception("Setting orbital electron density position to 'NaN' not allowed");
                 electronDensityMaximumPosition = value;
             }

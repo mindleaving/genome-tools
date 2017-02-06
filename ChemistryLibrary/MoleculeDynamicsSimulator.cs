@@ -43,7 +43,7 @@ namespace ChemistryLibrary
             if (!molecule.IsPositioned)
                 molecule.PositionAtoms();
             var currentAtomPositions = molecule.MoleculeStructure.Vertices.Keys
-                .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position.In(SIPrefix.Pico, Unit.Meter));
+                .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position);
             var lastNeighborhoodUpdate = 0.To(Unit.Second);
             var atomNeighborhoodMap = new AtomNeighborhoodMap(molecule);
             for (var t = 0.To(Unit.Second); t < settings.SimulationTime; t += settings.TimeStep)
@@ -60,14 +60,13 @@ namespace ChemistryLibrary
                 //WriteDebug(molecule);
 
                 var newAtomPositions = molecule.MoleculeStructure.Vertices.Keys
-                    .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position.In(SIPrefix.Pico, Unit.Meter));
+                    .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position);
                 if (settings.StopSimulationWhenAtomAtRest && t > settings.RampUpPeriod)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys
                         .Select(atom => currentAtomPositions[atom].DistanceTo(newAtomPositions[atom]))
-                        .Max()
-                        .To(SIPrefix.Pico, Unit.Meter);
-                    if(maximumPositionChange/settings.TimeStep < settings.MovementDetectionThreshold)
+                        .Max();
+                    if(maximumPositionChange/settings.TimeStep.Value < settings.MovementDetectionThreshold.Value)
                         break;
                 }
                 currentAtomPositions = newAtomPositions;
@@ -78,7 +77,7 @@ namespace ChemistryLibrary
 
         private void AddCustomForces(Molecule molecule,
             UnitValue elapsedTime,
-            Dictionary<uint, UnitVector3D> forceLookup, 
+            Dictionary<uint, Vector3D> forceLookup, 
             List<CustomAtomForce> customForces)
         {
             foreach (var customForce in customForces)
@@ -94,7 +93,7 @@ namespace ChemistryLibrary
             var oxygen = molecule.Atoms.Single(atom => atom.Element == ElementName.Oxygen);
             var fullOuterOrbitals = oxygen.OuterOrbitals.Where(o => o.IsFull);
             var output = fullOuterOrbitals
-                .Select(o => o.Atom.Position.VectorTo(o.MaximumElectronDensityPosition).In(SIPrefix.Pico, Unit.Meter).Normalize())
+                .Select(o => o.Atom.Position.VectorTo(o.MaximumElectronDensityPosition).Normalize())
                 .Select(v => v.X + ";" + v.Y + ";" + v.Z)
                 .Aggregate((a,b) => a + ";" + b)
                 + Environment.NewLine;
@@ -107,25 +106,25 @@ namespace ChemistryLibrary
             MoleculeDynamicsSimulationSettings settings, 
             bool zeroAtomMomentum)
         {
-            var maxVelocity = 1e2.To(Unit.MetersPerSecond);
+            var maxVelocity = 1e2;
+            var dT = settings.TimeStep.In(Unit.Second);
             foreach (var vertexForce in forces.ForceLookup)
             {
                 var atom = molecule.GetAtom(vertexForce.Key);
                 var force = vertexForce.Value;
                 if (settings.RampUp && elapsedTime < settings.RampUpPeriod)
                 {
-                    var quotient = elapsedTime.In(SIPrefix.Femto, Unit.Second)/
-                                   settings.RampUpPeriod.In(SIPrefix.Femto, Unit.Second);
+                    var quotient = elapsedTime.Value/settings.RampUpPeriod.Value;
                     force *= quotient;//Math.Pow(10, (int)(-100*quotient));
                 }
-                if (force.Magnitude().Value < ForceLowerCutoff)
+                if (force.Magnitude() < ForceLowerCutoff)
                     continue;
-                atom.Velocity += force/atom.Mass*settings.TimeStep;
+                atom.Velocity += settings.TimeStep.In(Unit.Second)/ atom.Mass.In(Unit.Kilogram) * force;
                 if (atom.Velocity.Magnitude() > maxVelocity)
                     atom.Velocity *= maxVelocity / atom.Velocity.Magnitude();
-                atom.Position += atom.Velocity*settings.TimeStep;
+                atom.Position += dT*atom.Velocity;
                 if (zeroAtomMomentum)
-                    atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
+                    atom.Velocity = new Vector3D(0, 0, 0);
                 else
                     atom.Velocity *= 0.5;
             }
@@ -138,19 +137,18 @@ namespace ChemistryLibrary
                 var orbital = lonePairForce.Key;
                 var atom = orbital.Atom;
                 var force = lonePairForce.Value;
-                if(force.Magnitude().Value < ForceLowerCutoff)
+                if(force.Magnitude() < ForceLowerCutoff)
                     continue;
-                var displacementDirection = force.In(Unit.Newton).Normalize();
-                var atomRadius = atom.Radius;
+                var displacementDirection = force.Normalize();
+                var atomRadius = atom.Radius.Value;
 
                 var lonePairVector = atom.Position.VectorTo(orbital.MaximumElectronDensityPosition);
-                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.In(SIPrefix.Pico, Unit.Meter).Normalize());
+                var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.Normalize());
                 var tangentialDisplacement = displacementDirection - displacementNormal;
                 var displacedLonePair = orbital.MaximumElectronDensityPosition
                                         + atomRadius*tangentialDisplacement;
                 lonePairVector = atom.Position.VectorTo(displacedLonePair);
-                var scaling = 0.85*atomRadius.In(SIPrefix.Pico, Unit.Meter) /
-                              lonePairVector.Magnitude().In(SIPrefix.Pico, Unit.Meter);
+                var scaling = 0.85*atomRadius / lonePairVector.Magnitude();
                 orbital.MaximumElectronDensityPosition = atom.Position + scaling*lonePairVector;
             }
         }

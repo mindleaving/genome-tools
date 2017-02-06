@@ -13,6 +13,8 @@ namespace MoleculeViewer
 {
     public class MoleculeViewModel : Viewport3DBase
     {
+        private const double DimensionScaling = 1e12;
+
         private ModelVisual3D moleculeModel;
         // ###############################
         // NOTE ON UNITS: ALL POSITIONS AND SIZES ARE IN PICOMETER
@@ -77,7 +79,7 @@ namespace MoleculeViewer
 
         private void SetCameraPosition(Molecule molecule)
         {
-            var atomPositions = molecule.Atoms.Select(atom => atom.Position.In(SIPrefix.Pico, Unit.Meter)).ToList();
+            var atomPositions = molecule.Atoms.Select(atom => DimensionScaling*atom.Position).ToList();
             var xMinMax = new MinMaxMean(atomPositions.Select(p => p.X));
             var yMinMax = new MinMaxMean(atomPositions.Select(p => p.Y));
             var zMinMax = new MinMaxMean(atomPositions.Select(p => p.Z));
@@ -111,11 +113,11 @@ namespace MoleculeViewer
 
         private MeshGeometry3D BuildAtomSphere(Atom atom)
         {
-            var center = atom.Position;
-            var centerX = center.X.In(SIPrefix.Pico, Unit.Meter);
-            var centerY = center.Y.In(SIPrefix.Pico, Unit.Meter);
-            var centerZ = center.Z.In(SIPrefix.Pico, Unit.Meter);
-            var radius = atom.Radius.In(SIPrefix.Pico, Unit.Meter);
+            var center = DimensionScaling*atom.Position;
+            var centerX = center.X;
+            var centerY = center.Y;
+            var centerZ = center.Z;
+            var radius = DimensionScaling*atom.Radius.Value;
 
             return BuildSphere(new Point3D(centerX, centerY, centerZ), radius);
         }

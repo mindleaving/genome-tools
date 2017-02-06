@@ -61,18 +61,15 @@ namespace MoleculeViewer
                 new CustomAtomForce
                 {
                     AtomVertex = aminoAcidBuilder.FirstAtomId,
-                    ForceFunc = (atom,t) => 1e3*atom.Position
-                        .VectorTo(new UnitPoint3D(Unit.Meter, 0,0,0))
-                        .In(Unit.Meter)
-                        .To(Unit.Newton)
+                    ForceFunc = (atom,t) => 1e3*atom.Position.VectorTo(new Point3D(0,0,0))
                 },
                 new CustomAtomForce
                 {
                     AtomVertex = aminoAcidBuilder.LastAtomId,
                     ForceFunc = (atom,t) => {
                         if(t > 50.To(SIPrefix.Nano, Unit.Second))
-                            return new UnitVector3D(Unit.Newton, 0,0,0);
-                        return 1e-4/(1 + t.In(SIPrefix.Pico, Unit.Second))*new UnitVector3D(Unit.Newton, 1, 0, 0);
+                            return new Vector3D(0,0,0);
+                        return 1e-4/(1 + t.In(SIPrefix.Pico, Unit.Second))*new Vector3D(1, 0, 0);
                     }
                 },
             };

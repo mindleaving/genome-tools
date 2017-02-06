@@ -19,8 +19,8 @@ namespace ChemistryLibrary
         public UnitValue FormalCharge { get; }
         public UnitValue EffectiveCharge { get; set; }
         public List<Orbital> Orbitals { get; }
-        public UnitPoint3D Position { get; set; }
-        public UnitVector3D Velocity { get; set; } = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
+        public Point3D Position { get; set; }
+        public Vector3D Velocity { get; set; } = new Vector3D(0, 0, 0);
         public IEnumerable<Electron> Electrons => Orbitals.SelectMany(orbital => orbital.Electrons);
         public IEnumerable<Electron> ValenceElectrons => OuterOrbitals.SelectMany(o => o.Electrons);
         public IEnumerable<Orbital> OuterOrbitals => Orbitals.Where(o => o.Period == Period);
