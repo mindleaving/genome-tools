@@ -49,6 +49,7 @@
     <Compile Include="CompoundUnitExtensions.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="EnumExtensions.cs" />
+    <Compile Include="Geometry.cs" />
     <Compile Include="GraphAlgorithmClasses.cs" />
     <Compile Include="GraphAlgorithms.cs" />
     <Compile Include="GraphClasses.cs" />
