@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using ChemistryLibrary;
 using Commons;
@@ -79,6 +80,10 @@ namespace MoleculeViewer
             //    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
             //var molecule = moleculeReference.Molecule;
             //molecule.PositionAtoms(moleculeReference.FirstAtomId, moleculeReference.LastAtomId);
+
+            //var effectiveCharges = aminoAcid.Atoms.OrderBy(atom => atom.EffectiveCharge)
+            //    .Select(atom => new { Atom = atom, Charge = atom.EffectiveCharge.Value})
+            //    .ToList();
 
             MoleculeViewModel = new MoleculeViewModel(aminoAcid);
             SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);

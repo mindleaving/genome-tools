@@ -50,13 +50,14 @@ namespace ChemistryLibrary
             {
                 if(cancellationToken.IsCancellationRequested)
                     break;
-                if (t - lastNeighborhoodUpdate > 1000.To(SIPrefix.Femto, Unit.Second))
+                if (t - lastNeighborhoodUpdate > 400.To(SIPrefix.Femto, Unit.Second))
                     atomNeighborhoodMap.Update();
 
                 var forces = ForceCalculator.CalculateForces(molecule, atomNeighborhoodMap);
                 AddCustomForces(molecule, t, forces.ForceLookup, customForces);
                 ApplyAtomForces(molecule, t, forces, settings, zeroAtomMomentum);
                 ApplyLonePairRepulsion(forces);
+                // TODO: Redistribute electrons (either here or as a step after molecule is fully connected
                 //WriteDebug(molecule);
 
                 var newAtomPositions = molecule.MoleculeStructure.Vertices.Keys
@@ -126,7 +127,7 @@ namespace ChemistryLibrary
                 if (zeroAtomMomentum)
                     atom.Velocity = new Vector3D(0, 0, 0);
                 else
-                    atom.Velocity *= 0.5;
+                    atom.Velocity *= 0.5; // TODO: Scale velocity to maintain a specific total energy, matching the environement's temperature
             }
         }
 

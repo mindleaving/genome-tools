@@ -76,7 +76,7 @@ namespace ChemistryLibrary
                     var chargeProduct = PhysicalConstants.CoulombsConstant.Value
                                         *charge1.Value
                                         *charge2.Value;
-                    var ionicForce = -(chargeProduct/(distance*distance))*r.Normalize();
+                    var ionicForce = -1e1*(chargeProduct/(distance*distance))*r.Normalize();
 
                     forceLookup[vertex] += ionicForce;
                     forceLookup[neighborVertex] += -ionicForce;
