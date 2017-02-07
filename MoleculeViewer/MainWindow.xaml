@@ -7,5 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525"
         Name="Self">
+    <Window.InputBindings>
+        <KeyBinding Key="R" Command="{Binding ElementName=Self, Path=MoleculeViewModel.ResetViewCommand}"></KeyBinding>
+    </Window.InputBindings>
     <moleculeViewer:MoleculeView ViewModel="{Binding ElementName=Self, Path=MoleculeViewModel}"/>
 </Window>

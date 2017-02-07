@@ -48,38 +48,37 @@ namespace MoleculeViewer
             //        + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
             //        + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL")
             //    .Molecule;
+            //var aminoAcidBuilder = PeptideBuilder
+            //    .PeptideFromString("IHTGEKPYKC");
             var aminoAcidBuilder = PeptideBuilder
-                .PeptideFromString("IHTGEKPYKC");
-            //var aminoAcidBuilder = AminoAcidLibrary.Glycine
-            //    .Add(AminoAcidLibrary.Threonine)
-            //    .Add(AminoAcidLibrary.Glycine);
+                .PeptideFromString(new string('A',18));
             var aminoAcid = aminoAcidBuilder.Molecule;
-            aminoAcid.PositionAtoms();
+            aminoAcid.PositionAtoms(aminoAcidBuilder.FirstAtomId, aminoAcidBuilder.LastAtomId);
 
-            var customForces = new List<CustomAtomForce>
-            {
-                new CustomAtomForce
-                {
-                    AtomVertex = aminoAcidBuilder.FirstAtomId,
-                    ForceFunc = (atom,t) => 1e3*atom.Position.VectorTo(new Point3D(0,0,0))
-                },
-                new CustomAtomForce
-                {
-                    AtomVertex = aminoAcidBuilder.LastAtomId,
-                    ForceFunc = (atom,t) => {
-                        if(t > 50.To(SIPrefix.Nano, Unit.Second))
-                            return new Vector3D(0,0,0);
-                        return 1e-4/(1 + t.In(SIPrefix.Pico, Unit.Second))*new Vector3D(1, 0, 0);
-                    }
-                },
-            };
+            var customForces = new List<CustomAtomForce>();
+            //{
+            //    new CustomAtomForce
+            //    {
+            //        AtomVertex = aminoAcidBuilder.FirstAtomId,
+            //        ForceFunc = (atom,t) => 1e3*atom.Position.VectorTo(new Point3D(0,0,0))
+            //    },
+            //    new CustomAtomForce
+            //    {
+            //        AtomVertex = aminoAcidBuilder.LastAtomId,
+            //        ForceFunc = (atom,t) => {
+            //            if(t > 50.To(SIPrefix.Nano, Unit.Second))
+            //                return new Vector3D(0,0,0);
+            //            return 1e-4/(1 + t.In(SIPrefix.Pico, Unit.Second))*new Vector3D(1, 0, 0);
+            //        }
+            //    },
+            //};
 
-            //var molecule = new MoleculeBuilder()
+            //var moleculeReference = new MoleculeBuilder()
             //    .Start
             //    .Add(ElementName.Nitrogen)
-            //    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen)
-            //    .Molecule;
-            //molecule.PositionAtoms();
+            //    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            //var molecule = moleculeReference.Molecule;
+            //molecule.PositionAtoms(moleculeReference.FirstAtomId, moleculeReference.LastAtomId);
 
             MoleculeViewModel = new MoleculeViewModel(aminoAcid);
             SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);

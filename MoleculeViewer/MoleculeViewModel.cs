@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using ChemistryLibrary;
@@ -41,9 +42,16 @@ namespace MoleculeViewer
             }
         }
 
+        public ICommand ResetViewCommand
+        {
+            get { return resetViewCommand; }
+            set { resetViewCommand = value; OnPropertyChanged(); }
+        }
+
         public event EventHandler MoleculeHasChanged;
         private readonly TrapLatch updateModelLatch;
         private int modelUpdatedCount;
+        private ICommand resetViewCommand;
 
         public MoleculeViewModel(Molecule molecule)
         {
@@ -57,7 +65,15 @@ namespace MoleculeViewer
             };
 
             BuildModel(molecule);
+            Camera = new PerspectiveCamera();
             SetCameraPosition(molecule);
+
+            ResetViewCommand = new RelayCommand(ResetView);
+        }
+
+        public void ResetView()
+        {
+            SetCameraPosition(Molecule);
         }
 
         private void BuildModel(Molecule molecule)
@@ -85,13 +101,13 @@ namespace MoleculeViewer
             var zMinMax = new MinMaxMean(atomPositions.Select(p => p.Z));
             var moleculeCenter = new Point3D(xMinMax.Mean, yMinMax.Mean, zMinMax.Mean);
             var position = new Point3D(moleculeCenter.X, moleculeCenter.Y, moleculeCenter.Z - xMinMax.Span);
-            var lookDirection = new Vector3D(
+            Camera.Position = position;
+            Camera.LookDirection = new Vector3D(
                 moleculeCenter.X - position.X,
                 moleculeCenter.Y - position.Y,
                 moleculeCenter.Z - position.Z);
-            var upDirection = new Vector3D(0, 1, 0);
-            var fieldOfView = 60;
-            Camera = new PerspectiveCamera(position, lookDirection, upDirection, fieldOfView);
+            Camera.UpDirection = new Vector3D(0, 1, 0);
+            Camera.FieldOfView = 60;
         }
 
         public void MoleculeHasBeenUpdated()

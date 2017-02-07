@@ -61,6 +61,7 @@
       <DependentUpon>MoleculeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="RelayCommand.cs" />
     <Compile Include="SimulationViewModel.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Compile Include="Viewport3DBase.cs" />

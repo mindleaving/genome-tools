@@ -44,7 +44,7 @@ namespace ChemistryLibrary
                 var v1V2Vector = atom1.Position.VectorTo(atom2.Position);
                 var forceDirection = v1V2Vector.Normalize();
                 var atomDistance = v1V2Vector.Magnitude();
-                var forceStrength = -1e-7*bond.BondEnergy.In(Unit.ElectronVolts)
+                var forceStrength = 1e4*-bond.BondEnergy.In(Unit.ElectronVolts)
                                     *(atomDistance - 0.9*bond.BondLength.Value);
 
                 forceLookup[vertex1.Id] += forceStrength*forceDirection;
@@ -94,9 +94,9 @@ namespace ChemistryLibrary
                 var atom = molecule.GetAtom(vertex);
                 var atom1Position = atom.Position;
                 var atom1Radius = atom.Radius.Value;
-                var bondedNeighbors = new HashSet<Atom>(atom.OuterOrbitals
-                    .Where(o => o.IsPartOfBond)
-                    .Select(o => GetBondedAtom(o, atom)));
+                //var bondedNeighbors = new HashSet<Atom>(atom.OuterOrbitals
+                //    .Where(o => o.IsPartOfBond)
+                //    .Select(o => GetBondedAtom(o, atom)));
 
                 var neighborhood = neighborhoodMap.GetNeighborhood(vertex);
                 foreach (var neighborVertex in neighborhood)
@@ -104,20 +104,16 @@ namespace ChemistryLibrary
                     if (neighborVertex <= vertex)
                         continue;
                     var neighborAtom = molecule.GetAtom(neighborVertex);
-                    if (bondedNeighbors.Contains(neighborAtom))
-                        continue;
+                    //if (bondedNeighbors.Contains(neighborAtom))
+                    //    continue;
                     var atom2Radius = atom.Radius.Value;
                     var atomRadiusSum = atom1Radius + atom2Radius;
-                    var r = atom1Position
-                        .VectorTo(neighborAtom.Position);
-                    var distanceInPicoMeter = r.Magnitude();
+                    var r = atom1Position.VectorTo(neighborAtom.Position);
+                    var distance = r.Magnitude();
 
-                    var shellRepulsionForce = -(1e-5*(1.0/distanceInPicoMeter)
-                                                *Math.Exp(Math.Min(atomRadiusSum - distanceInPicoMeter, 0)))
+                    var shellRepulsionForce = -(1e-5*(1e-12/distance)
+                                                *Math.Exp(Math.Min(1e12*(atomRadiusSum - distance), 0)))
                                               *r.Normalize();
-
-                    if (shellRepulsionForce.Magnitude() > 1e-5)
-                        continue;
 
                     forceLookup[vertex] += shellRepulsionForce;
                     forceLookup[neighborVertex] += -shellRepulsionForce;
@@ -229,7 +225,7 @@ namespace ChemistryLibrary
                 else
                     chargeProduct *= 1 + 2*lonePairForceExpansion;
             }
-            var repulsiveForce = (-(chargeProduct / (distance*distance))*forceVector);
+            var repulsiveForce = -(chargeProduct / (distance*distance))*forceVector;
             return repulsiveForce;
         }
     }

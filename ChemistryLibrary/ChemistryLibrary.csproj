@@ -64,6 +64,7 @@
     <Compile Include="MoleculeDynamicsSimulator.cs" />
     <Compile Include="MoleculeExtensions.cs" />
     <Compile Include="MoleculeLibrary.cs" />
+    <Compile Include="MoleculePositioner.cs" />
     <Compile Include="MoleculeReference.cs" />
     <Compile Include="NBodyForceCalculator.cs" />
     <Compile Include="Orbital.cs" />

@@ -23,7 +23,7 @@ namespace MoleculeViewer
         }
 
         public UnitValue SimulationTime { get; set; } = 10.To(SIPrefix.Nano, Unit.Second);
-        public UnitValue TimeStep { get; set; } = 2.To(SIPrefix.Femto, Unit.Second);
+        public UnitValue TimeStep { get; set; } = 8.To(SIPrefix.Femto, Unit.Second);
 
         public void RunSimulation()
         {
