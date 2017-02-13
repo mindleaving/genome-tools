@@ -121,7 +121,7 @@ namespace MoleculeViewer
 
         private GeometryModel3D ConstructAtom(Atom atom)
         {
-            var atomColor = DetermineAtomColor(atom.Element);
+            var atomColor = DetermineAtomColor(atom.Element, atom.IsBackbone);
             var material = new DiffuseMaterial(new SolidColorBrush(atomColor));
             var sphereMesh = BuildAtomSphere(atom);
             return new GeometryModel3D(sphereMesh, material);
@@ -222,26 +222,34 @@ namespace MoleculeViewer
             return meshPositions.Count - 1;
         }
 
-        private static Color DetermineAtomColor(ElementName atomElement)
+        private static Color DetermineAtomColor(ElementName atomElement, bool atomIsBackbone)
         {
+            var color = Colors.LightGray;
             switch (atomElement)
             {
                 case ElementName.Hydrogen:
-                    return Colors.White;
+                    color = Colors.White;
+                    break;
                 case ElementName.Carbon:
-                    return Color.FromRgb(0x33, 0x33, 0x33);
+                    color = Color.FromRgb(0x33, 0x33, 0x33);
+                    break;
                 case ElementName.Nitrogen:
-                    return Colors.Blue;
+                    color = Colors.Blue;
+                    break;
                 case ElementName.Oxygen:
-                    return Colors.Red;
+                    color = Colors.Red;
+                    break;
                 case ElementName.Fluorine:
                 case ElementName.Chlorine:
-                    return Colors.LawnGreen;
+                    color = Colors.LawnGreen;
+                    break;
                 case ElementName.Sulfur:
-                    return Colors.Yellow;
-                default:
-                    return Colors.LightGray;
+                    color = Colors.Yellow;
+                    break;
             }
+            if (!atomIsBackbone)
+                color.A = 0x55;
+            return color;
         }
 
         private void OnMoleculeHasChanged()

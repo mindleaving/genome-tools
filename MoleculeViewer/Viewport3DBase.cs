@@ -53,7 +53,7 @@ namespace MoleculeViewer
 
         public void RotateLookDirection(double horizontalRotation, double verticalRotation)
         {
-            const double RotationSpeedScale = 0.02; // Determined from user experience
+            const double RotationSpeedScale = 0.03; // Determined from user experience
             var lookDirectionChange = CalculatePositionChange(horizontalRotation, verticalRotation)
                 .Multiply(RotationSpeedScale);
             Camera.LookDirection = new Vector3D(
@@ -68,8 +68,7 @@ namespace MoleculeViewer
             var imagePlaneNormal = ToPantoVector3D(Camera.LookDirection);
             var verticalDirection = (upDirection - upDirection.ProjectOnto(imagePlaneNormal)).Normalize();
             var horizontalDirection = verticalDirection.CrossProduct(imagePlaneNormal).Normalize();
-            var positionChange = (verticalDirection.Multiply(deltaVertical) + horizontalDirection.Multiply(deltaHorizontal))
-                ;
+            var positionChange = verticalDirection.Multiply(deltaVertical) + horizontalDirection.Multiply(deltaHorizontal);
             return positionChange;
         }
 
@@ -80,24 +79,30 @@ namespace MoleculeViewer
 
         public void RotateObject(double horizontalRotation, double verticalRotation, Point3D objectCenter)
         {
-            const double PositionChangeScale = 150.0; // Determined from user experience
+            const double PositionChangeScale = 100.0; // Determined from user experience
 
             var lookDirection = ToPantoVector3D(Camera.LookDirection);
-            Point3D rotationPoint;
-            if (Math.Abs(lookDirection.Z) < 1e-6)
-            {
-                rotationPoint = new Point3D(0, 0, 0);
-            }
-            else
-            {
-                // Calculate scaling of look direction vector to hit the object plane.
-                // Object plane is here defined as x-y-plane with z = 0.
-                var intersectionVectorScaling = -(Camera.Position.Z - objectCenter.Z) / lookDirection.Z;
-                rotationPoint = new Point3D(
-                    Camera.Position.X + intersectionVectorScaling * lookDirection.X,
-                    Camera.Position.Y + intersectionVectorScaling * lookDirection.Y,
-                    Camera.Position.Z + intersectionVectorScaling * lookDirection.Z);
-            }
+            //Point3D rotationPoint;
+            //if (Math.Abs(lookDirection.Z) < 1e-6)
+            //{
+            //    rotationPoint = new Point3D(0, 0, 0);
+            //}
+            //else
+            //{
+            //    // Calculate scaling of look direction vector to hit the object plane.
+            //    // Object plane is here defined as x-y-plane with z = 0.
+            //    var intersectionVectorScaling = -(Camera.Position.Z - objectCenter.Z) / lookDirection.Z;
+            //    rotationPoint = new Point3D(
+            //        Camera.Position.X + intersectionVectorScaling * lookDirection.X,
+            //        Camera.Position.Y + intersectionVectorScaling * lookDirection.Y,
+            //        Camera.Position.Z + intersectionVectorScaling * lookDirection.Z);
+            //}
+            var lookDirectionMagnitude = lookDirection.Magnitude();
+            var rotationPointScaling = 1000/lookDirectionMagnitude;
+            var rotationPoint = new Point3D(
+                Camera.Position.X + rotationPointScaling*lookDirection.X,
+                Camera.Position.Y + rotationPointScaling*lookDirection.Y,
+                Camera.Position.Z + rotationPointScaling*lookDirection.Z);
             var distanceToRotationPoint = ToPantoVector3D(rotationPoint - Camera.Position).Magnitude();
             // Move camera up and sideways in current image plane
             var positionChange = CalculatePositionChange(horizontalRotation, verticalRotation)

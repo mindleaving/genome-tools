@@ -138,5 +138,17 @@ namespace ChemistryLibrary
             firstCarbonReference.ConnectTo(sideChainReference);
             return references;
         }
+
+        public static void MarkBackbone(this Molecule molecule, MoleculeReference moleculeReference)
+        {
+            var pathsFromFirstAtom = GraphAlgorithms.ShortestPaths(molecule.MoleculeStructure, moleculeReference.FirstAtomId);
+            var pathToLastAtom = pathsFromFirstAtom.PathTo(molecule.MoleculeStructure.Vertices[moleculeReference.LastAtomId]);
+            var pathVertices = pathToLastAtom.Path
+                .SelectMany(edge => new[] { edge.Vertex1Id, edge.Vertex2Id })
+                .Distinct()
+                .Select(vId => molecule.MoleculeStructure.Vertices[vId])
+                .Select(v => (Atom)v.Object);
+            pathVertices.ForEach(atom => atom.IsBackbone = true);
+        }
     }
 }

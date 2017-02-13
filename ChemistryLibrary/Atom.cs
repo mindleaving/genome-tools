@@ -34,6 +34,10 @@ namespace ChemistryLibrary
                 return Orbitals.Any(o => o.Energy < highestOccupiedEnergy && !o.IsFull);
             }
         }
+        /// <summary>
+        /// Marks atom as part of the backbone, e.g. of a peptide chain
+        /// </summary>
+        public bool IsBackbone { get; set; }
 
         public Atom(int protons, int neutrons)
         {

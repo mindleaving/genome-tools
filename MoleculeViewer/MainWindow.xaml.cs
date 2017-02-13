@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using ChemistryLibrary;
@@ -51,10 +53,12 @@ namespace MoleculeViewer
             //    .Molecule;
             //var aminoAcidBuilder = PeptideBuilder
             //    .PeptideFromString("IHTGEKPYKC");
-            var aminoAcidBuilder = PeptideBuilder
-                .PeptideFromString(new string('A',18));
-            var aminoAcid = aminoAcidBuilder.Molecule;
-            aminoAcid.PositionAtoms(aminoAcidBuilder.FirstAtomId, aminoAcidBuilder.LastAtomId);
+            var peptide = PeptideBuilder
+                .PeptideFromString("AP");
+            var aminoAcid = peptide.Molecule;
+            aminoAcid.MarkBackbone(peptide.MoleculeReference);
+            aminoAcid.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
+            File.WriteAllText(@"G:\Projects\HumanGenome\1abc.pdb", PdbSerializer.Serialize(peptide, "1abc"));
 
             var customForces = new List<CustomAtomForce>();
             //{
@@ -81,14 +85,48 @@ namespace MoleculeViewer
             //var molecule = moleculeReference.Molecule;
             //molecule.PositionAtoms(moleculeReference.FirstAtomId, moleculeReference.LastAtomId);
 
-            //var effectiveCharges = aminoAcid.Atoms.OrderBy(atom => atom.EffectiveCharge)
-            //    .Select(atom => new { Atom = atom, Charge = atom.EffectiveCharge.Value})
-            //    .ToList();
+            RedistributeCharges(aminoAcid);
 
             MoleculeViewModel = new MoleculeViewModel(aminoAcid);
             SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);
 
             SimulationViewModel.RunSimulation();
+        }
+
+        private void RedistributeCharges(Molecule aminoAcid)
+        {
+            var newCharges = aminoAcid.MoleculeStructure.Vertices
+                .ToDictionary(vId => vId.Key, vertex => ((Atom) vertex.Value.Object).EffectiveCharge);
+            double chargeChange;
+            do
+            {
+                var currentCharges = newCharges;
+                var vertices = aminoAcid.MoleculeStructure.Vertices
+                    .Select(v => v.Value);
+                foreach (var vertex in vertices)
+                {
+                    var neighbors = GraphAlgorithms.GetAdjacentVertices(aminoAcid.MoleculeStructure, vertex)
+                        .Select(v => (Atom)v.Object)
+                        .ToList();
+                    var atoms = new[] { (Atom)vertex.Object }.Concat(neighbors).ToList();
+                    var chargeSum = atoms.Sum(x => x.EffectiveCharge.In(Unit.ElementaryCharge))
+                        - atoms.Count;
+                    var electroNegativitySum = atoms.Sum(x => x.ElectroNegativity);
+                    foreach (var atom in atoms)
+                    {
+                        atom.EffectiveCharge = (1+chargeSum*(atom.ElectroNegativity/electroNegativitySum)).To(Unit.ElementaryCharge);
+                    }
+                }
+                newCharges = aminoAcid.MoleculeStructure.Vertices
+                    .ToDictionary(vId => vId.Key, vertex => ((Atom) vertex.Value.Object).EffectiveCharge);
+                chargeChange = aminoAcid.MoleculeStructure.Vertices.Keys
+                    .Select(vId => (newCharges[vId] - currentCharges[vId]).Abs().In(Unit.ElementaryCharge))
+                    .Max();
+
+                //var effectiveCharges = aminoAcid.Atoms.OrderBy(atom => atom.EffectiveCharge)
+                //    .Select(atom => new { Atom = atom, Charge = atom.EffectiveCharge.In(Unit.ElementaryCharge) })
+                //    .ToList();
+            } while (chargeChange > 0.01);
         }
 
         public SimulationViewModel SimulationViewModel
