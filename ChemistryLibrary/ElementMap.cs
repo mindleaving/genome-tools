@@ -11,9 +11,14 @@ namespace ChemistryLibrary
             return (ElementName) protons;
         }
 
-        public static ElementName FromSymbol(ElementSymbol symbol)
+        public static ElementName ToElementName(this ElementSymbol symbol)
         {
             return (ElementName) symbol;
+        }
+
+        public static ElementSymbol ToElementSymbol(this ElementName name)
+        {
+            return (ElementSymbol)name;
         }
     }
 }

@@ -32,9 +32,21 @@ namespace ChemistryLibrary
         {
             if (!moleculeReference.IsInitialized)
                 throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
-            return moleculeReference.Molecule.AddMolecule(otherMoleculeReference, 
+
+            return moleculeReference.Molecule.AddMolecule(otherMoleculeReference,
                 moleculeReference.FirstAtomId,
                 moleculeReference.LastAtomId);
+        }
+        public static MoleculeReference Add(this MoleculeReference moleculeReference, MoleculeReference otherMoleculeReference, 
+            out MoleculeReference updatedOtherMoleculeReference)
+        {
+            if (!moleculeReference.IsInitialized)
+                throw new InvalidOperationException("Cannot add atoms. Molecule reference is not initialized");
+
+            return moleculeReference.Molecule.AddMolecule(otherMoleculeReference, 
+                moleculeReference.FirstAtomId,
+                moleculeReference.LastAtomId,
+                out updatedOtherMoleculeReference);
         }
 
         public static MoleculeReference AddToCurrentAtom(this MoleculeReference moleculeReference, params ElementName[] elements)

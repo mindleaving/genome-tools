@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AminoAcidLibrary.cs" />
+    <Compile Include="AminoAcidName.cs" />
     <Compile Include="Atom.cs" />
     <Compile Include="AtomConnector.cs" />
     <Compile Include="AtomNeighborhoodMap.cs" />
@@ -70,6 +71,8 @@
     <Compile Include="Orbital.cs" />
     <Compile Include="OrbitalComparer.cs" />
     <Compile Include="OrbitalGenerator.cs" />
+    <Compile Include="PdbSerializer.cs" />
+    <Compile Include="Peptide.cs" />
     <Compile Include="PeptideBuilder.cs" />
     <Compile Include="PeriodicTable.cs" />
     <Compile Include="PhysicalConstants.cs" />

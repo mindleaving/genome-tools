@@ -46,9 +46,18 @@ namespace ChemistryLibrary
             return vertex.Id;
         }
 
+        public MoleculeReference AddMolecule(MoleculeReference moleculeToBeAdded,
+            uint firstAtomId,
+            uint connectionAtomId,
+            BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
+        {
+            MoleculeReference temp;
+            return AddMolecule(moleculeToBeAdded, firstAtomId, connectionAtomId, out temp, bondMultiplicity);
+        }
         public MoleculeReference AddMolecule(MoleculeReference moleculeToBeAdded, 
             uint firstAtomId,
             uint connectionAtomId, 
+            out MoleculeReference convertedInputMoleculeReference,
             BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
             var mergeInfo = MoleculeStructure.AddGraph(moleculeToBeAdded.Molecule.MoleculeStructure);
@@ -62,6 +71,9 @@ namespace ChemistryLibrary
                 var edge = MoleculeStructure.ConnectVertices(vertex1, vertex2);
                 edge.Object = bond;
             }
+            convertedInputMoleculeReference = new MoleculeReference(this, 
+                mergeInfo.VertexIdMap[moleculeToBeAdded.FirstAtomId],
+                mergeInfo.VertexIdMap[moleculeToBeAdded.LastAtomId]);
             return new MoleculeReference(this, firstAtomId, mergeInfo.VertexIdMap[moleculeToBeAdded.LastAtomId]);
         }
 

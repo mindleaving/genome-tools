@@ -1,32 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace ChemistryLibrary
 {
     public static class PeptideBuilder
     {
-        public static MoleculeReference PeptideFromString(string peptideString)
+        public static Peptide PeptideFromString(string peptideString)
         {
             var cleanedPeptideString = Regex.Replace(
                 peptideString.ToUpperInvariant(),
                 "[^A-Z]", "");
+            var aminoAcids = new List<AminoAcidReference>();
             MoleculeReference moleculeReference = null;
             foreach (var aminoAcidCode in cleanedPeptideString)
             {
                 if(aminoAcidCode == '#')
                     break;
                 var aminoAcid = MapLetterToAminoAcid(aminoAcidCode);
-                moleculeReference = moleculeReference != null ? moleculeReference.Add(aminoAcid) : aminoAcid;
+                MoleculeReference aminoAcidReference = aminoAcid;
+                moleculeReference = moleculeReference != null
+                    ? moleculeReference.Add(aminoAcid, out aminoAcidReference)
+                    : aminoAcid;
+                aminoAcids.Add(new AminoAcidReference(aminoAcid.Name, aminoAcidReference));
             }
-            return moleculeReference;
+            return new Peptide(moleculeReference, aminoAcids);
         }
 
-        private static MoleculeReference MapLetterToAminoAcid(char aminoAcidCode)
+        private static AminoAcidReference MapLetterToAminoAcid(char aminoAcidCode)
         {
             switch (aminoAcidCode)
             {
                 case 'I':
-                    return AminoAcidLibrary.IsoLeucine;
+                    return AminoAcidLibrary.Isoleucine;
                 case 'L':
                     return AminoAcidLibrary.Leucine;
                 case 'V':
