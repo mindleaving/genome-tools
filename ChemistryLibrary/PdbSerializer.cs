@@ -239,17 +239,16 @@ namespace ChemistryLibrary
             for (int residueIdx = 0; residueIdx < aminoAcids.Count; residueIdx++)
             {
                 var aminoAcid = aminoAcids[residueIdx];
+                AminoAcidAtomNamer.AssignNames(aminoAcid);
                 var aminoAcidVertices = aminoAcid.VertexIds
                     .Select(vId => aminoAcid.Molecule.MoleculeStructure.Vertices[vId]);
                 var residueName = aminoAcid.Name.ToThreeLetterCode();
                 foreach (var vertex in aminoAcidVertices)
                 {
-                    if (atomIdx > 1)
-                        output += Environment.NewLine;
                     var atom = aminoAcid.Molecule.GetAtom(vertex.Id);
                     if (atom.Element == ElementName.Hydrogen)
                         continue;
-                    var atomName = atom.Element.ToElementSymbol();
+                    var atomName = atom.AminoAcidAtomName ?? atom.Element.ToElementSymbol().ToString();
                     var x = (1e10*atom.Position.X).ToString("F3");
                     var y = (1e10*atom.Position.Y).ToString("F3");
                     var z = (1e10*atom.Position.Z).ToString("F3");
@@ -257,6 +256,9 @@ namespace ChemistryLibrary
                     var temperatureFactor = 0.0.ToString("F2");
                     var elementSymbol = atom.Element.ToElementSymbol();
                     var charge = "";
+
+                    if (atomIdx > 1)
+                        output += Environment.NewLine;
                     output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{residueIdx+1,4}    " +
                             $"{x,8}{y,8}{z,8}{occupancy,6}{temperatureFactor,6}          " +
                             $"{elementSymbol,2}{charge,2}";

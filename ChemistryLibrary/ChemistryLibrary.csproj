@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AminoAcidAtomNamer.cs" />
     <Compile Include="AminoAcidLibrary.cs" />
     <Compile Include="AminoAcidName.cs" />
     <Compile Include="Atom.cs" />

@@ -26,7 +26,11 @@ namespace ChemistryLibrary
                 else
                 {
                     moleculeReference = aminoAcid;
-                    aminoAcidReference = new MoleculeReference(aminoAcid.Molecule, aminoAcid.VertexIds);
+                    aminoAcidReference = new MoleculeReference(
+                        aminoAcid.Molecule, 
+                        aminoAcid.VertexIds, 
+                        aminoAcid.FirstAtomId, 
+                        aminoAcid.LastAtomId);
                 }
                 aminoAcids.Add(new AminoAcidReference(aminoAcid.Name, aminoAcidReference));
             }

@@ -38,6 +38,11 @@ namespace ChemistryLibrary
         /// Marks atom as part of the backbone, e.g. of a peptide chain
         /// </summary>
         public bool IsBackbone { get; set; }
+        /// <summary>
+        /// IUPAC nomenclature atom name for atoms in amino acids,
+        /// e.g. N, CA, CB, CG, etc.
+        /// </summary>
+        public string AminoAcidAtomName { get; set; }
 
         public Atom(int protons, int neutrons)
         {
