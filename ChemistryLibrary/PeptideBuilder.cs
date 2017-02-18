@@ -18,10 +18,16 @@ namespace ChemistryLibrary
                 if(aminoAcidCode == '#')
                     break;
                 var aminoAcid = MapLetterToAminoAcid(aminoAcidCode);
-                MoleculeReference aminoAcidReference = aminoAcid;
-                moleculeReference = moleculeReference != null
-                    ? moleculeReference.Add(aminoAcid, out aminoAcidReference)
-                    : aminoAcid;
+                MoleculeReference aminoAcidReference;
+                if (moleculeReference != null)
+                {
+                    moleculeReference = moleculeReference.Add(aminoAcid, out aminoAcidReference);
+                }
+                else
+                {
+                    moleculeReference = aminoAcid;
+                    aminoAcidReference = new MoleculeReference(aminoAcid.Molecule, aminoAcid.VertexIds);
+                }
                 aminoAcids.Add(new AminoAcidReference(aminoAcid.Name, aminoAcidReference));
             }
             return new Peptide(moleculeReference, aminoAcids);

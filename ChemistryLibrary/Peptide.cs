@@ -18,12 +18,12 @@ namespace ChemistryLibrary
     public class AminoAcidReference : MoleculeReference
     {
         public AminoAcidReference(AminoAcidName aminoAcidName, MoleculeReference moleculeReference)
-            : this(aminoAcidName, moleculeReference.Molecule, moleculeReference.FirstAtomId, moleculeReference.LastAtomId)
+            : this(aminoAcidName, moleculeReference.Molecule, moleculeReference.VertexIds, moleculeReference.FirstAtomId, moleculeReference.LastAtomId)
         {
         }
 
-        public AminoAcidReference(AminoAcidName name, Molecule molecule, uint firstAtomId, uint lastAtomId) 
-            : base(molecule, firstAtomId, lastAtomId)
+        public AminoAcidReference(AminoAcidName name, Molecule molecule, IEnumerable<uint> vertexIds,  uint firstAtomId, uint lastAtomId) 
+            : base(molecule, vertexIds, firstAtomId, lastAtomId)
         {
             Name = name;
         }

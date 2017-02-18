@@ -71,7 +71,8 @@ namespace ChemistryLibrary
                 var edge = MoleculeStructure.ConnectVertices(vertex1, vertex2);
                 edge.Object = bond;
             }
-            convertedInputMoleculeReference = new MoleculeReference(this, 
+            convertedInputMoleculeReference = new MoleculeReference(this,
+                moleculeToBeAdded.VertexIds.Select(oldVertexId => mergeInfo.VertexIdMap[oldVertexId]),
                 mergeInfo.VertexIdMap[moleculeToBeAdded.FirstAtomId],
                 mergeInfo.VertexIdMap[moleculeToBeAdded.LastAtomId]);
             return new MoleculeReference(this, firstAtomId, mergeInfo.VertexIdMap[moleculeToBeAdded.LastAtomId]);

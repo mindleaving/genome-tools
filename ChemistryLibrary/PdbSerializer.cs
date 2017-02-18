@@ -70,7 +70,7 @@ namespace ChemistryLibrary
                 if (idx > 0)
                     output += Environment.NewLine;
                 var description = descriptions[idx];
-                output += $"COMPND {idx,3}{description,70}";
+                output += $"COMPND {idx+1,3}{description,70}";
             }
             return output;
         }
@@ -85,7 +85,7 @@ namespace ChemistryLibrary
                 if (idx > 0)
                     output += Environment.NewLine;
                 var source = sources[idx];
-                output += $"SOURCE {idx,3}{source,69} ";
+                output += $"SOURCE {idx+1,3}{source,69} ";
             }
             return output;
         }
@@ -100,7 +100,7 @@ namespace ChemistryLibrary
                 if (idx > 0)
                     output += Environment.NewLine;
                 var keyword = experimentData[idx];
-                output += $"KEYWDS  {idx,2}{keyword,69} ";
+                output += $"KEYWDS  {idx+1,2}{keyword,69} ";
             }
             return output;
         }
@@ -115,7 +115,7 @@ namespace ChemistryLibrary
                 if (idx > 0)
                     output += Environment.NewLine;
                 var data = experimentData[idx];
-                output += $"EXPDTA  {idx,2}{data,69} ";
+                output += $"EXPDTA  {idx+1,2}{data,69} ";
             }
             return output;
         }
@@ -129,7 +129,7 @@ namespace ChemistryLibrary
                 if (idx > 0)
                     output += Environment.NewLine;
                 var author = authors[idx];
-                output += $"AUTHOR  {idx,2}{author,69} ";
+                output += $"AUTHOR  {idx+1,2}{author,69} ";
             }
             return output;
         }
@@ -147,7 +147,7 @@ namespace ChemistryLibrary
                     ? DateTime.MinValue.ToString("dd-MMM-yy").ToUpperInvariant()
                     : "";
                 var revisionId = revisionVersion > 1 ? 1 : 0;
-                output += $"REVDAT {revisionVersion,3}{idx,2} {date,9} {revisionId,4}    1       {revisionNote,41}";
+                output += $"REVDAT {revisionVersion,3}{idx+1,2} {date,9} {revisionId,4}    1       {revisionNote,41}";
             }
             return output;
         }
@@ -176,7 +176,7 @@ namespace ChemistryLibrary
             {
                 if (lineIdx > 0)
                     output += Environment.NewLine;
-                var line = $"SEQRES {lineIdx,3} {sequenceId} {residues.Count,4}  "
+                var line = $"SEQRES {lineIdx+1,3} {sequenceId} {residues.Count,4}  "
                            + residues.Skip(lineIdx * 13).Take(13).Aggregate((a, b) => a + " " + b);
                 output += line.PadRight(80);
             }
@@ -193,7 +193,7 @@ namespace ChemistryLibrary
             var gamma = 90.0.ToString("F2");
             var spaceGroup = "P 1";
             var z = 1;
-            return $"CRYST1{a,-9}{b,-9}{c,-9}{alpha,-7}{beta,-7}{gamma,-7}{spaceGroup,11}{z,-4}".PadRight(80);
+            return $"CRYST1{a,9}{b,9}{c,9}{alpha,7}{beta,7}{gamma,7}{spaceGroup,11}{z,4}".PadRight(80);
         }
 
         private static string BuildOrigin()
@@ -239,23 +239,23 @@ namespace ChemistryLibrary
             for (int residueIdx = 0; residueIdx < aminoAcids.Count; residueIdx++)
             {
                 var aminoAcid = aminoAcids[residueIdx];
-                var aminoAcidAtoms = GraphAlgorithms
-                    .GetVerticesBetween(aminoAcid.Molecule.MoleculeStructure, aminoAcid.FirstAtomId, aminoAcid.LastAtomId)
-                    .Select(v => aminoAcid.Molecule.GetAtom(v.Id));
-                foreach (var atom in aminoAcidAtoms)
+                var aminoAcidVertices = aminoAcid.VertexIds
+                    .Select(vId => aminoAcid.Molecule.MoleculeStructure.Vertices[vId]);
+                foreach (var vertex in aminoAcidVertices)
                 {
                     if (atomIdx > 1)
                         output += Environment.NewLine;
+                    var atom = aminoAcid.Molecule.GetAtom(vertex.Id);
                     var atomName = atom.Element.ToElementSymbol();
                     var residueName = aminoAcid.Name.ToThreeLetterCode();
-                    var x = (100*atom.Position.X).ToString("F3");
-                    var y = (100*atom.Position.Y).ToString("F3");
-                    var z = (100*atom.Position.Z).ToString("F3");
+                    var x = (1e10*atom.Position.X).ToString("F3");
+                    var y = (1e10*atom.Position.Y).ToString("F3");
+                    var z = (1e10*atom.Position.Z).ToString("F3");
                     var occupancy = 1.0.ToString("F2");
                     var temperatureFactor = 0.0.ToString("F2");
                     var elementSymbol = atom.Element.ToElementSymbol();
                     var charge = "";
-                    output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{residueIdx,4}    " +
+                    output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{residueIdx+1,4}    " +
                             $"{x,8}{y,8}{z,8}{occupancy,6}{temperatureFactor,6}          " +
                             $"{elementSymbol,2}{charge,2}";
                     atomIdx++;
