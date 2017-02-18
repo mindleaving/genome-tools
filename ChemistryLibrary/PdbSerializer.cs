@@ -241,13 +241,15 @@ namespace ChemistryLibrary
                 var aminoAcid = aminoAcids[residueIdx];
                 var aminoAcidVertices = aminoAcid.VertexIds
                     .Select(vId => aminoAcid.Molecule.MoleculeStructure.Vertices[vId]);
+                var residueName = aminoAcid.Name.ToThreeLetterCode();
                 foreach (var vertex in aminoAcidVertices)
                 {
                     if (atomIdx > 1)
                         output += Environment.NewLine;
                     var atom = aminoAcid.Molecule.GetAtom(vertex.Id);
+                    if (atom.Element == ElementName.Hydrogen)
+                        continue;
                     var atomName = atom.Element.ToElementSymbol();
-                    var residueName = aminoAcid.Name.ToThreeLetterCode();
                     var x = (1e10*atom.Position.X).ToString("F3");
                     var y = (1e10*atom.Position.Y).ToString("F3");
                     var z = (1e10*atom.Position.Z).ToString("F3");
