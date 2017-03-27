@@ -16,7 +16,7 @@ namespace ChemistryLibrary
             var graph = molecule.MoleculeStructure;
 
             var forceLookup = CalculateBondForces(graph);
-            CalculateIonicForces(molecule, forceLookup, neighborhoodMap);
+            //CalculateIonicForces(molecule, forceLookup, neighborhoodMap);
             CalculateAtomShellRepulsion(molecule, forceLookup, neighborhoodMap);
             var lonePairForceLookup = CalculateLonePairRepulsion(graph, forceLookup);
             if(forceLookup.Values.Any(v => v.X.IsNaN()))
@@ -76,7 +76,7 @@ namespace ChemistryLibrary
                     var chargeProduct = PhysicalConstants.CoulombsConstant.Value
                                         *charge1.Value
                                         *charge2.Value;
-                    var ionicForce = -1e1*(chargeProduct/(distance*distance))*r.Normalize();
+                    var ionicForce = -5*1e-1*(chargeProduct/(distance*distance))*r.Normalize();
 
                     forceLookup[vertex] += ionicForce;
                     forceLookup[neighborVertex] += -ionicForce;
@@ -225,7 +225,7 @@ namespace ChemistryLibrary
                 else
                     chargeProduct *= 1 + 2*lonePairForceExpansion;
             }
-            var repulsiveForce = -(chargeProduct / (distance*distance))*forceVector;
+            var repulsiveForce = -1e0*(chargeProduct / (distance*distance))*forceVector;
             return repulsiveForce;
         }
     }

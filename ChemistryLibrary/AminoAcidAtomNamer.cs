@@ -37,15 +37,15 @@ namespace ChemistryLibrary
 
             var sideChainCarbonVertex = carbonEndNeighborVertices.Single(v => ((Atom)v.Object).Element == ElementName.Carbon);
 
-            var unprocessedVertices = new Queue<AtomChainInfo>(new []
+            var activeChains = new Queue<AtomChainInfo>(new []
             {
                 new AtomChainInfo { Vertex = sideChainCarbonVertex, ChainIdx = 1}
             });
             var level = 1;
-            while (unprocessedVertices.Any())
+            while (activeChains.Any())
             {
-                var atomChains = unprocessedVertices.ToList();
-                unprocessedVertices.Clear();
+                var atomChains = activeChains.ToList();
+                activeChains.Clear();
                 foreach (var atomChain in atomChains)
                 {
                     if(atomChain.Vertex.AlgorithmData.Equals(true))
@@ -54,7 +54,9 @@ namespace ChemistryLibrary
                     var atom = (Atom) atomChain.Vertex.Object;
                     var elementSymbol = atom.Element.ToElementSymbol().ToString();
                     var levelLetter = MapLevelToLetter(level);
-                    var chainSuffix = atomChains.Count > 1 ? atomChain.ChainIdx.ToString() : "";
+                    var chainSuffix = atomChains.Select(chain => chain.Vertex.Id).Distinct().Count() > 1
+                        ? atomChain.ChainIdx.ToString()
+                        : "";
 
                     atom.AminoAcidAtomName = elementSymbol + levelLetter + chainSuffix;
 
@@ -67,7 +69,7 @@ namespace ChemistryLibrary
                             Vertex = v,
                             ChainIdx = atomChain.ChainIdx + idx
                         })
-                        .ForEach(chainInfo => unprocessedVertices.Enqueue(chainInfo));
+                        .ForEach(chainInfo => activeChains.Enqueue(chainInfo));
                 }
                 level++;
             }

@@ -127,7 +127,7 @@ namespace ChemistryLibrary
                 if (zeroAtomMomentum)
                     atom.Velocity = new Vector3D(0, 0, 0);
                 else
-                    atom.Velocity *= 0.5; // TODO: Scale velocity to maintain a specific total energy, matching the environement's temperature
+                    atom.Velocity *= 1.0; // TODO: Scale velocity to maintain a specific total energy, matching the environement's temperature
             }
         }
 

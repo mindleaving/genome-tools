@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using ChemistryLibrary;
 using Commons;
 
@@ -22,10 +23,10 @@ namespace MoleculeViewer
             moleculeDynamicsSimulator.OneIterationComplete += (sender, args) => moleculeViewModel.MoleculeHasBeenUpdated();
         }
 
-        public UnitValue SimulationTime { get; set; } = 10.To(SIPrefix.Nano, Unit.Second);
+        public UnitValue SimulationTime { get; set; } = 4.To(SIPrefix.Pico, Unit.Second);
         public UnitValue TimeStep { get; set; } = 8.To(SIPrefix.Femto, Unit.Second);
 
-        public void RunSimulation()
+        public async Task RunSimulation()
         {
             var settings = new MoleculeDynamicsSimulationSettings
             {
@@ -33,7 +34,7 @@ namespace MoleculeViewer
                 TimeStep = TimeStep
             };
             cancellationTokenSource = new CancellationTokenSource();
-            moleculeDynamicsSimulator.MinimizeEnergy(Molecule, customForces, settings, cancellationTokenSource.Token);
+            await moleculeDynamicsSimulator.MinimizeEnergy(Molecule, customForces, settings, cancellationTokenSource.Token);
         }
 
         public void Dispose()

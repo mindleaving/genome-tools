@@ -66,15 +66,12 @@ namespace ChemistryLibrary
                 var sideChain1Builder = new MoleculeBuilder();
                 var sideChain11Builder = new MoleculeBuilder();
                 sideChain11Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
-                var sideChain12Builder = new MoleculeBuilder();
-                sideChain12Builder.Start
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
                 sideChain1Builder.Start
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
                     .AddSideChain(sideChain11Builder.Start)
-                    .AddSideChain(sideChain12Builder.Start);
+                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen); ;
 
                 var moduleBuilder = new MoleculeBuilder();
                 var moleculeReference = moduleBuilder.Start
@@ -157,10 +154,11 @@ namespace ChemistryLibrary
                 var sideChain1Builder = new MoleculeBuilder();
                 var sideChain11Builder = new MoleculeBuilder();
                 var sideChain11End = sideChain11Builder.Start
-                    .Add(ElementName.Carbon, BondMultiplicity.Double)
+                    .Add(ElementName.Carbon)
                     .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
                 var benzolReferences = sideChain1Builder.Start
                     .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                    .Add(ElementName.Carbon).AddSideChain(sideChain11Builder.Start)
                     .AddBenzolRing(1);
                 benzolReferences.Single().ConnectTo(sideChain11End);
 
