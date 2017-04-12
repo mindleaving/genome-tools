@@ -65,7 +65,7 @@ namespace ChemistryLibrary
                 if (settings.StopSimulationWhenAtomAtRest && t > settings.RampUpPeriod)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys
-                        .Select(atom => currentAtomPositions[atom].DistanceTo(newAtomPositions[atom]))
+                        .Select(atom => currentAtomPositions[atom].DistanceTo(newAtomPositions[atom]).In(SIPrefix.Pico, Unit.Meter))
                         .Max();
                     if(maximumPositionChange/settings.TimeStep.Value < settings.MovementDetectionThreshold.Value)
                         break;
@@ -120,12 +120,12 @@ namespace ChemistryLibrary
                 }
                 if (force.Magnitude() < ForceLowerCutoff)
                     continue;
-                atom.Velocity += settings.TimeStep.In(Unit.Second)/ atom.Mass.In(Unit.Kilogram) * force;
-                if (atom.Velocity.Magnitude() > maxVelocity)
-                    atom.Velocity *= maxVelocity / atom.Velocity.Magnitude();
+                atom.Velocity += settings.TimeStep/ atom.Mass * force;
+                if (atom.Velocity.Magnitude().In(Unit.MetersPerSecond) > maxVelocity)
+                    atom.Velocity *= maxVelocity / atom.Velocity.Magnitude().In(Unit.MetersPerSecond);
                 atom.Position += dT*atom.Velocity;
                 if (zeroAtomMomentum)
-                    atom.Velocity = new Vector3D(0, 0, 0);
+                    atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
                 else
                     atom.Velocity *= 1.0; // TODO: Scale velocity to maintain a specific total energy, matching the environement's temperature
             }

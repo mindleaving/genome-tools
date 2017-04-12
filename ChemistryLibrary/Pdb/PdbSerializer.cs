@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Commons;
 
-namespace ChemistryLibrary
+namespace ChemistryLibrary.Pdb
 {
     public static class PdbSerializer
     {
@@ -29,7 +28,7 @@ namespace ChemistryLibrary
             var date = DateTime.Now;
 
             var aminoAcidSequence = peptide.AminoAcids
-                .Select(aa => aa.Name.ToThreeLetterCode())
+                .Select(aa => AminoAcidExtensions.ToThreeLetterCode(aa.Name))
                 .ToList();
 
             var output =  BuildHeader(description, date, pdbCode) + Environment.NewLine
@@ -239,7 +238,7 @@ namespace ChemistryLibrary
             for (int residueIdx = 0; residueIdx < aminoAcids.Count; residueIdx++)
             {
                 var aminoAcid = aminoAcids[residueIdx];
-                AminoAcidAtomNamer.AssignNames(aminoAcid);
+                PdbAminoAcidAtomNamer.AssignNames(aminoAcid);
                 var aminoAcidVertices = aminoAcid.VertexIds
                     .Select(vId => aminoAcid.Molecule.MoleculeStructure.Vertices[vId]);
                 var residueName = aminoAcid.Name.ToThreeLetterCode();

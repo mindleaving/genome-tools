@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Commons;
 
-namespace ChemistryLibrary
+namespace ChemistryLibrary.Pdb
 {
-    public class AminoAcidAtomNamer
+    public static class PdbAminoAcidAtomNamer
     {
         public static void AssignNames(AminoAcidReference aminoAcidReference)
         {

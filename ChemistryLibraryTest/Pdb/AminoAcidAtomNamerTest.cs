@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using ChemistryLibrary;
+using ChemistryLibrary.Pdb;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace ChemistryLibraryTest.Pdb
 {
     [TestFixture]
     public class AminoAcidAtomNamerTest
@@ -11,7 +12,7 @@ namespace ChemistryLibraryTest
         public void GlycineNamedCorrectly()
         {
             var aminoAcidReference = AminoAcidLibrary.Glycine;
-            AminoAcidAtomNamer.AssignNames(aminoAcidReference);
+            PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
             var nitrogen = (Atom) moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
@@ -37,7 +38,7 @@ namespace ChemistryLibraryTest
         public void AlanineNamedCorrectly()
         {
             var aminoAcidReference = AminoAcidLibrary.Alanine;
-            AminoAcidAtomNamer.AssignNames(aminoAcidReference);
+            PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
             var nitrogen = (Atom)moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
@@ -66,7 +67,7 @@ namespace ChemistryLibraryTest
         public void ProlineNamedCorrectly()
         {
             var aminoAcidReference = AminoAcidLibrary.Proline;
-            AminoAcidAtomNamer.AssignNames(aminoAcidReference);
+            PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
             var nitrogen = (Atom)moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
@@ -95,7 +96,7 @@ namespace ChemistryLibraryTest
         public void LeucineNamedCorrectly()
         {
             var aminoAcidReference = AminoAcidLibrary.Leucine;
-            AminoAcidAtomNamer.AssignNames(aminoAcidReference);
+            PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
             var nitrogen = (Atom)moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
@@ -124,7 +125,7 @@ namespace ChemistryLibraryTest
         public void PhenylalanineNamedCorrectly()
         {
             var aminoAcidReference = AminoAcidLibrary.Phenylalanine;
-            AminoAcidAtomNamer.AssignNames(aminoAcidReference);
+            PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
             var nitrogen = (Atom)moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;

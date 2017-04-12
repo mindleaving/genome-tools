@@ -4,31 +4,42 @@ namespace ChemistryLibrary
 {
     public class Peptide
     {
-        public Peptide(MoleculeReference moleculeReference, List<AminoAcidReference> aminoAcids)
+        public Peptide(MoleculeReference moleculeReference,
+            List<AminoAcidReference> aminoAcids)
+            : this(moleculeReference, aminoAcids, new List<PeptideAnnotation>())
+        {
+        }
+        public Peptide(MoleculeReference moleculeReference, 
+            List<AminoAcidReference> aminoAcids,
+            List<PeptideAnnotation> annotations)
         {
             MoleculeReference = moleculeReference;
             AminoAcids = aminoAcids;
+            Annotations = annotations;
         }
 
+        public char ChainId { get; set; }
         public Molecule Molecule => MoleculeReference.Molecule;
         public MoleculeReference MoleculeReference { get; }
         public List<AminoAcidReference> AminoAcids { get; }
+        public List<PeptideAnnotation> Annotations { get; }
     }
 
-    public class AminoAcidReference : MoleculeReference
+    public class PeptideAnnotation
     {
-        public AminoAcidReference(AminoAcidName aminoAcidName, MoleculeReference moleculeReference)
-            : this(aminoAcidName, moleculeReference.Molecule, moleculeReference.VertexIds, moleculeReference.FirstAtomId, moleculeReference.LastAtomId)
+        public PeptideAnnotation(PeptideAnnotationType type, List<AminoAcidReference> aminoAcidReferences)
         {
+            Type = type;
+            AminoAcidReferences.AddRange(aminoAcidReferences);
         }
 
-        public AminoAcidReference(AminoAcidName name, Molecule molecule, IEnumerable<uint> vertexIds,  uint firstAtomId, uint lastAtomId) 
-            : base(molecule, vertexIds, firstAtomId, lastAtomId)
-        {
-            Name = name;
-        }
+        public PeptideAnnotationType Type { get; set; }
+        public List<AminoAcidReference> AminoAcidReferences { get; } = new List<AminoAcidReference>();
+    }
 
-        public AminoAcidName Name { get; }
-
+    public enum PeptideAnnotationType
+    {
+        AlphaHelix,
+        BetaSheet
     }
 }

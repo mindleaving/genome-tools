@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ChemistryLibrary
@@ -8,15 +9,17 @@ namespace ChemistryLibrary
     {
         public static Peptide PeptideFromString(string peptideString)
         {
-            var cleanedPeptideString = Regex.Replace(
-                peptideString.ToUpperInvariant(),
-                "[^A-Z]", "");
+            var sequence = Regex.Replace(peptideString.ToUpperInvariant(), "[^A-Z]", "")
+                .Select(aminoAcidCode => aminoAcidCode.ToAminoAcidName());
+            return PeptideFromSequence(sequence);
+        }
+
+        public static Peptide PeptideFromSequence(IEnumerable<AminoAcidName> cleanedPeptideString)
+        {
             var aminoAcids = new List<AminoAcidReference>();
             MoleculeReference moleculeReference = null;
             foreach (var aminoAcidCode in cleanedPeptideString)
             {
-                if(aminoAcidCode == '#')
-                    break;
                 var aminoAcid = MapLetterToAminoAcid(aminoAcidCode);
                 MoleculeReference aminoAcidReference;
                 if (moleculeReference != null)
@@ -27,9 +30,9 @@ namespace ChemistryLibrary
                 {
                     moleculeReference = aminoAcid;
                     aminoAcidReference = new MoleculeReference(
-                        aminoAcid.Molecule, 
-                        aminoAcid.VertexIds, 
-                        aminoAcid.FirstAtomId, 
+                        aminoAcid.Molecule,
+                        aminoAcid.VertexIds,
+                        aminoAcid.FirstAtomId,
                         aminoAcid.LastAtomId);
                 }
                 aminoAcids.Add(new AminoAcidReference(aminoAcid.Name, aminoAcidReference));
@@ -37,49 +40,49 @@ namespace ChemistryLibrary
             return new Peptide(moleculeReference, aminoAcids);
         }
 
-        private static AminoAcidReference MapLetterToAminoAcid(char aminoAcidCode)
+        private static AminoAcidReference MapLetterToAminoAcid(AminoAcidName aminoAcidCode)
         {
             switch (aminoAcidCode)
             {
-                case 'I':
+                case AminoAcidName.Isoleucine:
                     return AminoAcidLibrary.Isoleucine;
-                case 'L':
+                case AminoAcidName.Leucine:
                     return AminoAcidLibrary.Leucine;
-                case 'V':
+                case AminoAcidName.Valine:
                     return AminoAcidLibrary.Valine;
-                case 'F':
+                case AminoAcidName.Phenylalanine:
                     return AminoAcidLibrary.Phenylalanine;
-                case 'M':
+                case AminoAcidName.Methionine:
                     return AminoAcidLibrary.Methionine;
-                case 'C':
+                case AminoAcidName.Cysteine:
                     return AminoAcidLibrary.Cysteine;
-                case 'A':
+                case AminoAcidName.Alanine:
                     return AminoAcidLibrary.Alanine;
-                case 'G':
+                case AminoAcidName.Glycine:
                     return AminoAcidLibrary.Glycine;
-                case 'P':
+                case AminoAcidName.Proline:
                     return AminoAcidLibrary.Proline;
-                case 'T':
+                case AminoAcidName.Threonine:
                     return AminoAcidLibrary.Threonine;
-                case 'S':
+                case AminoAcidName.Serine:
                     return AminoAcidLibrary.Serine;
-                case 'Y':
+                case AminoAcidName.Tyrosine:
                     return AminoAcidLibrary.Tyrosine;
-                case 'W':
+                case AminoAcidName.Tryptophan:
                     return AminoAcidLibrary.Tryptophan;
-                case 'Q':
+                case AminoAcidName.Glutamine:
                     return AminoAcidLibrary.Glutamine;
-                case 'N':
+                case AminoAcidName.Asparagine:
                     return AminoAcidLibrary.Asparagine;
-                case 'H':
+                case AminoAcidName.Histidine:
                     return AminoAcidLibrary.Histidine;
-                case 'E':
+                case AminoAcidName.GlutamicAcid:
                     return AminoAcidLibrary.GlutamicAcid;
-                case 'D':
+                case AminoAcidName.AsparticAcid:
                     return AminoAcidLibrary.AsparticAcid;
-                case 'K':
+                case AminoAcidName.Lysine:
                     return AminoAcidLibrary.Lysine;
-                case 'R':
+                case AminoAcidName.Arginine:
                     return AminoAcidLibrary.Arginine;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(aminoAcidCode), $"Unknown amino acid code '{aminoAcidCode}'");

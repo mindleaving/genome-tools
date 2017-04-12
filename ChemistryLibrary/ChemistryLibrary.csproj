@@ -44,9 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AminoAcidAtomNamer.cs" />
     <Compile Include="AminoAcidLibrary.cs" />
     <Compile Include="AminoAcidName.cs" />
+    <Compile Include="AminoAcidReference.cs" />
+    <Compile Include="ApproximatedAminoAcid.cs" />
+    <Compile Include="ApproximatePeptide.cs" />
     <Compile Include="Atom.cs" />
     <Compile Include="AtomConnector.cs" />
     <Compile Include="AtomNeighborhoodMap.cs" />
@@ -72,7 +74,12 @@
     <Compile Include="Orbital.cs" />
     <Compile Include="OrbitalComparer.cs" />
     <Compile Include="OrbitalGenerator.cs" />
-    <Compile Include="PdbSerializer.cs" />
+    <Compile Include="Pdb\PdbAminoAcidAtomNamer.cs" />
+    <Compile Include="Pdb\PdbSheetLine.cs" />
+    <Compile Include="Pdb\PdbAtomLine.cs" />
+    <Compile Include="Pdb\PdbHelixLine.cs" />
+    <Compile Include="Pdb\PdbReader.cs" />
+    <Compile Include="Pdb\PdbSerializer.cs" />
     <Compile Include="Peptide.cs" />
     <Compile Include="PeptideBuilder.cs" />
     <Compile Include="PeriodicTable.cs" />
@@ -91,6 +98,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

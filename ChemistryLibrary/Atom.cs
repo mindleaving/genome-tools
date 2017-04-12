@@ -7,6 +7,8 @@ namespace ChemistryLibrary
 {
     public class Atom
     {
+        private UnitPoint3D position;
+
         public string Id { get; } = Guid.NewGuid().ToString();
 
         public int Protons { get; }
@@ -19,8 +21,23 @@ namespace ChemistryLibrary
         public UnitValue FormalCharge { get; }
         public UnitValue EffectiveCharge { get; set; }
         public List<Orbital> Orbitals { get; }
-        public Point3D Position { get; set; }
-        public Vector3D Velocity { get; set; } = new Vector3D(0, 0, 0);
+        /// <summary>
+        /// Position in units of picometer
+        /// </summary>
+        public UnitPoint3D Position
+        {
+            get { return position; }
+            set
+            {
+                if(position != null && IsPositionFixed)
+                    throw new InvalidOperationException("Fixed atoms must not be moved");
+                position = value;
+            }
+        }
+        /// <summary>
+        /// Velocity in meters per second
+        /// </summary>
+        public UnitVector3D Velocity { get; set; } = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
         public IEnumerable<Electron> Electrons => Orbitals.SelectMany(orbital => orbital.Electrons);
         public IEnumerable<Electron> ValenceElectrons => OuterOrbitals.SelectMany(o => o.Electrons);
         public IEnumerable<Orbital> OuterOrbitals => Orbitals.Where(o => o.Period == Period);
@@ -43,6 +60,10 @@ namespace ChemistryLibrary
         /// e.g. N, CA, CB, CG, etc.
         /// </summary>
         public string AminoAcidAtomName { get; set; }
+        /// <summary>
+        /// True if atom is fixed to its current position.
+        /// </summary>
+        public bool IsPositionFixed { get; set; }
 
         public Atom(int protons, int neutrons)
         {

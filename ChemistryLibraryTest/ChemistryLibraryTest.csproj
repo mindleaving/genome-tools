@@ -44,10 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AminoAcidAtomNamerTest.cs" />
+    <Compile Include="Pdb\AminoAcidAtomNamerTest.cs" />
+    <Compile Include="ApproximatePeptideTest.cs" />
     <Compile Include="MoleculeDynamicsRunner.cs" />
     <Compile Include="OrbitalComparerTest.cs" />
-    <Compile Include="PdbGeneratorTool.cs" />
+    <Compile Include="Pdb\PdbGeneratorTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpherePointDistributorTest.cs" />
   </ItemGroup>

@@ -1,13 +1,16 @@
 ﻿using System.IO;
 using ChemistryLibrary;
+using ChemistryLibrary.Pdb;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace ChemistryLibraryTest.Pdb
 {
     [TestFixture]
     public class PdbGeneratorTool
     {
         [Test]
+        [Category("Tool")]
+        [Ignore("Is tool")]
         public void GeneratePdbForPeptide()
         {
             var peptide = PeptideBuilder.PeptideFromString(

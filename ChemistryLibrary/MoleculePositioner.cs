@@ -9,16 +9,23 @@ namespace ChemistryLibrary
     {
         public static void PositionAtoms(Molecule molecule, uint firstAtomId = uint.MaxValue, uint lastAtomId = uint.MaxValue)
         {
-            molecule.MoleculeStructure.Vertices.Values.ForEach(v => ((Atom)v.Object).Position = null);
+            // Remove position information
+            molecule.MoleculeStructure.Vertices.Values
+                .Select(v => (Atom)v.Object)
+                .Where(atom => !atom.IsPositionFixed)
+                .ForEach(atom => atom.Position = null);
 
             var positionableVertices = new Queue<Vertex>();
 
+            // If first and last atom is specified, position atoms between those two first
+            // Usually the case when a peptide is positioned, in which case the backbone
+            // is oriented along the X-axis
             if (firstAtomId != uint.MaxValue && lastAtomId != uint.MaxValue)
             {
                 // Position first atom
                 var firstVertex = molecule.MoleculeStructure.Vertices[firstAtomId];
                 var firstAtom = (Atom) firstVertex.Object;
-                firstAtom.Position = new Point3D(0,0,0);
+                firstAtom.Position = new UnitPoint3D(Unit.Meter, 0,0,0);
                 positionableVertices.Enqueue(firstVertex);
 
                 // Trace through molecule to last atom
@@ -48,7 +55,7 @@ namespace ChemistryLibrary
                     : molecule.MoleculeStructure.Vertices.Values.First();
                 positionableVertices.Enqueue(startVertex);
                 var startAtom = (Atom)startVertex.Object;
-                startAtom.Position = new Point3D(0, 0, 0);
+                startAtom.Position = new UnitPoint3D(Unit.Meter, 0, 0, 0);
             }
             while (positionableVertices.Any())
             {
@@ -82,7 +89,7 @@ namespace ChemistryLibrary
                 var bondLength = bonds.Select(bond => bond.BondLength.Value).Average();
                 var bondDirection = evenlySpacePointsQueue.Dequeue().ToVector3D();
                 var neighborPosition = currentAtom.Position + bondLength*bondDirection;
-                atom.Position = neighborPosition;
+                atom.Position = neighborPosition.To(SIPrefix.Pico, Unit.Meter);
             }
 
             var lonePairs = currentAtom.OuterOrbitals.Where(o => o.IsFull && !o.IsPartOfBond).ToList();
@@ -129,7 +136,7 @@ namespace ChemistryLibrary
                 neighborPosition = candidateAtomPositions
                     .MinimumItem(p => p.DistanceToLine(new Point3D(0, 0, 0), new Point3D(1, 0, 0)));
             }
-            neighborAtom.Position = neighborPosition;
+            neighborAtom.Position = neighborPosition.To(SIPrefix.Pico, Unit.Meter);
         }
 
         private static IEnumerable<Point3D> GetAtomSpherePoints(Atom currentAtom, IEnumerable<Vertex> adjacentVertices)

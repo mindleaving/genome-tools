@@ -27,7 +27,7 @@ namespace ChemistryLibrary
             neighborhoodMap.Clear();
             vertices.ForEach(vertex => neighborhoodMap.Add(vertex, new List<uint>()));
 
-            var threshold = distanceThreshold.Value;
+            var threshold = distanceThreshold;
             for (var idx1 = 0; idx1 < vertices.Count-1; idx1++)
             {
                 var vertex1 = vertices[idx1];

@@ -45,7 +45,7 @@ namespace ChemistryLibrary
                 var forceDirection = v1V2Vector.Normalize();
                 var atomDistance = v1V2Vector.Magnitude();
                 var forceStrength = 1e4*-bond.BondEnergy.In(Unit.ElectronVolts)
-                                    *(atomDistance - 0.9*bond.BondLength.Value);
+                                    *(atomDistance - 0.9*bond.BondLength);
 
                 forceLookup[vertex1.Id] += forceStrength*forceDirection;
                 forceLookup[vertex2.Id] += -forceStrength*forceDirection;
@@ -72,7 +72,7 @@ namespace ChemistryLibrary
                     var neighborAtom = molecule.GetAtom(neighborVertex);
                     var charge2 = neighborAtom.EffectiveCharge;
                     var r = atom1Position.VectorTo(neighborAtom.Position);
-                    var distance = r.Magnitude();
+                    var distance = r.Magnitude().In(SIPrefix.Pico, Unit.Meter);
                     var chargeProduct = PhysicalConstants.CoulombsConstant.Value
                                         *charge1.Value
                                         *charge2.Value;
@@ -109,7 +109,7 @@ namespace ChemistryLibrary
                     var atom2Radius = atom.Radius.Value;
                     var atomRadiusSum = atom1Radius + atom2Radius;
                     var r = atom1Position.VectorTo(neighborAtom.Position);
-                    var distance = r.Magnitude();
+                    var distance = r.Magnitude().In(SIPrefix.Pico, Unit.Meter);
 
                     var shellRepulsionForce = -(1e-5*(1e-12/distance)
                                                 *Math.Exp(Math.Min(1e12*(atomRadiusSum - distance), 0)))

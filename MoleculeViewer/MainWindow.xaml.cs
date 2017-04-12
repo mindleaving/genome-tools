@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using ChemistryLibrary;
+using ChemistryLibrary.Pdb;
 using Commons;
 
 namespace MoleculeViewer
