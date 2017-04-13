@@ -25,7 +25,8 @@ namespace ChemistryLibrary
                 // Position first atom
                 var firstVertex = molecule.MoleculeStructure.Vertices[firstAtomId];
                 var firstAtom = (Atom) firstVertex.Object;
-                firstAtom.Position = new UnitPoint3D(Unit.Meter, 0,0,0);
+                if(firstAtom.Position == null)
+                    firstAtom.Position = new UnitPoint3D(Unit.Meter, 0,0,0);
                 positionableVertices.Enqueue(firstVertex);
 
                 // Trace through molecule to last atom
@@ -55,7 +56,8 @@ namespace ChemistryLibrary
                     : molecule.MoleculeStructure.Vertices.Values.First();
                 positionableVertices.Enqueue(startVertex);
                 var startAtom = (Atom)startVertex.Object;
-                startAtom.Position = new UnitPoint3D(Unit.Meter, 0, 0, 0);
+                if(startAtom.Position == null)
+                    startAtom.Position = new UnitPoint3D(Unit.Meter, 0, 0, 0);
             }
             while (positionableVertices.Any())
             {

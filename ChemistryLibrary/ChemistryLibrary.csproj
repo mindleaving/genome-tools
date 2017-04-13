@@ -74,6 +74,7 @@
     <Compile Include="Orbital.cs" />
     <Compile Include="OrbitalComparer.cs" />
     <Compile Include="OrbitalGenerator.cs" />
+    <Compile Include="Pdb\OffsetSequenceMatcher.cs" />
     <Compile Include="Pdb\PdbAminoAcidAtomNamer.cs" />
     <Compile Include="Pdb\PdbSheetLine.cs" />
     <Compile Include="Pdb\PdbAtomLine.cs" />

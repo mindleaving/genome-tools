@@ -20,7 +20,7 @@ namespace ChemistryLibrary
 
         public Atom GetAtomFromName(string atomName)
         {
-            return Molecule.Atoms.SingleOrDefault(atom => atom.AminoAcidAtomName == atomName);
+            return VertexIds.Select(Molecule.GetAtom).SingleOrDefault(atom => atom.AminoAcidAtomName == atomName);
         }
     }
 }

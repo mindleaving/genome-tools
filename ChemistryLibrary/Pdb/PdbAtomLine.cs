@@ -6,6 +6,7 @@
         public string Name { get; set; }
         public string ResidueName { get; set; }
         public char ChainId { get; set; }
+        public char AlternateConformationId { get; set; }
         public int ResidueNumber { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
