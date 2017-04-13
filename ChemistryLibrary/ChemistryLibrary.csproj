@@ -63,6 +63,7 @@
     <Compile Include="ElementSymbol.cs" />
     <Compile Include="ForceCalculator.cs" />
     <Compile Include="IsotopeTable.cs" />
+    <Compile Include="Measurements\AminoAcidAngleMeasurer.cs" />
     <Compile Include="Molecule.cs" />
     <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="MoleculeDynamicsSimulator.cs" />
