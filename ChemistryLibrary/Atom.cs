@@ -64,6 +64,10 @@ namespace ChemistryLibrary
         /// True if atom is fixed to its current position.
         /// </summary>
         public bool IsPositionFixed { get; set; }
+        /// <summary>
+        /// Helper flag for <see cref="MoleculePositioner"/>.
+        /// </summary>
+        public bool IsPositioned { get; set; }
 
         public Atom(int protons, int neutrons)
         {
