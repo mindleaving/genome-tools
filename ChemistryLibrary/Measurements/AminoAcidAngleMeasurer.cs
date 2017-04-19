@@ -100,12 +100,10 @@ namespace ChemistryLibrary.Measurements
             var vector3 = point3.VectorTo(point4);
 
             var plane12Normal = vector1.CrossProduct(vector2);
+            var plane23Normal = vector2.CrossProduct(vector3);
 
-            var vector3On2Normal = vector3 - vector3.ProjectOnto(vector2);
-            var vector1On2Normal = vector1 - vector1.ProjectOnto(vector2);
-
-            var angle = vector1On2Normal.AngleWith(vector3On2Normal);
-            var sign = plane12Normal.DotProduct(vector3On2Normal) > 0 ? 1 : -1;
+            var angle = plane12Normal.AngleWith(plane23Normal);
+            var sign = vector3.DotProduct(plane12Normal) > 0 ? 1 : -1;
             return sign*angle;
         }
     }
