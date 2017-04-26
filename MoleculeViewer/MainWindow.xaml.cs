@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using ChemistryLibrary;
+using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Pdb;
 using Commons;
 
@@ -26,39 +28,65 @@ namespace MoleculeViewer
 
             //var water = MoleculeLibrary.H2O;
             //water.PositionAtoms();
-            var peptide = PeptideBuilder.PeptideFromString(
-                "MQRSPLEKASVVSKLFFSWTRPILRKGYRQRLELSDIYQIPSVDSADNLSEKLEREWDRE"
-                + "LASKKNPKLINALRRCFFWRFMFYGIFLYLGEVTKAVQPLLLGRIIASYDPDNKEERSIA"
-                + "IYLGIGLCLLFIVRTLLLHPAIFGLHHIGMQMRIAMFSLIYKKTLKLSSRVLDKISIGQL"
-                + "VSLLSNNLNKFDEGLALAHFVWIAPLQVALLMGLIWELLQASAFCGLGFLIVLALFQAGL"
-                + "GRMMMKYRDQRAGKISERLVITSEMIENIQSVKAYCWEEAMEKMIENLRQTELKLTRKAA"
-                + "YVRYFNSSAFFFSGFFVVFLSVLPYALIKGIILRKIFTTISFCIVLRMAVTRQFPWAVQT"
-                + "WYDSLGAINKIQDFLQKQEYKTLEYNLTTTEVVMENVTAFWEEGFGELFEKAKQNNNNRK"
-                + "TSNGDDSLFFSNFSLLGTPVLKDINFKIERGQLLAVAGSTGAGKTSLLMVIMGELEPSEG"
-                + "KIKHSGRISFCSQFSWIMPGTIKENIIFGVSYDEYRYRSVIKACQLEEDISKFAEKDNIV"
-                + "LGEGGITLSGGQRARISLARAVYKDADLYLLDSPFGYLDVLTEKEIFESCVCKLMANKTR"
-                + "ILVTSKMEHLKKADKILILHEGSSYFYGTFSELQNLQPDFSSKLMGCDSFDQFSAERRNS"
-                + "ILTETLHRFSLEGDAPVSWTETKKQSFKQTGEFGEKRKNSILNPINSIRKFSIVQKTPLQ"
-                + "MNGIEEDSDEPLERRLSLVPDSEQGEAILPRISVISTGPTLQARRRQSVLNLMTHSVNQG"
-                + "QNIHRKTTASTRKVSLAPQANLTELDIYSRRLSQETGLEISEEINEEDLKECFFDDMESI"
-                + "PAVTTWNTYLRYITVHKSLIFVLIWCLVIFLAEVAASLVVLWLLGNTPLQDKGNSTHSRN"
-                + "NSYAVIITSTSSYYVFYIYVGVADTLLAMGFFRGLPLVHTLITVSKILHHKMLHSVLQAP"
-                + "MSTLNTLKAGGILNRFSKDIAILDDLLPLTIFDFIQLLLIVIGAIAVVAVLQPYIFVATV"
-                + "PVIVAFIMLRAYFLQTSQQLKQLESEGRSPIFTHLVTSLKGLWTLRAFGRQPYFETLFHK"
-                + "ALNLHTANWFLYLSTLRWFQMRIEMIFVIFFIAVTFISILTTGEGEGRVGIILTLAMNIM"
-                + "STLQWAVNSSIDVDSLMRSVSRVFKFIDMPTEGKPTKSTKPYKNGQLSKVMIIENSHVKK"
-                + "DDIWPSGGQMTVKDLTAKYTEGGNAILENISFSISPGQRVGLLGRTGSGKSTLLSAFLRL"
-                + "LNTEGEIQIDGVSWDSITLQQWRKAFGVIPQKVFIFSGTFRKNLDPYEQWSDQEIWKVAD"
-                + "EVGLRSVIEQFPGKLDFVLVDGGCVLSHGHKQLMCLARSVLSKAKILLLDEPSAHLDPVT"
-                + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
-                + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL");
+            //var peptide = PeptideBuilder.PeptideFromString(
+            //    "MQRSPLEKASVVSKLFFSWTRPILRKGYRQRLELSDIYQIPSVDSADNLSEKLEREWDRE"
+            //    + "LASKKNPKLINALRRCFFWRFMFYGIFLYLGEVTKAVQPLLLGRIIASYDPDNKEERSIA"
+            //    + "IYLGIGLCLLFIVRTLLLHPAIFGLHHIGMQMRIAMFSLIYKKTLKLSSRVLDKISIGQL"
+            //    + "VSLLSNNLNKFDEGLALAHFVWIAPLQVALLMGLIWELLQASAFCGLGFLIVLALFQAGL"
+            //    + "GRMMMKYRDQRAGKISERLVITSEMIENIQSVKAYCWEEAMEKMIENLRQTELKLTRKAA"
+            //    + "YVRYFNSSAFFFSGFFVVFLSVLPYALIKGIILRKIFTTISFCIVLRMAVTRQFPWAVQT"
+            //    + "WYDSLGAINKIQDFLQKQEYKTLEYNLTTTEVVMENVTAFWEEGFGELFEKAKQNNNNRK"
+            //    + "TSNGDDSLFFSNFSLLGTPVLKDINFKIERGQLLAVAGSTGAGKTSLLMVIMGELEPSEG"
+            //    + "KIKHSGRISFCSQFSWIMPGTIKENIIFGVSYDEYRYRSVIKACQLEEDISKFAEKDNIV"
+            //    + "LGEGGITLSGGQRARISLARAVYKDADLYLLDSPFGYLDVLTEKEIFESCVCKLMANKTR"
+            //    + "ILVTSKMEHLKKADKILILHEGSSYFYGTFSELQNLQPDFSSKLMGCDSFDQFSAERRNS"
+            //    + "ILTETLHRFSLEGDAPVSWTETKKQSFKQTGEFGEKRKNSILNPINSIRKFSIVQKTPLQ"
+            //    + "MNGIEEDSDEPLERRLSLVPDSEQGEAILPRISVISTGPTLQARRRQSVLNLMTHSVNQG"
+            //    + "QNIHRKTTASTRKVSLAPQANLTELDIYSRRLSQETGLEISEEINEEDLKECFFDDMESI"
+            //    + "PAVTTWNTYLRYITVHKSLIFVLIWCLVIFLAEVAASLVVLWLLGNTPLQDKGNSTHSRN"
+            //    + "NSYAVIITSTSSYYVFYIYVGVADTLLAMGFFRGLPLVHTLITVSKILHHKMLHSVLQAP"
+            //    + "MSTLNTLKAGGILNRFSKDIAILDDLLPLTIFDFIQLLLIVIGAIAVVAVLQPYIFVATV"
+            //    + "PVIVAFIMLRAYFLQTSQQLKQLESEGRSPIFTHLVTSLKGLWTLRAFGRQPYFETLFHK"
+            //    + "ALNLHTANWFLYLSTLRWFQMRIEMIFVIFFIAVTFISILTTGEGEGRVGIILTLAMNIM"
+            //    + "STLQWAVNSSIDVDSLMRSVSRVFKFIDMPTEGKPTKSTKPYKNGQLSKVMIIENSHVKK"
+            //    + "DDIWPSGGQMTVKDLTAKYTEGGNAILENISFSISPGQRVGLLGRTGSGKSTLLSAFLRL"
+            //    + "LNTEGEIQIDGVSWDSITLQQWRKAFGVIPQKVFIFSGTFRKNLDPYEQWSDQEIWKVAD"
+            //    + "EVGLRSVIEQFPGKLDFVLVDGGCVLSHGHKQLMCLARSVLSKAKILLLDEPSAHLDPVT"
+            //    + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
+            //    + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL");
             //var aminoAcidBuilder = PeptideBuilder
             //    .PeptideFromString("IHTGEKPYKC");
             //var peptide = PeptideBuilder
             //    .PeptideFromString("Q");
-            var aminoAcid = peptide.Molecule;
-            aminoAcid.MarkBackbone(peptide.MoleculeReference);
-            aminoAcid.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
+
+            var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5hhe.pdb";
+            var result = PdbReader.ReadFile(filename);
+            var peptide = result.Chains.First();
+            var angleMeasurerer = new AminoAcidAngleMeasurer();
+            var angleMeasurement = angleMeasurerer.MeasureAngles(peptide);
+            var approximatePeptide = new ApproximatePeptide(peptide.AminoAcids.Select(aa => aa.Name).ToList());
+            for (int aminoAcidIdx = 0; aminoAcidIdx < approximatePeptide.AminoAcids.Count; aminoAcidIdx++)
+            {
+                var aminoAcid = approximatePeptide.AminoAcids[aminoAcidIdx];
+                var chainReference = peptide.AminoAcids[aminoAcidIdx];
+                if (angleMeasurement.ContainsKey(chainReference))
+                {
+                    var angles = angleMeasurement[chainReference];
+                    aminoAcid.PhiAngle = angles.Phi;
+                    aminoAcid.PsiAngle = angles.Psi;
+                }
+                else
+                {
+                    Debugger.Break();
+                }
+            }
+            approximatePeptide.UpdatePositions();
+            var approximatePeptideCompleter = new ApproximatePeptideCompleter(approximatePeptide);
+            var backbone = approximatePeptideCompleter.GetFullPeptide();
+
+
+            peptide.Molecule.MarkBackbone(peptide.MoleculeReference);
+            //peptide.Molecule.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
 
             var customForces = new List<CustomAtomForce>();
             //{
@@ -85,13 +113,14 @@ namespace MoleculeViewer
             //var molecule = moleculeReference.Molecule;
             //molecule.PositionAtoms(moleculeReference.FirstAtomId, moleculeReference.LastAtomId);
 
-            RedistributeCharges(aminoAcid);
+            RedistributeCharges(backbone.Molecule);
 
-            MoleculeViewModel = new MoleculeViewModel(aminoAcid);
+            MoleculeViewModel = new MoleculeViewModel(backbone.Molecule);
             SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);
 
-            SimulationViewModel.RunSimulation().ContinueWith(x => 
-                File.WriteAllText(@"G:\Projects\HumanGenome\cftr.pdb", PdbSerializer.Serialize(peptide, "cftr")));
+            //SimulationViewModel.RunSimulation();
+            //SimulationViewModel.RunSimulation().ContinueWith(x => 
+            //    File.WriteAllText(@"G:\Projects\HumanGenome\cftr.pdb", PdbSerializer.Serialize(peptide, "cftr")));
         }
 
         private void RedistributeCharges(Molecule aminoAcid)

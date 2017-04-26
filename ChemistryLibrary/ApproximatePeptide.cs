@@ -20,6 +20,16 @@ namespace ChemistryLibrary
             BuildPeptide(aminoAcidNames);
         }
 
+        public void UpdatePositions()
+        {
+            ApproximatedAminoAcid lastAminoAcid = null;
+            foreach (var aminoAcid in AminoAcids)
+            {
+                PositionAminoAcid(aminoAcid, lastAminoAcid);
+                lastAminoAcid = aminoAcid;
+            }
+        }
+
         private void BuildPeptide(IList<AminoAcidName> aminoAcidNames)
         {
             foreach (var aminoAcidName in aminoAcidNames)
@@ -39,14 +49,14 @@ namespace ChemistryLibrary
             var CaCNAngle = 116.0*Math.PI/180;
             var CNCaAngle = 122.0*Math.PI/180;
 
-            Point3D carbonPosition;
-            Point3D carbonAlphaPosition;
+            UnitPoint3D carbonPosition;
+            UnitPoint3D carbonAlphaPosition;
             Vector3D carbonAlphaCarbonBondDirection;
             Vector3D nitrogenCarbonAlphaBondDirection;
             if (lastAminoAcid == null)
             {
-                carbonPosition = new Point3D(0, 0, 0);
-                carbonAlphaPosition = new Point3D(-CaCDistance.In(SIPrefix.Pico, Unit.Meter), 0, 0);
+                carbonPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0, 0, 0);
+                carbonAlphaPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, -CaCDistance.In(SIPrefix.Pico, Unit.Meter), 0, 0);
                 carbonAlphaCarbonBondDirection = carbonAlphaPosition.VectorTo(carbonPosition);
                 nitrogenCarbonAlphaBondDirection = new Vector3D(0, 1, 0);
             }
@@ -59,9 +69,9 @@ namespace ChemistryLibrary
                 nitrogenCarbonAlphaBondDirection = lastAminoAcid.NitrogenPosition
                     .VectorTo(carbonAlphaPosition);
             }
-            var omega = 0*Math.PI/180;
-            var phi = 0*Math.PI/180;
-            var psi = -10*Math.PI/180;
+            var omega = 180*Math.PI/180;
+            var phi = aminoAcid.PhiAngle?.In(Unit.Degree) ?? 0;
+            var psi = aminoAcid.PsiAngle?.In(Unit.Degree) ?? -10*Math.PI/180;
             var nitrogenPosition = CalculateAtomPosition(carbonPosition, 
                 carbonAlphaCarbonBondDirection, 
                 nitrogenCarbonAlphaBondDirection, 
@@ -87,7 +97,7 @@ namespace ChemistryLibrary
             aminoAcid.PsiAngle = psi.To(Unit.Radians);
         }
 
-        private Point3D CalculateAtomPosition(Point3D currentPosition, 
+        private UnitPoint3D CalculateAtomPosition(UnitPoint3D currentPosition, 
             Vector3D vector1, 
             Vector3D vector2, 
             UnitValue bondLength, 
@@ -107,7 +117,8 @@ namespace ChemistryLibrary
             transformMatrix.SetColumn(0, basisVector1.Data);
             transformMatrix.SetColumn(1, basisVector2.Data);
             transformMatrix.SetColumn(2, basisVector3.Data);
-            return currentPosition + new Vector3D(transformMatrix.Data.Multiply(bondVector.Data.ConvertToMatrix()).Vectorize());
+            var bondDirection = transformMatrix.Data.Multiply(bondVector.Data.ConvertToMatrix()).Vectorize();
+            return currentPosition + new UnitVector3D(SIPrefix.Pico, Unit.Meter, bondDirection[0], bondDirection[1], bondDirection[2]);
         }
 
         public List<ApproximatedAminoAcid> AminoAcids { get; } = new List<ApproximatedAminoAcid>();

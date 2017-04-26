@@ -44,11 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AminoAcidExtensions.cs" />
     <Compile Include="AminoAcidLibrary.cs" />
     <Compile Include="AminoAcidName.cs" />
     <Compile Include="AminoAcidReference.cs" />
     <Compile Include="ApproximatedAminoAcid.cs" />
     <Compile Include="ApproximatePeptide.cs" />
+    <Compile Include="ApproximatePeptideCompleter.cs" />
     <Compile Include="Atom.cs" />
     <Compile Include="AtomConnector.cs" />
     <Compile Include="AtomNeighborhoodMap.cs" />

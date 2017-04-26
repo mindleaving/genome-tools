@@ -40,6 +40,10 @@ namespace ChemistryLibraryTest.Pdb
                         aminoAcid.PsiAngle = angles.Psi;
                     }
                 }
+                approximatePeptide.UpdatePositions();
+                var approximatePeptideCompleter = new ApproximatePeptideCompleter(approximatePeptide);
+                var backbone = approximatePeptideCompleter.GetBackbone();
+                var peptide = approximatePeptideCompleter.GetFullPeptide();
                 approximatePeptides.Add(approximatePeptide);
             }
             WriteRamachandranPlotData(@"G:\Projects\HumanGenome\ramachandranData.csv", angleMeasurements);

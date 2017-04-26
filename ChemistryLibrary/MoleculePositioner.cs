@@ -155,7 +155,9 @@ namespace ChemistryLibrary
 
         private static IEnumerable<Point3D> GetAtomSpherePoints(Atom currentAtom, IEnumerable<Vertex> adjacentVertices)
         {
-            var positionedNeighbors = adjacentVertices.Where(v => ((Atom) v.Object).Position != null).ToList();
+            var positionedNeighbors = adjacentVertices
+                .Where(v => ((Atom) v.Object).IsPositioned || ((Atom)v.Object).IsPositionFixed)
+                .ToList();
             var existingPoints = positionedNeighbors
                 .Select(v => (Atom) v.Object)
                 .Select(a => currentAtom.Position.VectorTo(a.Position))

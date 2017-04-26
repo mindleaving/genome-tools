@@ -1,9 +1,59 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace ChemistryLibrary
 {
     public static class AminoAcidLibrary
     {
+        public static AminoAcidReference Get(AminoAcidName aminoAcidCode)
+        {
+            switch (aminoAcidCode)
+            {
+                case AminoAcidName.Isoleucine:
+                    return Isoleucine;
+                case AminoAcidName.Leucine:
+                    return Leucine;
+                case AminoAcidName.Valine:
+                    return Valine;
+                case AminoAcidName.Phenylalanine:
+                    return Phenylalanine;
+                case AminoAcidName.Methionine:
+                    return Methionine;
+                case AminoAcidName.Cysteine:
+                    return Cysteine;
+                case AminoAcidName.Alanine:
+                    return Alanine;
+                case AminoAcidName.Glycine:
+                    return Glycine;
+                case AminoAcidName.Proline:
+                    return Proline;
+                case AminoAcidName.Threonine:
+                    return Threonine;
+                case AminoAcidName.Serine:
+                    return Serine;
+                case AminoAcidName.Tyrosine:
+                    return Tyrosine;
+                case AminoAcidName.Tryptophan:
+                    return Tryptophan;
+                case AminoAcidName.Glutamine:
+                    return Glutamine;
+                case AminoAcidName.Asparagine:
+                    return Asparagine;
+                case AminoAcidName.Histidine:
+                    return Histidine;
+                case AminoAcidName.GlutamicAcid:
+                    return GlutamicAcid;
+                case AminoAcidName.AsparticAcid:
+                    return AsparticAcid;
+                case AminoAcidName.Lysine:
+                    return Lysine;
+                case AminoAcidName.Arginine:
+                    return Arginine;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(aminoAcidCode), $"Unknown amino acid code '{aminoAcidCode}'");
+            }
+        }
+
         public static AminoAcidReference Alanine
         {
             get

@@ -195,11 +195,23 @@ namespace ChemistryLibrary.Pdb
                 .GroupBy(atom => atom.ResidueNumber)
                 .Select(atomGroup => new ResidueSequenceItem
                     {
-                        AminoAcidName = atomGroup.First().ResidueName.ToAminoAcidName(),
+                        AminoAcidName = ParseAminoAcidName(atomGroup.First().ResidueName),
                         ResidueNumber = atomGroup.Key
                     })
                 .ToList();
             return aminoAcidMap;
+        }
+
+        private static AminoAcidName ParseAminoAcidName(string redidueName)
+        {
+            try
+            {
+                return redidueName.ToAminoAcidName();
+            }
+            catch (ChemistryException)
+            {
+                return AminoAcidName.Alanine;
+            }
         }
 
         private static string ReadLineCode(string line)
