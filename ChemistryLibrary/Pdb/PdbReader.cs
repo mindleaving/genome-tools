@@ -107,7 +107,7 @@ namespace ChemistryLibrary.Pdb
 
         private static IList<AminoAcidName> ExtractSequence(IList<string> lines, char chainId)
         {
-            var seqresSequence = ExtractSequenceFromSeqresLines(lines, chainId);
+            //var seqresSequence = ExtractSequenceFromSeqresLines(lines, chainId);
             var atomSequence = ExtractSequenceFromAtomLines(lines, chainId);
             //var matchedSequences = new OffsetSequenceMatcher<AminoAcidName>(
             //    seqresSequence.Select(x => x.AminoAcidName).ToList(), 

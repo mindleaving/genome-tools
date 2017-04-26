@@ -8,12 +8,22 @@ namespace ChemistryLibrary
 {
     public class ApproximatePeptide
     {
+        public ApproximatePeptide(IList<AminoAcidName> aminoAcidNames)
+        {
+            BuildPeptide(aminoAcidNames);
+        }
+
         public ApproximatePeptide(string sequence)
         {
             var cleanedPeptideString = Regex.Replace(sequence.ToUpperInvariant(), "[^A-Z]", "");
-            foreach (var aminoAcidCode in cleanedPeptideString)
+            var aminoAcidNames = cleanedPeptideString.Select(str => str.ToAminoAcidName()).ToList();
+            BuildPeptide(aminoAcidNames);
+        }
+
+        private void BuildPeptide(IList<AminoAcidName> aminoAcidNames)
+        {
+            foreach (var aminoAcidName in aminoAcidNames)
             {
-                var aminoAcidName = aminoAcidCode.ToAminoAcidName();
                 var aminoAcid = new ApproximatedAminoAcid(aminoAcidName);
                 PositionAminoAcid(aminoAcid, AminoAcids.LastOrDefault());
                 AminoAcids.Add(aminoAcid);
@@ -73,8 +83,8 @@ namespace ChemistryLibrary
             aminoAcid.NitrogenPosition = nitrogenPosition;
             aminoAcid.CarbonAlphaPosition = carbonAlphaPosition;
             aminoAcid.CarbonPosition = carbonPosition;
-            aminoAcid.PhiAngle = phi;
-            aminoAcid.PsiAngle = psi;
+            aminoAcid.PhiAngle = phi.To(Unit.Radians);
+            aminoAcid.PsiAngle = psi.To(Unit.Radians);
         }
 
         private Point3D CalculateAtomPosition(Point3D currentPosition, 

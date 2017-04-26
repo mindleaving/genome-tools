@@ -120,7 +120,7 @@ namespace ChemistryLibrary
                 }
                 if (force.Magnitude() < ForceLowerCutoff)
                     continue;
-                atom.Velocity += settings.TimeStep/ atom.Mass * force;
+                atom.Velocity += settings.TimeStep * (force.To(Unit.Newton) / atom.Mass);
                 if (atom.Velocity.Magnitude().In(Unit.MetersPerSecond) > maxVelocity)
                     atom.Velocity *= maxVelocity / atom.Velocity.Magnitude().In(Unit.MetersPerSecond);
                 atom.Position += dT*atom.Velocity;

@@ -65,7 +65,7 @@ namespace ChemistryLibrary
         {
             var upperLetterCode = threeLetterCode.ToUpperInvariant();
             if (!ThreeLetterAminoAcidMap.ContainsKey(upperLetterCode))
-                throw new ChemistryException($"Unknown amino acid with code '{upperLetterCode}'");
+                throw new ChemistryException($"Unknown amino acid with code '{upperLetterCode}'"); //return AminoAcidName.Alanine;
             return ThreeLetterAminoAcidMap[upperLetterCode];
         }
 

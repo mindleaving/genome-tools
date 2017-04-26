@@ -16,10 +16,11 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void Debug()
         {
-            var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5uww.pdb";
+            var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5uak.pdb";
             var result = PdbReader.ReadFile(filename);
             var angleMeasurerer = new AminoAcidAngleMeasurer();
             var angleMeasurements = new Dictionary<AminoAcidReference, AminoAcidAngles>();
+            var approximatePeptides = new List<ApproximatePeptide>();
             foreach (var chain in result.Chains)
             {
                 var angleMeasurement = angleMeasurerer.MeasureAngles(chain);
@@ -27,6 +28,19 @@ namespace ChemistryLibraryTest.Pdb
                 {
                     angleMeasurements.Add(kvp.Key, kvp.Value);
                 }
+                var approximatePeptide = new ApproximatePeptide(chain.AminoAcids.Select(aa => aa.Name).ToList());
+                for (int aminoAcidIdx = 0; aminoAcidIdx < approximatePeptide.AminoAcids.Count; aminoAcidIdx++)
+                {
+                    var aminoAcid = approximatePeptide.AminoAcids[aminoAcidIdx];
+                    var chainReference = chain.AminoAcids[aminoAcidIdx];
+                    if (angleMeasurement.ContainsKey(chainReference))
+                    {
+                        var angles = angleMeasurement[chainReference];
+                        aminoAcid.PhiAngle = angles.Phi;
+                        aminoAcid.PsiAngle = angles.Psi;
+                    }
+                }
+                approximatePeptides.Add(approximatePeptide);
             }
             WriteRamachandranPlotData(@"G:\Projects\HumanGenome\ramachandranData.csv", angleMeasurements);
 
