@@ -27,18 +27,23 @@ namespace ChemistryLibrary
 
     public class PeptideAnnotation
     {
-        public PeptideAnnotation(PeptideAnnotationType type, List<AminoAcidReference> aminoAcidReferences)
+        public PeptideAnnotation(PeptideSecondaryStructure type,
+            List<AminoAcidReference> aminoAcidReferences,
+            int firstAminoAcidNumber)
         {
             Type = type;
+            FirstAminoAcidNumber = firstAminoAcidNumber;
             AminoAcidReferences.AddRange(aminoAcidReferences);
         }
 
-        public PeptideAnnotationType Type { get; set; }
+        public PeptideSecondaryStructure Type { get; }
+        public int FirstAminoAcidNumber { get; }
         public List<AminoAcidReference> AminoAcidReferences { get; } = new List<AminoAcidReference>();
     }
 
-    public enum PeptideAnnotationType
+    public enum PeptideSecondaryStructure
     {
+        None,
         AlphaHelix,
         BetaSheet
     }

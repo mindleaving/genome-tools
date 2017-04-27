@@ -33,15 +33,15 @@ namespace ChemistryLibrary.Pdb
         private static Peptide ExtractChain(IList<string> lines, char chainId)
         {
             var aminoAcidSequence = ExtractSequence(lines, chainId);
-            var peptide = PeptideBuilder.PeptideFromSequence(aminoAcidSequence);
+            var peptide = PeptideBuilder.PeptideFromSequence(aminoAcidSequence.Sequence);
             peptide.ChainId = chainId;
-            var annotations = ExtractAnnotations(lines, chainId, peptide);
+            var annotations = ExtractAnnotations(lines, chainId, peptide, aminoAcidSequence.FirstResidueNumber);
             peptide.Annotations.AddRange(annotations);
-            ReadAtomPositions(lines, chainId, peptide);
+            ReadAtomPositions(lines, chainId, peptide, aminoAcidSequence.FirstResidueNumber);
             return peptide;
         }
 
-        private static void ReadAtomPositions(IList<string> lines, char chainId, Peptide peptide)
+        private static void ReadAtomPositions(IList<string> lines, char chainId, Peptide peptide, int firstResidueNumber)
         {
             var aminoAcidAtomGroups = lines
                 .Where(line => ReadLineCode(line) == "ATOM")
@@ -51,11 +51,11 @@ namespace ChemistryLibrary.Pdb
                 .GroupBy(atom => atom.ResidueNumber);
             foreach (var aminoAcidAtomInfos in aminoAcidAtomGroups)
             {
-                if(aminoAcidAtomInfos.Key < 1) // TODO: Log warning
+                if(aminoAcidAtomInfos.Key < firstResidueNumber) // TODO: Log warning
                     continue;
-                if(aminoAcidAtomInfos.Key >= peptide.AminoAcids.Count) // TODO: Log warning
+                if(aminoAcidAtomInfos.Key >= peptide.AminoAcids.Count + firstResidueNumber) // TODO: Log warning
                     continue;
-                var aminoAcid = peptide.AminoAcids[aminoAcidAtomInfos.Key - 1];
+                var aminoAcid = peptide.AminoAcids[aminoAcidAtomInfos.Key - firstResidueNumber];
                 PdbAminoAcidAtomNamer.AssignNames(aminoAcid);
                 foreach (var atomInfo in aminoAcidAtomInfos)
                 {
@@ -71,7 +71,7 @@ namespace ChemistryLibrary.Pdb
             }
         }
 
-        private static List<PeptideAnnotation> ExtractAnnotations(IList<string> lines, char chainId, Peptide peptide)
+        private static List<PeptideAnnotation> ExtractAnnotations(IList<string> lines, char chainId, Peptide peptide, int firstResidueNumber)
         {
             var helices = lines
                 .Where(line => ReadLineCode(line) == "HELIX")
@@ -81,8 +81,9 @@ namespace ChemistryLibrary.Pdb
             foreach (var helix in helices)
             {
                 var annotation = new PeptideAnnotation(
-                    PeptideAnnotationType.AlphaHelix,
-                    peptide.AminoAcids.Skip(helix.FirstResidueNumber - 1).Take(helix.ResidueCount).ToList());
+                    PeptideSecondaryStructure.AlphaHelix,
+                    peptide.AminoAcids.Skip(helix.FirstResidueNumber - firstResidueNumber).Take(helix.ResidueCount).ToList(),
+                    helix.FirstResidueNumber);
                 annotations.Add(annotation);
             }
             var sheetStrandGroups = lines
@@ -95,29 +96,42 @@ namespace ChemistryLibrary.Pdb
                 var sheetAminoAcids = new List<AminoAcidReference>();
                 foreach (var strand in sheetStrands)
                 {
-                    sheetAminoAcids.AddRange(peptide.AminoAcids.Skip(strand.FirstResidueNumber - 1).Take(strand.ResidueCount));
+                    sheetAminoAcids.AddRange(peptide.AminoAcids.Skip(strand.FirstResidueNumber - firstResidueNumber).Take(strand.ResidueCount));
                 }
                 var annotation = new PeptideAnnotation(
-                    PeptideAnnotationType.BetaSheet, 
-                    sheetAminoAcids);
+                    PeptideSecondaryStructure.BetaSheet, 
+                    sheetAminoAcids,
+                    sheetStrands.First().FirstResidueNumber);
                 annotations.Add(annotation);
             }
             return annotations;
         }
 
-        private static IList<AminoAcidName> ExtractSequence(IList<string> lines, char chainId)
+        private class AminoAcidSequence
+        {
+            public AminoAcidSequence(IList<AminoAcidName> aminoAcidNames, int firstResidueNumber)
+            {
+                Sequence = new List<AminoAcidName>(aminoAcidNames);
+                FirstResidueNumber = firstResidueNumber;
+            }
+
+            public int FirstResidueNumber { get; }
+            public IList<AminoAcidName> Sequence { get; }
+        }
+        private static AminoAcidSequence ExtractSequence(IList<string> lines, char chainId)
         {
             //var seqresSequence = ExtractSequenceFromSeqresLines(lines, chainId);
             var atomSequence = ExtractSequenceFromAtomLines(lines, chainId);
             //var matchedSequences = new OffsetSequenceMatcher<AminoAcidName>(
             //    seqresSequence.Select(x => x.AminoAcidName).ToList(), 
             //    atomSequence.Select(x => x.AminoAcidName).ToList());
-            
+
             // Build sequence from atom sequence
-            var residueCount = atomSequence.Max(x => x.ResidueNumber);
+            var startResidueNumber = atomSequence.First().ResidueNumber;
+            var lastResidueNumber = atomSequence.Last().ResidueNumber;
             var sequence = new List<AminoAcidName>();
             var residueMap = atomSequence.ToDictionary(x => x.ResidueNumber, x => x.AminoAcidName);
-            for (int residueIdx = 1; residueIdx < residueCount; residueIdx++)
+            for (int residueIdx = startResidueNumber; residueIdx <= lastResidueNumber; residueIdx++)
             {
                 AminoAcidName aminoAcidName;
                 if (residueMap.ContainsKey(residueIdx))
@@ -128,7 +142,7 @@ namespace ChemistryLibrary.Pdb
                 }
                 sequence.Add(aminoAcidName);
             }
-            return sequence;
+            return new AminoAcidSequence(sequence, startResidueNumber);
         }
 
         private static IList<ResidueSequenceItem> ExtractSequenceFromSeqresLines(IList<string> lines, char chainId)
@@ -297,7 +311,7 @@ namespace ChemistryLibrary.Pdb
                 StrandCount = int.Parse(line.Substring(14, 2).Trim()),
                 FirstResidueName = line.Substring(17, 3).Trim().ToUpperInvariant(),
                 FirstResidueNumber = int.Parse(line.Substring(22, 4).Trim()),
-                FirstResidueChainId = line[26],
+                FirstResidueChainId = line[21],
                 LastResidueName = line.Substring(28, 3).Trim().ToUpperInvariant(),
                 LastResidueNumber = int.Parse(line.Substring(33, 4).Trim()),
                 LastResidueChainId = line[32],
