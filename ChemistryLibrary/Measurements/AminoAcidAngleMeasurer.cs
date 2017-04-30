@@ -42,7 +42,7 @@ namespace ChemistryLibrary.Measurements
                     && lastCarbonPosition != null
                     && nitrogenPosition != null)
                 {
-                    var psi = MeasureAnglesFromPositions(
+                    var psi = CalculateDihedralAngle(
                         lastNitrogenPosition,
                         lastCarbonAlphaPosition,
                         lastCarbonPosition,
@@ -56,7 +56,7 @@ namespace ChemistryLibrary.Measurements
                     && nitrogenPosition != null
                     && carbonAlphaPosition != null)
                 {
-                    omega = MeasureAnglesFromPositions(
+                    omega = CalculateDihedralAngle(
                         lastCarbonAlphaPosition,
                         lastCarbonPosition,
                         nitrogenPosition,
@@ -68,7 +68,7 @@ namespace ChemistryLibrary.Measurements
                     && carbonAlphaPosition != null
                     && carbonPosition != null)
                 {
-                    phi = MeasureAnglesFromPositions(
+                    phi = CalculateDihedralAngle(
                         lastCarbonPosition,
                         nitrogenPosition,
                         carbonAlphaPosition,
@@ -90,7 +90,75 @@ namespace ChemistryLibrary.Measurements
             return measurements;
         }
 
-        private UnitValue MeasureAnglesFromPositions(UnitPoint3D point1, 
+        public Dictionary<ApproximatedAminoAcid, AminoAcidAngles> MeasureAngles(ApproximatePeptide peptide)
+        {
+            var measurements = new Dictionary<ApproximatedAminoAcid, AminoAcidAngles>();
+            AminoAcidAngles lastAngles = null;
+
+            UnitPoint3D lastNitrogenPosition = null;
+            UnitPoint3D lastCarbonAlphaPosition = null;
+            UnitPoint3D lastCarbonPosition = null;
+            foreach (var aminoAcid in peptide.AminoAcids)
+            {
+                var nitrogenPosition = aminoAcid.NitrogenPosition;
+                var carbonAlphaPosition = aminoAcid.CarbonAlphaPosition;
+                var carbonPosition = aminoAcid.CarbonPosition;
+
+                if (lastAngles != null
+                    && lastNitrogenPosition != null
+                    && lastCarbonAlphaPosition != null
+                    && lastCarbonPosition != null
+                    && nitrogenPosition != null)
+                {
+                    var psi = CalculateDihedralAngle(
+                        lastNitrogenPosition,
+                        lastCarbonAlphaPosition,
+                        lastCarbonPosition,
+                        nitrogenPosition);
+                    lastAngles.Psi = psi;
+                }
+
+                UnitValue omega = null;
+                if (lastCarbonAlphaPosition != null
+                    && lastCarbonPosition != null
+                    && nitrogenPosition != null
+                    && carbonAlphaPosition != null)
+                {
+                    omega = CalculateDihedralAngle(
+                        lastCarbonAlphaPosition,
+                        lastCarbonPosition,
+                        nitrogenPosition,
+                        carbonAlphaPosition);
+                }
+                UnitValue phi = null;
+                if (lastCarbonPosition != null
+                    && nitrogenPosition != null
+                    && carbonAlphaPosition != null
+                    && carbonPosition != null)
+                {
+                    phi = CalculateDihedralAngle(
+                        lastCarbonPosition,
+                        nitrogenPosition,
+                        carbonAlphaPosition,
+                        carbonPosition);
+                }
+
+                var angles = new AminoAcidAngles
+                {
+                    Omega = omega,
+                    Phi = phi
+                };
+                measurements.Add(aminoAcid, angles);
+
+                lastNitrogenPosition = nitrogenPosition;
+                lastCarbonAlphaPosition = carbonAlphaPosition;
+                lastCarbonPosition = carbonPosition;
+                lastAngles = angles;
+            }
+            return measurements;
+        }
+
+        public UnitValue CalculateDihedralAngle(UnitPoint3D point1, 
             UnitPoint3D point2, 
             UnitPoint3D point3, 
             UnitPoint3D point4)

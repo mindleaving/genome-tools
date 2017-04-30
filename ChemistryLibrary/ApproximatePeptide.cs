@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Commons;
@@ -8,6 +9,10 @@ namespace ChemistryLibrary
 {
     public class ApproximatePeptide
     {
+        public ApproximatePeptide(IList<ApproximatedAminoAcid> aminoAcids)
+        {
+            BuildPeptide(aminoAcids);
+        }
         public ApproximatePeptide(IList<AminoAcidName> aminoAcidNames)
         {
             BuildPeptide(aminoAcidNames);
@@ -30,6 +35,14 @@ namespace ChemistryLibrary
             }
         }
 
+        private void BuildPeptide(IList<ApproximatedAminoAcid> aminoAcids)
+        {
+            foreach (var aminoAcid in aminoAcids)
+            {
+                PositionAminoAcid(aminoAcid, AminoAcids.LastOrDefault());
+                AminoAcids.Add(aminoAcid);
+            }
+        }
         private void BuildPeptide(IList<AminoAcidName> aminoAcidNames)
         {
             foreach (var aminoAcidName in aminoAcidNames)
@@ -69,9 +82,9 @@ namespace ChemistryLibrary
                 nitrogenCarbonAlphaBondDirection = lastAminoAcid.NitrogenPosition
                     .VectorTo(carbonAlphaPosition);
             }
-            var omega = 180*Math.PI/180;
-            var phi = aminoAcid.PhiAngle?.In(Unit.Degree) ?? 0;
-            var psi = aminoAcid.PsiAngle?.In(Unit.Degree) ?? -10*Math.PI/180;
+            var omega = aminoAcid.OmegaAngle?.In(Unit.Radians) ?? 180*Math.PI/180;
+            var phi = aminoAcid.PhiAngle?.In(Unit.Radians) ?? 0;
+            var psi = lastAminoAcid?.PsiAngle?.In(Unit.Radians) ?? 0;
             var nitrogenPosition = CalculateAtomPosition(carbonPosition, 
                 carbonAlphaCarbonBondDirection, 
                 nitrogenCarbonAlphaBondDirection, 
@@ -93,8 +106,12 @@ namespace ChemistryLibrary
             aminoAcid.NitrogenPosition = nitrogenPosition;
             aminoAcid.CarbonAlphaPosition = carbonAlphaPosition;
             aminoAcid.CarbonPosition = carbonPosition;
-            aminoAcid.PhiAngle = phi.To(Unit.Radians);
-            aminoAcid.PsiAngle = psi.To(Unit.Radians);
+            if (aminoAcid.OmegaAngle == null)
+                aminoAcid.OmegaAngle = omega.To(Unit.Radians);
+            if(aminoAcid.PhiAngle == null)
+                aminoAcid.PhiAngle = phi.To(Unit.Radians);
+            if(lastAminoAcid != null && lastAminoAcid.PsiAngle == null)
+                lastAminoAcid.PsiAngle = psi.To(Unit.Radians);
         }
 
         private UnitPoint3D CalculateAtomPosition(UnitPoint3D currentPosition, 
@@ -111,14 +128,20 @@ namespace ChemistryLibrary
 
             var bondVector = bondLength.In(SIPrefix.Pico, Unit.Meter)*new Vector3D(
                                  -Math.Cos(bondAngle),
-                                 Math.Sin(bondAngle)*Math.Cos(bondTorsion),
-                                 Math.Sin(bondAngle)*Math.Sin(bondTorsion));
+                                 -Math.Sin(bondAngle)*Math.Cos(bondTorsion),
+                                 -Math.Sin(bondAngle)*Math.Sin(bondTorsion));
+
             var transformMatrix = new Matrix3X3();
             transformMatrix.SetColumn(0, basisVector1.Data);
             transformMatrix.SetColumn(1, basisVector2.Data);
             transformMatrix.SetColumn(2, basisVector3.Data);
             var bondDirection = transformMatrix.Data.Multiply(bondVector.Data.ConvertToMatrix()).Vectorize();
-            return currentPosition + new UnitVector3D(SIPrefix.Pico, Unit.Meter, bondDirection[0], bondDirection[1], bondDirection[2]);
+            //var v4 = new Vector3D(bondDirection);
+            //var v4Angle = v4.CrossProduct(vector1).AngleWith(basisVector3);
+            //if(Math.Abs(v4Angle.In(Unit.Radians) - bondTorsion) > 1e-3)
+            //    Debugger.Break();
+            var atomPosition = currentPosition + new UnitVector3D(SIPrefix.Pico, Unit.Meter, bondDirection[0], bondDirection[1], bondDirection[2]);
+            return atomPosition;
         }
 
         public List<ApproximatedAminoAcid> AminoAcids { get; } = new List<ApproximatedAminoAcid>();
