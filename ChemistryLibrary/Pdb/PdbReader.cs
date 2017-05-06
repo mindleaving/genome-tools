@@ -13,8 +13,10 @@ namespace ChemistryLibrary.Pdb
         {
             Chains.AddRange(chains);
         }
+
         public List<Peptide> Chains { get; } = new List<Peptide>();
     }
+
     public static class PdbReader
     {
         public static PdbReaderResult ReadFile(string filename)
@@ -24,8 +26,15 @@ namespace ChemistryLibrary.Pdb
             var chains = new List<Peptide>();
             foreach (var chainId in chainIds)
             {
-                var chain = ExtractChain(lines, chainId);
-                chains.Add(chain);
+                try
+                {
+                    var chain = ExtractChain(lines, chainId);
+                    chains.Add(chain);
+                }
+                catch (ChemistryException chemException)
+                {
+                    // TODO: Log
+                }
             }
             return new PdbReaderResult(chains.ToArray());
         }
@@ -218,14 +227,15 @@ namespace ChemistryLibrary.Pdb
 
         private static AminoAcidName ParseAminoAcidName(string redidueName)
         {
-            try
-            {
-                return redidueName.ToAminoAcidName();
-            }
-            catch (ChemistryException)
-            {
-                return AminoAcidName.Alanine;
-            }
+            return redidueName.ToAminoAcidName();
+            //try
+            //{
+            //    return redidueName.ToAminoAcidName();
+            //}
+            //catch (ChemistryException)
+            //{
+            //    return AminoAcidName.Alanine;
+            //}
         }
 
         private static string ReadLineCode(string line)
