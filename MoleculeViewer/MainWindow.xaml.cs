@@ -72,6 +72,7 @@ namespace MoleculeViewer
                 if (angleMeasurement.ContainsKey(chainReference))
                 {
                     var angles = angleMeasurement[chainReference];
+                    aminoAcid.OmegaAngle = angles.Omega;
                     aminoAcid.PhiAngle = angles.Phi;
                     aminoAcid.PsiAngle = angles.Psi;
                 }
@@ -85,8 +86,8 @@ namespace MoleculeViewer
             var backbone = approximatePeptideCompleter.GetFullPeptide();
 
 
-            peptide.Molecule.MarkBackbone(peptide.MoleculeReference);
-            //peptide.Molecule.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
+            backbone.Molecule.MarkBackbone(backbone.MoleculeReference);
+            backbone.Molecule.PositionAtoms(backbone.MoleculeReference.FirstAtomId, backbone.MoleculeReference.LastAtomId);
 
             var customForces = new List<CustomAtomForce>();
             //{

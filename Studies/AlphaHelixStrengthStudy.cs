@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using ChemistryLibrary;
 using Commons;
 using NUnit.Framework;
@@ -25,6 +24,8 @@ namespace Studies
         {
             var annotatedSequencesFile = @"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt";
             var annotatedSequences = ParseHelixSequences(annotatedSequencesFile);
+            //var aminoAcidPairs = GetAminoAcidPairs(annotatedSequences);
+            //var leastCommonPair = aminoAcidPairs.OrderBy(kvp => kvp.Value).First();
 
             Func<double[], double> costFunc = parameters => HelixSequenceCostFunc(parameters, annotatedSequences);
             var parameterSettings = GeneratePairwiseAminoAcidParameters();
@@ -34,9 +35,64 @@ namespace Studies
             for (int idx = 0; idx < randomizedStartValueIterations; idx++)
             {
                 RandomizeStartValues(parameterSettings, 2);
-                var optimizationResult = GradientDescentOptimizer.Optimize(costFunc, parameterSettings, 0.9);
+                var optimizationResult = GradientDescentOptimizer.Optimize(costFunc, parameterSettings, double.NegativeInfinity);
                 WriteOptimizationResult(@"G:\Projects\HumanGenome\helixAffinityOptimizationResults.dat", optimizationResult);
             }
+        }
+
+        [Test]
+        public void OutputClassification()
+        {
+            var annotatedSequencesFile = @"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt";
+            var annotatedSequences = ParseHelixSequences(annotatedSequencesFile);
+
+            GeneratePairwiseAminoAcidParameters();
+            var bestOptimizationResult = File.ReadAllLines(@"G:\Projects\HumanGenome\helixAffinityOptimizationResults.dat")
+                    .Where(line => line.Split(';').Length > 2)
+                    .OrderBy(line => double.Parse(line.Split(';')[0], CultureInfo.InvariantCulture))
+                    .First();
+            var parameters = bestOptimizationResult.Split(';').Skip(2).Select(double.Parse).ToArray();
+            var directNeighborInfluence = parameters[0];
+            var fourthNeighborInfluence = parameters[1];
+            var bondAffinityLookup = CreateBondAffinityLookup(parameters);
+            var classifiedSequences = new List<string>();
+            foreach (var annotatedSequence in annotatedSequences)
+            {
+                classifiedSequences.Add(GenerateAnnotatedSequence(annotatedSequence.AminoAcidCodes, annotatedSequence.IsHelixSignal));
+                var classificationResult = ClassifySequence(annotatedSequence.AminoAcidCodes, bondAffinityLookup, directNeighborInfluence, fourthNeighborInfluence);
+                var classifiedSequence = GenerateAnnotatedSequence(annotatedSequence.AminoAcidCodes, classificationResult.Select(x => x > 0).ToList());
+                classifiedSequences.Add(classifiedSequence);
+                classifiedSequences.Add(string.Empty);
+            }
+            File.WriteAllLines(@"G:\Projects\HumanGenome\classifiedHelixSequences.txt", classifiedSequences);
+        }
+
+        private string GenerateAnnotatedSequence(IList<char> aminoAcidCodes, IList<bool> classificationResult)
+        {
+            var helixInProgress = false;
+            var sequence = string.Empty;
+            for (int codeIdx = 0; codeIdx < aminoAcidCodes.Count; codeIdx++)
+            {
+                var aminoAcidCode = aminoAcidCodes[codeIdx];
+                var isHelix = classificationResult[codeIdx];
+                if (!helixInProgress && isHelix)
+                {
+                    //sequence += "[";
+                    helixInProgress = true;
+                }
+                else if (helixInProgress && !isHelix)
+                {
+                    //sequence += "]";
+                    helixInProgress = false;
+                }
+                else
+                {
+                    //sequence += " ";
+                }
+                sequence += helixInProgress ? "#" : "_";
+                //sequence += aminoAcidCode;
+            }
+            return sequence;
         }
 
         private readonly object fileLockObject = new object();
@@ -117,7 +173,7 @@ namespace Studies
         //{
         //    return classificationValue != expected ? 1 : 0;
         //}
-        private double EvaluateClassification(double classificationValue, bool expected)
+        private static double EvaluateClassification(double classificationValue, bool expected)
         {
             var actual = classificationValue > 0;
             if (actual == expected)
@@ -127,36 +183,36 @@ namespace Studies
             return 1+Math.Abs(classificationValue);
         }
 
-        private IList<double> ClassifySequence(
+        private static IList<double> ClassifySequence(
             IList<char> aminoAcids,
             Dictionary<string, double> bondAffinityLookup,
             double directNeighborInfluence,
             double fourthNeighborInfluence)
         {
-            var classification = new List<double>();
+            var totalAffinity = new List<double>();
             for (int aminoAcidIdx = 0; aminoAcidIdx < aminoAcids.Count; aminoAcidIdx++)
             {
                 var aminoAcid = aminoAcids[aminoAcidIdx];
-                var neighborM4 = aminoAcidIdx < 4 ? (char) 0 : aminoAcids[aminoAcidIdx - 4];
+                //var neighborM4 = aminoAcidIdx < 4 ? (char) 0 : aminoAcids[aminoAcidIdx - 4];
                 var neighborM1 = aminoAcidIdx < 4 ? (char) 0 : aminoAcids[aminoAcidIdx - 1];
                 var neighborP1 = aminoAcidIdx + 4 >= aminoAcids.Count ? (char) 0 : aminoAcids[aminoAcidIdx + 1];
                 var neighborP4 = aminoAcidIdx + 4 >= aminoAcids.Count ? (char) 0 : aminoAcids[aminoAcidIdx + 4];
 
-                var totalAffinity = 0.0;
-                if(neighborM4 != 0)
-                {
-                    var pairCode = BuildAminoAcidPair(aminoAcid, neighborM4);
-                    if(bondAffinityLookup.ContainsKey(pairCode))
-                    {
-                        totalAffinity += fourthNeighborInfluence * bondAffinityLookup[pairCode];
-                    }
-                }
+                var localAffinity = 0.0;
+                //if(neighborM4 != 0)
+                //{
+                //    var pairCode = BuildAminoAcidPair(aminoAcid, neighborM4);
+                //    if(bondAffinityLookup.ContainsKey(pairCode))
+                //    {
+                //        localAffinity += fourthNeighborInfluence * bondAffinityLookup[pairCode];
+                //    }
+                //}
                 if (neighborM1 != 0)
                 {
                     var pairCode = BuildAminoAcidPair(aminoAcid, neighborM1);
                     if (bondAffinityLookup.ContainsKey(pairCode))
                     {
-                        totalAffinity += directNeighborInfluence*bondAffinityLookup[pairCode];
+                        localAffinity += directNeighborInfluence*bondAffinityLookup[pairCode];
                     }
                 }
                 if (neighborP1 != 0)
@@ -164,7 +220,7 @@ namespace Studies
                     var pairCode = BuildAminoAcidPair(aminoAcid, neighborP1);
                     if (bondAffinityLookup.ContainsKey(pairCode))
                     {
-                        totalAffinity += directNeighborInfluence * bondAffinityLookup[pairCode];
+                        localAffinity += directNeighborInfluence * bondAffinityLookup[pairCode];
                     }
                 }
                 if (neighborP4 != 0)
@@ -172,15 +228,17 @@ namespace Studies
                     var pairCode = BuildAminoAcidPair(aminoAcid, neighborP4);
                     if (bondAffinityLookup.ContainsKey(pairCode))
                     {
-                        totalAffinity += fourthNeighborInfluence * bondAffinityLookup[pairCode];
+                        localAffinity += fourthNeighborInfluence * bondAffinityLookup[pairCode];
                     }
                 }
-                classification.Add(totalAffinity);
+                totalAffinity.Add(localAffinity);
             }
+            const int WindowSize = 21;
+            var classification = totalAffinity.MovingAverage(WindowSize).ToList();
             return classification;
         }
 
-        private string BuildAminoAcidPair(char code1, char code2)
+        private static string BuildAminoAcidPair(char code1, char code2)
         {
             if (code1 < code2)
                 return string.Empty + code1 + code2;
