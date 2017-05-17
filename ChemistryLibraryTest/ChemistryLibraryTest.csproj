@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Measurements\AminoAcidAngleMeasurerTest.cs" />
+    <Compile Include="Measurements\CompactnessMeasurerTest.cs" />
     <Compile Include="Pdb\AminoAcidAtomNamerTest.cs" />
     <Compile Include="ApproximatePeptideTest.cs" />
     <Compile Include="MoleculeDynamicsRunner.cs" />

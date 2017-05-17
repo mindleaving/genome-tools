@@ -34,6 +34,10 @@
       <HintPath>..\packages\MathNet.Numerics.3.17.0\lib\net40\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="MIConvexHull.NET Standard, Version=1.0.17.411, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MIConvexHull.1.1.17.0411\lib\netstandard1.0\MIConvexHull.NET Standard.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,6 +70,7 @@
     <Compile Include="ForceCalculator.cs" />
     <Compile Include="IsotopeTable.cs" />
     <Compile Include="Measurements\AminoAcidAngleMeasurer.cs" />
+    <Compile Include="Measurements\CompactnessMeasurer.cs" />
     <Compile Include="Molecule.cs" />
     <Compile Include="MoleculeBuilder.cs" />
     <Compile Include="MoleculeDynamicsSimulator.cs" />
@@ -102,7 +107,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="MIConvexHull.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
