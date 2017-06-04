@@ -1,4 +1,6 @@
-﻿namespace ChemistryLibrary.Pdb
+﻿using ChemistryLibrary.Objects;
+
+namespace ChemistryLibrary.Pdb
 {
     public class PdbAtomLine
     {

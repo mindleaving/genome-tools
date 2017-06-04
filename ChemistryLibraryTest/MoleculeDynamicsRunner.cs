@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using ChemistryLibrary;
+using ChemistryLibrary.Builders;
+using ChemistryLibrary.Extensions;
+using ChemistryLibrary.Simulation;
 using Commons;
 using NUnit.Framework;
 

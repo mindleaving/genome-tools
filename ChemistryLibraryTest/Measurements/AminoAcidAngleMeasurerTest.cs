@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using ChemistryLibrary;
+using ChemistryLibrary.Builders;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Pdb;
 using Commons;
@@ -43,8 +44,7 @@ namespace ChemistryLibraryTest.Measurements
             C2.Position = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 200, 200, 100);
             C2.IsPositionFixed = true;
 
-            var sut = new AminoAcidAngleMeasurer();
-            var measurements = sut.MeasureAngles(peptide);
+            var measurements = AminoAcidAngleMeasurer.MeasureAngles(peptide);
 
             Assert.That(measurements.ContainsKey(firstAminoAcid));
             Assert.That(measurements.ContainsKey(lastAminoAcid));

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary;
+using ChemistryLibrary.Objects;
+using ChemistryLibrary.Simulation;
 using Commons;
 
 namespace MoleculeViewer

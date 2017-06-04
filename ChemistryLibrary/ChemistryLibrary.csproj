@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics, Version=3.17.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.3.17.0\lib\net40\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=3.19.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.3.19.0\lib\net40\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="MIConvexHull.NET Standard, Version=1.0.17.411, Culture=neutral, processorArchitecture=MSIL">
@@ -48,40 +48,42 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AminoAcidExtensions.cs" />
-    <Compile Include="AminoAcidLibrary.cs" />
-    <Compile Include="AminoAcidName.cs" />
-    <Compile Include="AminoAcidReference.cs" />
-    <Compile Include="ApproximatedAminoAcid.cs" />
-    <Compile Include="ApproximatePeptide.cs" />
-    <Compile Include="ApproximatePeptideCompleter.cs" />
-    <Compile Include="Atom.cs" />
-    <Compile Include="AtomConnector.cs" />
-    <Compile Include="AtomNeighborhoodMap.cs" />
-    <Compile Include="AtomPropertyCalculator.cs" />
-    <Compile Include="Bond.cs" />
-    <Compile Include="BondLengthCalculator.cs" />
-    <Compile Include="ChemistryException.cs" />
-    <Compile Include="CustomAtomForce.cs" />
-    <Compile Include="Electron.cs" />
-    <Compile Include="ElementMap.cs" />
-    <Compile Include="ElementName.cs" />
-    <Compile Include="ElementSymbol.cs" />
-    <Compile Include="ForceCalculator.cs" />
-    <Compile Include="IsotopeTable.cs" />
+    <Compile Include="Builders\ApproximateAminoAcidPositioner.cs" />
+    <Compile Include="Builders\ApproximatePeptideBuilder.cs" />
+    <Compile Include="Builders\OrbitalGenerator.cs" />
+    <Compile Include="Extensions\AminoAcidExtensions.cs" />
+    <Compile Include="Builders\AminoAcidLibrary.cs" />
+    <Compile Include="Objects\AminoAcidName.cs" />
+    <Compile Include="Objects\AminoAcidReference.cs" />
+    <Compile Include="Objects\ApproximatedAminoAcid.cs" />
+    <Compile Include="Objects\ApproximatePeptide.cs" />
+    <Compile Include="Builders\ApproximatePeptideCompleter.cs" />
+    <Compile Include="Objects\Atom.cs" />
+    <Compile Include="Builders\AtomConnector.cs" />
+    <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
+    <Compile Include="Simulation\AtomNeighborhoodMap.cs" />
+    <Compile Include="Objects\Bond.cs" />
+    <Compile Include="Objects\ChemistryException.cs" />
+    <Compile Include="Simulation\CustomAtomForce.cs" />
+    <Compile Include="Objects\Electron.cs" />
+    <Compile Include="DataLookups\ElementMap.cs" />
+    <Compile Include="Objects\ElementName.cs" />
+    <Compile Include="Objects\ElementSymbol.cs" />
+    <Compile Include="Simulation\ForceCalculator.cs" />
+    <Compile Include="DataLookups\IsotopeTable.cs" />
     <Compile Include="Measurements\AminoAcidAngleMeasurer.cs" />
+    <Compile Include="Measurements\AtomPropertyCalculator.cs" />
+    <Compile Include="Measurements\BondLengthCalculator.cs" />
     <Compile Include="Measurements\CompactnessMeasurer.cs" />
-    <Compile Include="Molecule.cs" />
-    <Compile Include="MoleculeBuilder.cs" />
-    <Compile Include="MoleculeDynamicsSimulator.cs" />
-    <Compile Include="MoleculeExtensions.cs" />
-    <Compile Include="MoleculeLibrary.cs" />
-    <Compile Include="MoleculePositioner.cs" />
-    <Compile Include="MoleculeReference.cs" />
-    <Compile Include="NBodyForceCalculator.cs" />
-    <Compile Include="Orbital.cs" />
-    <Compile Include="OrbitalComparer.cs" />
-    <Compile Include="OrbitalGenerator.cs" />
+    <Compile Include="Objects\Molecule.cs" />
+    <Compile Include="Builders\MoleculeBuilder.cs" />
+    <Compile Include="Extensions\MoleculeExtensions.cs" />
+    <Compile Include="Builders\MoleculeLibrary.cs" />
+    <Compile Include="Builders\MoleculePositioner.cs" />
+    <Compile Include="Objects\MoleculeReference.cs" />
+    <Compile Include="Simulation\NBodyForceCalculator.cs" />
+    <Compile Include="Objects\Orbital.cs" />
+    <Compile Include="Objects\OrbitalComparer.cs" />
     <Compile Include="Pdb\OffsetSequenceMatcher.cs" />
     <Compile Include="Pdb\PdbAminoAcidAtomNamer.cs" />
     <Compile Include="Pdb\PdbSheetLine.cs" />
@@ -89,14 +91,18 @@
     <Compile Include="Pdb\PdbHelixLine.cs" />
     <Compile Include="Pdb\PdbReader.cs" />
     <Compile Include="Pdb\PdbSerializer.cs" />
-    <Compile Include="Peptide.cs" />
-    <Compile Include="PeptideBuilder.cs" />
-    <Compile Include="PeriodicTable.cs" />
-    <Compile Include="PhysicalConstants.cs" />
-    <Compile Include="PhysicsException.cs" />
+    <Compile Include="Objects\Peptide.cs" />
+    <Compile Include="Builders\PeptideBuilder.cs" />
+    <Compile Include="DataLookups\PeriodicTable.cs" />
+    <Compile Include="DataLookups\PhysicalConstants.cs" />
+    <Compile Include="Objects\PhysicsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpherePointDistributor.cs" />
-    <Compile Include="SpinType.cs" />
+    <Compile Include="Simulation\MoleculeDynamicsSimulationSettings.cs" />
+    <Compile Include="Simulation\MoleculeDynamicsSimulator.cs" />
+    <Compile Include="Builders\SpherePointDistributor.cs" />
+    <Compile Include="Objects\SpinType.cs" />
+    <Compile Include="Simulation\RamachadranForceCalculator.cs" />
+    <Compile Include="Simulation\RamachandranPlotDistribution.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Commons\Commons.csproj">
@@ -110,6 +116,7 @@
   <ItemGroup>
     <Content Include="MIConvexHull.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

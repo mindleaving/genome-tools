@@ -1,0 +1,22 @@
+﻿using Commons;
+
+namespace ChemistryLibrary.Objects
+{
+    public class ApproximatedAminoAcid
+    {
+        public ApproximatedAminoAcid(AminoAcidName aminoAcidName)
+        {
+            Name = aminoAcidName;
+        }
+
+        public UnitPoint3D NitrogenPosition { get; set; }
+        public UnitPoint3D CarbonAlphaPosition { get; set; }
+        public UnitPoint3D CarbonPosition { get; set; }
+        public UnitValue OmegaAngle { get; set; }
+        public UnitValue PhiAngle { get; set; }
+        public UnitValue PsiAngle { get; set; }
+        public AminoAcidName Name { get; }
+
+        public bool IsFrozen { get; set; }
+    }
+}

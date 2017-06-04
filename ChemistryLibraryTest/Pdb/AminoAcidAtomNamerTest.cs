@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using ChemistryLibrary;
+using ChemistryLibrary.Builders;
+using ChemistryLibrary.Objects;
 using ChemistryLibrary.Pdb;
 using NUnit.Framework;
 

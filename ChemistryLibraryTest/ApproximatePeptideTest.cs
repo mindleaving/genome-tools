@@ -1,5 +1,7 @@
 ﻿using ChemistryLibrary;
+using ChemistryLibrary.Builders;
 using ChemistryLibrary.Measurements;
+using ChemistryLibrary.Objects;
 using Commons;
 using NUnit.Framework;
 
@@ -11,7 +13,7 @@ namespace ChemistryLibraryTest
         [Test]
         public void ApproximatePeptidePositioningTest()
         {
-            var peptide = new ApproximatePeptide(new string('A', 3));
+            var peptide = ApproximatePeptideBuilder.FromSequence(new string('A', 3));
             Assert.That(peptide.AminoAcids.Count, Is.EqualTo(3));
         }
 
@@ -31,8 +33,7 @@ namespace ChemistryLibraryTest
                 PsiAngle = 0.To(Unit.Degree)
             };
             var peptide = new ApproximatePeptide(new [] { aminoAcid1, aminoAcid2});
-            var angleMeasurer = new AminoAcidAngleMeasurer();
-            var angles = angleMeasurer.MeasureAngles(peptide);
+            var angles = AminoAcidAngleMeasurer.MeasureAngles(peptide);
             var aminoAcid1Angles = angles[aminoAcid1];
             var aminoAcid2Angles = angles[aminoAcid2];
 

@@ -6,8 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using ChemistryLibrary;
+using ChemistryLibrary.Builders;
+using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
+using ChemistryLibrary.Objects;
 using ChemistryLibrary.Pdb;
+using ChemistryLibrary.Simulation;
 using Commons;
 
 namespace MoleculeViewer
@@ -62,9 +66,8 @@ namespace MoleculeViewer
             var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5hhe.pdb";
             var result = PdbReader.ReadFile(filename);
             var peptide = result.Chains.First();
-            var angleMeasurerer = new AminoAcidAngleMeasurer();
-            var angleMeasurement = angleMeasurerer.MeasureAngles(peptide);
-            var approximatePeptide = new ApproximatePeptide(peptide.AminoAcids.Select(aa => aa.Name).ToList());
+            var angleMeasurement = AminoAcidAngleMeasurer.MeasureAngles(peptide);
+            var approximatePeptide = ApproximatePeptideBuilder.FromSequence(peptide.AminoAcids.Select(aa => aa.Name).ToList());
             for (int aminoAcidIdx = 0; aminoAcidIdx < approximatePeptide.AminoAcids.Count; aminoAcidIdx++)
             {
                 var aminoAcid = approximatePeptide.AminoAcids[aminoAcidIdx];

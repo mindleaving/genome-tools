@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using ChemistryLibrary.Builders;
+using ChemistryLibrary.Extensions;
+using ChemistryLibrary.Objects;
 using Commons;
 
 namespace ChemistryLibrary.Pdb

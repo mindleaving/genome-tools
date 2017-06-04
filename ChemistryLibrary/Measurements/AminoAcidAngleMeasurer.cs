@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ChemistryLibrary.Objects;
 using ChemistryLibrary.Pdb;
 using Commons;
 
@@ -10,9 +11,9 @@ namespace ChemistryLibrary.Measurements
         public UnitValue Phi { get; set; }
         public UnitValue Psi { get; set; }
     }
-    public class AminoAcidAngleMeasurer
+    public static class AminoAcidAngleMeasurer
     {
-        public Dictionary<AminoAcidReference, AminoAcidAngles> MeasureAngles(Peptide peptide)
+        public static Dictionary<AminoAcidReference, AminoAcidAngles> MeasureAngles(Peptide peptide)
         {
             var measurements = new Dictionary<AminoAcidReference, AminoAcidAngles>();
             AminoAcidAngles lastAngles = null;
@@ -90,7 +91,7 @@ namespace ChemistryLibrary.Measurements
             return measurements;
         }
 
-        public Dictionary<ApproximatedAminoAcid, AminoAcidAngles> MeasureAngles(ApproximatePeptide peptide)
+        public static Dictionary<ApproximatedAminoAcid, AminoAcidAngles> MeasureAngles(ApproximatePeptide peptide)
         {
             var measurements = new Dictionary<ApproximatedAminoAcid, AminoAcidAngles>();
             AminoAcidAngles lastAngles = null;
@@ -158,7 +159,7 @@ namespace ChemistryLibrary.Measurements
             return measurements;
         }
 
-        public UnitValue CalculateDihedralAngle(UnitPoint3D point1, 
+        public static UnitValue CalculateDihedralAngle(UnitPoint3D point1, 
             UnitPoint3D point2, 
             UnitPoint3D point3, 
             UnitPoint3D point4)

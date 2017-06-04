@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary;
+using ChemistryLibrary.Builders;
 using Commons;
 using NUnit.Framework;
 

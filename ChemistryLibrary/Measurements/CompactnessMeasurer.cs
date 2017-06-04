@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ChemistryLibrary.Objects;
 using Commons;
 using MIConvexHull;
 
@@ -23,7 +24,7 @@ namespace ChemistryLibrary.Measurements
 
         private static double CalculateVolume(ConvexHull<Vertex3D, DefaultConvexFace<Vertex3D>> convexHull)
         {
-            var oneThird = 1.0/3.0;
+            const double oneThird = 1.0/3.0;
             var volume = 0.0;
             var origin = convexHull.Points.First().Point;
             foreach (var face in convexHull.Faces)

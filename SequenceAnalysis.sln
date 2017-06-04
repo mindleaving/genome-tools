@@ -5,8 +5,6 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SequenceAnalysis", "SequenceAnalysis\SequenceAnalysis.csproj", "{0FF51782-DB60-4A66-AA42-83C095F292FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastaSplitter", "FastaSplitter\FastaSplitter.csproj", "{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChromosomeImageGenerator", "ChromosomeImageGenerator\ChromosomeImageGenerator.csproj", "{B375B1E6-B286-4B56-814D-8919D4100DE9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeptideAligner", "PeptideAligner\PeptideAligner.csproj", "{F4E81D40-64A1-4A88-9A85-9C61C96CB09E}"
@@ -33,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChemistryLibraryTest", "Che
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Studies", "Studies\Studies.csproj", "{73032AAF-A48E-4138-8B83-D56E56EDF0D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj", "{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,10 +43,6 @@ Global
 		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FF51782-DB60-4A66-AA42-83C095F292FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F6088E8-3F36-4AC9-87B2-7F10E8E359D6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B375B1E6-B286-4B56-814D-8919D4100DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -99,6 +95,10 @@ Global
 		{73032AAF-A48E-4138-8B83-D56E56EDF0D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73032AAF-A48E-4138-8B83-D56E56EDF0D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73032AAF-A48E-4138-8B83-D56E56EDF0D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
