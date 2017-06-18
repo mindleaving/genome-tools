@@ -7,8 +7,20 @@ namespace ChemistryLibrary.Measurements
 {
     public class AminoAcidAngles
     {
+        /// <summary>
+        /// Dihedral angle of nitrogen and alpha-carbon of current amino acid
+        /// with carbons from PREVIOUS amino acid
+        /// </summary>
         public UnitValue Omega { get; set; }
+        /// <summary>
+        /// Dihedral angle of carbon of previous amino acid and nitrogen of current amino acid
+        /// with alpha-carbon and carbon of current amino acid
+        /// </summary>
         public UnitValue Phi { get; set; }
+        /// <summary>
+        /// Dihedral angle of nitrogen and alpha-carbon of current amino acid
+        /// with carbon of current amino acid and nitrogen of next amino acid
+        /// </summary>
         public UnitValue Psi { get; set; }
     }
     public static class AminoAcidAngleMeasurer

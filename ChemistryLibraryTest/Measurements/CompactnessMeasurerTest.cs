@@ -29,8 +29,11 @@ namespace ChemistryLibraryTest.Measurements
             aa3.CarbonAlphaPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0, 0, 1);
             aa3.CarbonPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0.5, 0.5, 0.5);
 
-            var volume = CompactnessMeasurer.Measure(peptide);
-            Assert.That(volume, Is.EqualTo(1).Within(1e-6));
+            var result = CompactnessMeasurer.Measure(peptide);
+            var volume = result.Volume.Value;
+            var picoMultiplier = SIPrefix.Pico.GetMultiplier();
+            var cubicPicoMultiplier = picoMultiplier * picoMultiplier * picoMultiplier;
+            Assert.That(volume / cubicPicoMultiplier, Is.EqualTo(1).Within(1e-6));
         }
     }
 }

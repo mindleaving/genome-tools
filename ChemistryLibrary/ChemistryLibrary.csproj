@@ -60,10 +60,12 @@
     <Compile Include="Builders\ApproximatePeptideCompleter.cs" />
     <Compile Include="Objects\Atom.cs" />
     <Compile Include="Builders\AtomConnector.cs" />
+    <Compile Include="Simulation\ApproximateAminoAcidForces.cs" />
     <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
     <Compile Include="Simulation\AtomNeighborhoodMap.cs" />
     <Compile Include="Objects\Bond.cs" />
     <Compile Include="Objects\ChemistryException.cs" />
+    <Compile Include="Simulation\CompactingForceCalculator.cs" />
     <Compile Include="Simulation\CustomAtomForce.cs" />
     <Compile Include="Objects\Electron.cs" />
     <Compile Include="DataLookups\ElementMap.cs" />

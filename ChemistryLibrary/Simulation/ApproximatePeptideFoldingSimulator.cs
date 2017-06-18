@@ -35,7 +35,7 @@ namespace ChemistryLibrary.Simulation
                 var cancellationToken = cancellationTokenSource.Token;
                 SimulationTask = Task.Run(() => RunSimulation(simulationSettings, cancellationToken), cancellationToken);
                 IsSimulating = true;
-            }            
+            }
         }
 
         public void StopSimulation()
@@ -56,14 +56,31 @@ namespace ChemistryLibrary.Simulation
             CancellationToken cancellationToken)
         {
             var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var compactnessForceCalculator = new CompactingForceCalculator();
             var ramachadranForceCalculator = new RamachadranForceCalculator(ramachadranDataDirectory);
 
             var simulationTime = simulationSettings.SimulationTime;
             var dT = simulationSettings.TimeStep;
             for (CurrentTime = 0.To(Unit.Second); CurrentTime < simulationTime; CurrentTime += dT)
             {
-                var compactness = CompactnessMeasurer.Measure(Peptide);
+                var compactnessMeasurerResult = CompactnessMeasurer.Measure(Peptide);
+                var compactnessForces = compactnessForceCalculator.Calculate(compactnessMeasurerResult);
                 var ramachandranForces = ramachadranForceCalculator.CalculateForce(Peptide);
+                foreach (var aminoAcid in Peptide.AminoAcids)
+                {
+                    var resultingForce = new ApproximateAminoAcidForces();
+                    if(compactnessForces.ContainsKey(aminoAcid))
+                    {
+                        var compactnessForce = compactnessForces[aminoAcid];
+                        resultingForce += compactnessForce;
+                    }
+                    if (ramachandranForces.ContainsKey(aminoAcid))
+                    {
+                        var ramachandranForce = ramachandranForces[aminoAcid];
+                        resultingForce += ramachandranForce;
+                    }
+
+                }
             }
         }
 
@@ -73,13 +90,6 @@ namespace ChemistryLibrary.Simulation
             cancellationTokenSource?.Dispose();
             SimulationTask?.Dispose();
         }
-    }
-
-    public class ApproximateAminoAcidForces
-    {
-        public UnitVector3D NitrogenForce { get; set; }
-        public UnitVector3D CarbonAlphaForce { get; set; }
-        public UnitVector3D CarbonForce { get; set; }
     }
 
     public class ApproximatePeptideSimulationSettings : MoleculeDynamicsSimulationSettings
