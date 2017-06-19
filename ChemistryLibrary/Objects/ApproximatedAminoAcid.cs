@@ -18,6 +18,9 @@ namespace ChemistryLibrary.Objects
         public UnitPoint3D NitrogenPosition { get; set; }
         public UnitPoint3D CarbonAlphaPosition { get; set; }
         public UnitPoint3D CarbonPosition { get; set; }
+        public UnitVector3D NitrogenVelocity { get; set; }
+        public UnitVector3D CarbonAlphaVelocity { get; set; }
+        public UnitVector3D CarbonVelocity { get; set; }
         public UnitValue OmegaAngle { get; set; }
         public UnitValue PhiAngle { get; set; }
         public UnitValue PsiAngle { get; set; }
