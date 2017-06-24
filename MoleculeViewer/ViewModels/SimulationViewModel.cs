@@ -1,8 +1,9 @@
 ﻿using System.Windows.Input;
 using ChemistryLibrary.Simulation;
 using Commons;
+using Commons.Wpf;
 
-namespace MoleculeViewer
+namespace MoleculeViewer.ViewModels
 {
     public class SimulationViewModel : ViewModelBase
     {

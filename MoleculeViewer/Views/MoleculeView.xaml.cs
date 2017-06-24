@@ -2,15 +2,17 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MoleculeViewer.ViewModels;
 
-namespace MoleculeViewer
+namespace MoleculeViewer.Views
 {
     /// <summary>
     /// Interaction logic for MoleculeView.xaml
     /// </summary>
     public partial class MoleculeView : UserControl
     {
-        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register("ViewModel", typeof(MoleculeViewModel), typeof(MoleculeView), new PropertyMetadata(default(MoleculeViewModel)));
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register("ViewModel", 
+            typeof(MoleculeViewModel), typeof(MoleculeView), new PropertyMetadata(default(MoleculeViewModel)));
 
         public MoleculeView()
         {

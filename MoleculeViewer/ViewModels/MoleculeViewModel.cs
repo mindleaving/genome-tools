@@ -5,13 +5,13 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using ChemistryLibrary;
 using ChemistryLibrary.Objects;
 using Commons;
+using Commons.Wpf;
 using Point3D = System.Windows.Media.Media3D.Point3D;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
-namespace MoleculeViewer
+namespace MoleculeViewer.ViewModels
 {
     public class MoleculeViewModel : Viewport3DBase
     {

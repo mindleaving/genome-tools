@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using MoleculeViewer.Annotations;
 
-namespace MoleculeViewer
+namespace MoleculeViewer.ViewModels
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

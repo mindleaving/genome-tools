@@ -54,6 +54,8 @@
     <Compile Include="DataLookups\AminoAcidSideChainMassLookup.cs" />
     <Compile Include="Extensions\AminoAcidExtensions.cs" />
     <Compile Include="Builders\AminoAcidLibrary.cs" />
+    <Compile Include="IO\Aminoseq\AminoseqReader.cs" />
+    <Compile Include="IO\PeptideLoader.cs" />
     <Compile Include="Objects\AminoAcidName.cs" />
     <Compile Include="Objects\AminoAcidReference.cs" />
     <Compile Include="Objects\ApproximatedAminoAcid.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="Objects\Bond.cs" />
     <Compile Include="Objects\ChemistryException.cs" />
     <Compile Include="Simulation\BondForceCalculator.cs" />
+    <Compile Include="Simulation\ChargeRedistributor.cs" />
     <Compile Include="Simulation\CompactingForceCalculator.cs" />
     <Compile Include="Simulation\CustomAtomForce.cs" />
     <Compile Include="Objects\Electron.cs" />
