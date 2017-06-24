@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,12 +18,15 @@ namespace MoleculeViewer.ViewModels
     {
         private const double DimensionScaling = 1e12;
 
+        private List<Atom> atoms;
         private ModelVisual3D moleculeModel;
+        private readonly TrapLatch updateModelLatch;
+        private int modelUpdatedCount;
+        private ICommand resetViewCommand;
         // ###############################
         // NOTE ON UNITS: ALL POSITIONS AND SIZES ARE IN PICOMETER
         // ###############################
 
-        public Molecule Molecule { get; }
         public ModelVisual3D MoleculeModel
         {
             get { return moleculeModel; }
@@ -32,6 +36,8 @@ namespace MoleculeViewer.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public event EventHandler MoleculeHasChanged;
 
         public int ModelUpdatedCount
         {
@@ -49,38 +55,45 @@ namespace MoleculeViewer.ViewModels
             set { resetViewCommand = value; OnPropertyChanged(); }
         }
 
-        public event EventHandler MoleculeHasChanged;
-        private readonly TrapLatch updateModelLatch;
-        private int modelUpdatedCount;
-        private ICommand resetViewCommand;
-
-        public MoleculeViewModel(Molecule molecule)
+        public MoleculeViewModel()
         {
-            Molecule = molecule;
             updateModelLatch = new TrapLatch(
-                obj => { }, 
-                obj => Application.Current.Dispatcher.BeginInvoke(new Action(() => BuildModel((Molecule)obj))),
+                obj => { },
+                obj => Application.Current.Dispatcher.BeginInvoke(new Action(() => DrawAtomsImpl((IEnumerable<Atom>)obj))),
                 obj => { })
             {
                 State = TrapLatch.LatchState.Trapping
             };
-
-            BuildModel(molecule);
-            Camera = new PerspectiveCamera();
-            SetCameraPosition(molecule);
-
             ResetViewCommand = new RelayCommand(ResetView);
         }
 
         public void ResetView()
         {
-            SetCameraPosition(Molecule);
+            if(atoms != null)
+                SetCameraPosition();
         }
 
-        private void BuildModel(Molecule molecule)
+        public void DrawAtoms(IEnumerable<Atom> newAtoms)
         {
+            updateModelLatch.Invoke(newAtoms);
+        }
+
+        private void DrawAtomsImpl(IEnumerable<Atom> newAtoms)
+        {
+            var atomCountBefore = atoms?.Count ?? 0;
+            atoms = newAtoms.ToList();
+            var atomCountAfter = atoms.Count;
+            BuildModel();
+            if(atomCountBefore != atomCountAfter)
+                SetCameraPosition();
+        }
+
+        private void BuildModel()
+        {
+            if (atoms == null || !atoms.Any())
+                return;
             var modelContent = new Model3DGroup();
-            foreach (var atom in molecule.Atoms)
+            foreach (var atom in atoms.Where(atom => atom.Position != null))
             {
                 var atomSphere = ConstructAtom(atom);
                 modelContent.Children.Add(atomSphere);
@@ -90,13 +103,16 @@ namespace MoleculeViewer.ViewModels
             modelContent.Children.Add(lightSource1);
             modelContent.Children.Add(lightSource2);
             MoleculeModel = new ModelVisual3D {Content = modelContent};
-            OnMoleculeHasChanged();
+            ModelUpdatedCount++;
+            MoleculeHasChanged?.Invoke(this, EventArgs.Empty);
             Task.Delay(100).ContinueWith(task => updateModelLatch.State = TrapLatch.LatchState.Trapping);
         }
 
-        private void SetCameraPosition(Molecule molecule)
+        private void SetCameraPosition()
         {
-            var atomPositions = molecule.Atoms.Select(atom => DimensionScaling*atom.Position).ToList();
+            if(atoms == null || !atoms.Any())
+                return;
+            var atomPositions = atoms.Select(atom => DimensionScaling*atom.Position).ToList();
             var xMinMax = new MinMaxMean(atomPositions.Select(p => p.X));
             var yMinMax = new MinMaxMean(atomPositions.Select(p => p.Y));
             var zMinMax = new MinMaxMean(atomPositions.Select(p => p.Z));
@@ -109,15 +125,6 @@ namespace MoleculeViewer.ViewModels
                 moleculeCenter.Z - position.Z);
             Camera.UpDirection = new Vector3D(0, 1, 0);
             Camera.FieldOfView = 60;
-        }
-
-        public void MoleculeHasBeenUpdated()
-        {
-            if(Application.Current?.Dispatcher == null 
-                || Application.Current.Dispatcher.HasShutdownStarted)
-                return;
-            ModelUpdatedCount++;
-            updateModelLatch.Invoke(Molecule);            
         }
 
         private GeometryModel3D ConstructAtom(Atom atom)
@@ -251,11 +258,6 @@ namespace MoleculeViewer.ViewModels
             if (!atomIsBackbone)
                 color.A = 0x55;
             return color;
-        }
-
-        private void OnMoleculeHasChanged()
-        {
-            MoleculeHasChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

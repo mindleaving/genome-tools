@@ -44,7 +44,7 @@ namespace ChemistryLibrary.Simulation
                 var plotDistribution = ramachadranPlotDistributions[aminoAcid.Name];
                 var aminoAcidAngles = aminoAcidAnglesDictionary[aminoAcid];
 
-                if (aminoAcidAngles.Omega != null)
+                if (aminoAcidAngles.Omega != null && !aminoAcidAngles.Omega.Value.IsNaN())
                 {
                     ApplyOmegaDeviationForce(previousAminoAcid, aminoAcid, aminoAcidAngles, forceDictionary);
                 }
@@ -63,11 +63,11 @@ namespace ChemistryLibrary.Simulation
 
         private static void ApplyOmegaDeviationForce(ApproximatedAminoAcid lastAminoAcid, ApproximatedAminoAcid aminoAcid, AminoAcidAngles aminoAcidAngles, Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> forceDictionary)
         {
+            if (lastAminoAcid == null)
+                return;
             var omegaDeviation = aminoAcidAngles.Omega.In(Unit.Degree) < 0
                 ? -180 - aminoAcidAngles.Omega.In(Unit.Degree)
                 : 180 - aminoAcidAngles.Omega.In(Unit.Degree);
-            if(lastAminoAcid == null)
-                return;
 
             if (!forceDictionary.ContainsKey(aminoAcid))
                 forceDictionary.Add(aminoAcid, new ApproximateAminoAcidForces());

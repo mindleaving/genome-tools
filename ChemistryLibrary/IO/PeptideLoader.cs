@@ -14,10 +14,10 @@ namespace ChemistryLibrary.IO
             var extension = Path.GetExtension(filename).ToLowerInvariant();
             switch (extension)
             {
-                case "pdb":
+                case ".pdb":
                     var result = PdbReader.ReadFile(filename);
                     return result.Chains.First();
-                case "aminoseq":
+                case ".aminoseq":
                     return AminoseqReader.ReadFile(filename);
                 default:
                     throw new ArgumentException($"File extension '{extension}' is unsupported");

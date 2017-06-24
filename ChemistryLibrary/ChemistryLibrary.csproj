@@ -63,6 +63,8 @@
     <Compile Include="Builders\ApproximatePeptideCompleter.cs" />
     <Compile Include="Objects\Atom.cs" />
     <Compile Include="Builders\AtomConnector.cs" />
+    <Compile Include="Objects\PeptideAnnotation.cs" />
+    <Compile Include="Objects\PeptideSecondaryStructure.cs" />
     <Compile Include="Simulation\ApproximateAminoAcidForces.cs" />
     <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
     <Compile Include="Simulation\ApproximatePeptideSimulationSettings.cs" />

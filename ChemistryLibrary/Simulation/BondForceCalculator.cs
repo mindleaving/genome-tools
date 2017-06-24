@@ -53,7 +53,7 @@ namespace ChemistryLibrary.Simulation
         private UnitVector3D CalculateBondForce(UnitPoint3D atom1Position, UnitPoint3D atom2Position, UnitValue equilibriumBondLength)
         {
             // Settings
-            const double bondSpringConstant = 1e6;
+            const double bondSpringConstant = 1e5;
 
             var atomDistance = atom1Position.DistanceTo(atom2Position);
             var deviationFromEquilibrium = atomDistance - equilibriumBondLength;

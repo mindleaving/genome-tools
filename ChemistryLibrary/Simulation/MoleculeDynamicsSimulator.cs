@@ -97,7 +97,7 @@ namespace ChemistryLibrary.Simulation
                         break;
                 }
                 currentAtomPositions = newAtomPositions;
-                OnTimestepCompleted(new SimulationTimestepCompleteEventArgs(t, null));
+                OnTimestepCompleted(new SimulationTimestepCompleteEventArgs(t, Molecule));
             }
             OnSimulationFinished();
         }

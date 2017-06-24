@@ -5,7 +5,7 @@ using ChemistryLibrary.Objects;
 
 namespace ChemistryLibrary.IO.Aminoseq
 {
-    public class AminoseqReader
+    public static class AminoseqReader
     {
         public static Peptide ReadFile(string filename)
         {

@@ -105,7 +105,8 @@ namespace ChemistryLibrary.Simulation
             UnitValue timeStepSize,
             UnitValue reservoirTemperature)
         {
-            var nitrogenForce = resultingForces.NitrogenForce;
+            var scaling = 1e-4;
+            var nitrogenForce = scaling*resultingForces.NitrogenForce;
             var nitrogenMass = PeriodicTable.GetSingleAtomMass(ElementName.Nitrogen);
             var nitrogenAcceleration = nitrogenForce / nitrogenMass;
             var nitrogenVelocityChange = nitrogenAcceleration * timeStepSize;
@@ -113,7 +114,7 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.NitrogenVelocity = InteractWithReservoir(aminoAcid.NitrogenVelocity, nitrogenMass, reservoirTemperature);
             aminoAcid.NitrogenPosition += aminoAcid.NitrogenVelocity * timeStepSize;
 
-            var carbonAlphaForce = resultingForces.CarbonAlphaForce;
+            var carbonAlphaForce = scaling * resultingForces.CarbonAlphaForce;
             var carbonAlphaMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon) + AminoAcidSideChainMassLookup.SideChainMasses[aminoAcid.Name];
             var carbonAlphaAcceleration = carbonAlphaForce / carbonAlphaMass;
             var carbonAlphaVelocityChange = carbonAlphaAcceleration * timeStepSize;
@@ -121,7 +122,7 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.CarbonAlphaVelocity = InteractWithReservoir(aminoAcid.CarbonAlphaVelocity, carbonAlphaMass, reservoirTemperature);
             aminoAcid.CarbonAlphaPosition += aminoAcid.CarbonAlphaVelocity * timeStepSize;
 
-            var carbonForce = resultingForces.CarbonForce;
+            var carbonForce = scaling * resultingForces.CarbonForce;
             var carbonMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon);
             var carbonAcceleration = carbonForce / carbonMass;
             var carbonVelocityChange = carbonAcceleration * timeStepSize;

@@ -3,14 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:moleculeViewer="clr-namespace:MoleculeViewer"
         xmlns:views="clr-namespace:MoleculeViewer.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
+        Title="Molecule viewer" Height="350" Width="525"
         Name="Self">
     <Window.InputBindings>
         <KeyBinding Key="R" Command="{Binding ElementName=Self, Path=MoleculeViewModel.ResetViewCommand}"></KeyBinding>
     </Window.InputBindings>
-    <views:MoleculeView ViewModel="{Binding ElementName=Self, Path=MoleculeViewModel}"/>
-    
+
+    <Grid DataContext="{Binding ElementName=Self}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <views:MoleculeView Grid.Row="0" ViewModel="{Binding MoleculeViewModel}"/>
+        <views:SimulationView Grid.Row="1" ViewModel="{Binding SimulationViewModel}"/>
+    </Grid>
 </Window>

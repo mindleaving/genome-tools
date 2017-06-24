@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="MoleculeViewer.Views.SimulationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="500"
+             Name="Self">
+    <Grid DataContext="{Binding ElementName=Self, Path=ViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Expander Grid.Row="0" Header="Settings">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Simulation time" Margin="2" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="0" Margin="2" Text="{Binding SimulationTime}"/>
+
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Time step" Margin="2" VerticalAlignment="Center"/>
+                <TextBox Grid.Column="1" Grid.Row="1" Margin="2" Text="{Binding TimeStep}"/>
+            </Grid>
+        </Expander>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Command="{Binding StartSimulationCommand}" Content="Start simulation" Margin="2"/>
+            <Button Command="{Binding StopSimulationCommand}" Content="Stop simulation" Margin="2"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

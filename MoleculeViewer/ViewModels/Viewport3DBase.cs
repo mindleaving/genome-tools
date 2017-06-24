@@ -8,7 +8,7 @@ namespace MoleculeViewer.ViewModels
 {
     public abstract class Viewport3DBase : ViewModelBase
     {
-        private PerspectiveCamera camera;
+        private PerspectiveCamera camera = new PerspectiveCamera();
 
         public PerspectiveCamera Camera
         {
