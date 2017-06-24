@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AlphaHelixStrengthStudy.cs" />
     <Compile Include="ApproximatePeptideFoldingValidationStudy.cs" />
+    <Compile Include="MoleculeDynamicsStudy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

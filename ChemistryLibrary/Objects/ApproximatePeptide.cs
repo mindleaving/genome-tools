@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ChemistryLibrary.Builders;
 using Commons;
 
@@ -16,6 +17,11 @@ namespace ChemistryLibrary.Objects
         public void UpdatePositions()
         {
             ApproximateAminoAcidPositioner.Position(AminoAcids, new UnitPoint3D(Unit.Meter, 0, 0, 0));
+        }
+
+        public ApproximatePeptide DeepClone()
+        {
+            return new ApproximatePeptide(AminoAcids.Select(aa => aa.DeepClone()).ToList());
         }
     }
 }

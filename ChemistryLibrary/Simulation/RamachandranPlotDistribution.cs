@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using ChemistryLibrary.Measurements;
@@ -28,13 +29,20 @@ namespace ChemistryLibrary.Simulation
         {
             var distribution = new double[gridSteps, gridSteps];
             var probabilityDensitySum = 0.0;
-            for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
+            for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
             {
-                for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
+                for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
                 {
                     // Non-normalized probability density
                     var angles = GetAnglesFromGridPosition(new Point2D(phiStepIdx, psiStepIdx));
-                    var probabilityDensity = double.NaN; // TODO
+                    var prohibitedZonePhiCenter = -Math.Sin(2 * angles.Psi.In(Unit.Radians));
+                    var prohibitedZoneWidth = 60;
+
+                    var phi = angles.Phi.In(Unit.Degree);
+                    var distanceFromCenter = phi - prohibitedZonePhiCenter;
+                    var distanceSquared = distanceFromCenter * distanceFromCenter;
+                    var zoneWidthSquared = prohibitedZoneWidth * prohibitedZoneWidth;
+                    var probabilityDensity = (1.0 - Math.Exp(-distanceSquared/zoneWidthSquared));
 
                     distribution[psiStepIdx, phiStepIdx] = probabilityDensity;
                     probabilityDensitySum += probabilityDensity;
@@ -55,9 +63,9 @@ namespace ChemistryLibrary.Simulation
         {
             var gridSteps = distributionPlot.GetLength(0);
             var gradientPlot = new Vector2D[gridSteps, gridSteps];
-            for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
+            for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
             {
-                for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
+                for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
                 {
                     var leftPixel = phiStepIdx == 0
                         ? distributionPlot[psiStepIdx, gridSteps - 1]

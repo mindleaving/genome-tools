@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Simulation;
@@ -9,6 +10,8 @@ namespace Studies
 {
     public class ApproximatePeptideFoldingValidationStudy
     {
+        private readonly ManualResetEvent simulationWaitHandle = new ManualResetEvent(true);
+
         [Test]
         [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\5m9j.pdb")]
         public void ApproximatePeptideIsFoldedToKnownStableState(string pdbFilePath)
@@ -22,9 +25,23 @@ namespace Studies
                 SimulationTime = 10.To(SIPrefix.Pico, Unit.Second),
                 TimeStep = 2.To(SIPrefix.Femto, Unit.Second)
             };
-            var simulator = new ApproximatePeptideFoldingSimulator(approximatePeptide);
-            simulator.StartSimulation(simulationSettings);
+            var simulator = new ApproximatePeptideFoldingSimulator(approximatePeptide, simulationSettings);
+            simulator.TimestepCompleted += Simulator_TimestepCompleted;
+            simulator.SimulationCompleted += Simulator_SimulationCompleted;
+            simulationWaitHandle.Reset();
+            simulator.StartSimulation();
 
+            simulationWaitHandle.WaitOne();
+            Assert.Pass();
+        }
+
+        private void Simulator_SimulationCompleted(object sender, System.EventArgs e)
+        {
+            simulationWaitHandle.Set();
+        }
+
+        private void Simulator_TimestepCompleted(object sender, SimulationTimestepCompleteEventArgs e)
+        {
         }
     }
 }

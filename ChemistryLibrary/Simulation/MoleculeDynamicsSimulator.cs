@@ -9,70 +9,95 @@ using Commons;
 
 namespace ChemistryLibrary.Simulation
 {
-    public class MoleculeDynamicsSimulator
+    public class MoleculeDynamicsSimulator : ISimulationRunner
     {
         private const double ForceLowerCutoff = 1e-50;
 
-        public Task MinimizeEnergy(Molecule molecule,
-            List<CustomAtomForce> customForces,
-            MoleculeDynamicsSimulationSettings settings, 
-            CancellationToken cancellationToken)
+        private readonly List<CustomAtomForce> customAtomForces;
+        private readonly MoleculeDynamicsSimulationSettings simulationSettings;
+        private CancellationTokenSource cancellationTokenSource;
+        private readonly object simulationControlLock = new object();
+
+        public MoleculeDynamicsSimulator(Molecule molecule,
+            List<CustomAtomForce> customAtomForces,
+            MoleculeDynamicsSimulationSettings simulationSettings)
         {
-            settings.StopSimulationWhenAtomAtRest = false;
-            settings.ForceRampUp = true;
-            settings.ForceRampUpPeriod = 500*settings.TimeStep;
-            return Task.Factory.StartNew(() => Simulate(molecule, customForces, settings, cancellationToken, true), cancellationToken);
+            this.customAtomForces = customAtomForces;
+            this.simulationSettings = simulationSettings;
+            Molecule = molecule;
         }
 
-        public Task RunSimulation(Molecule molecule, 
-            List<CustomAtomForce> customForces,
-            MoleculeDynamicsSimulationSettings settings,
-            CancellationToken cancellationToken)
+        public Molecule Molecule { get; }
+        public Task SimulationTask { get; private set; }
+        public bool IsSimulating { get; private set; }
+        public UnitValue CurrentTime { get; private set; }
+        public event EventHandler<SimulationTimestepCompleteEventArgs> TimestepCompleted;
+        public event EventHandler SimulationCompleted;
+
+        public void StartSimulation()
         {
-            settings.StopSimulationWhenAtomAtRest = false;
-            settings.ForceRampUp = true;
-            settings.ForceRampUpPeriod = 500 * settings.TimeStep;
-            return Task.Factory.StartNew(() => Simulate(molecule, customForces, settings, cancellationToken), cancellationToken);
+            if (IsSimulating)
+                return;
+            lock (simulationControlLock)
+            {
+                // Recheck
+                if (IsSimulating)
+                    return;
+                cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = cancellationTokenSource.Token;
+                SimulationTask = Task.Run(() => RunSimulation(cancellationToken), cancellationToken);
+                IsSimulating = true;
+            }
         }
 
-        private void Simulate(Molecule molecule,
-            List<CustomAtomForce> customForces,
-            MoleculeDynamicsSimulationSettings settings,
-            CancellationToken cancellationToken, 
-            bool zeroAtomMomentum = false)
+        public void StopSimulation()
         {
-            if (!molecule.IsPositioned)
-                molecule.PositionAtoms();
-            var currentAtomPositions = molecule.MoleculeStructure.Vertices.Keys
-                .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position);
+            if (!IsSimulating)
+                return;
+            lock (simulationControlLock)
+            {
+                if (!IsSimulating)
+                    return;
+                cancellationTokenSource?.Cancel();
+                SimulationTask?.Wait();
+                IsSimulating = false;
+            }
+        }
+
+        private void RunSimulation(CancellationToken cancellationToken)
+        {
+            if (!Molecule.IsPositioned)
+                Molecule.PositionAtoms();
+            var currentAtomPositions = Molecule.MoleculeStructure.Vertices.Keys
+                .ToDictionary(vId => vId, vId => Molecule.GetAtom(vId).Position);
             var lastNeighborhoodUpdate = 0.To(Unit.Second);
-            var atomNeighborhoodMap = new AtomNeighborhoodMap(molecule);
-            for (var t = 0.To(Unit.Second); t < settings.SimulationTime; t += settings.TimeStep)
+            var atomNeighborhoodMap = new AtomNeighborhoodMap(Molecule);
+            for (var t = 0.To(Unit.Second); t < simulationSettings.SimulationTime; t += simulationSettings.TimeStep)
             {
                 if(cancellationToken.IsCancellationRequested)
                     break;
                 if (t - lastNeighborhoodUpdate > 400.To(SIPrefix.Femto, Unit.Second))
                     atomNeighborhoodMap.Update();
 
-                var forces = ForceCalculator.CalculateForces(molecule, atomNeighborhoodMap);
-                AddCustomForces(molecule, t, forces.ForceLookup, customForces);
-                ApplyAtomForces(molecule, t, forces, settings, zeroAtomMomentum);
+                var forces = ForceCalculator.CalculateForces(Molecule, atomNeighborhoodMap);
+                AddCustomForces(Molecule, t, forces.ForceLookup, customAtomForces);
+                ApplyAtomForces(Molecule, t, forces, simulationSettings);
                 ApplyLonePairRepulsion(forces);
                 // TODO: Redistribute electrons (either here or as a step after molecule is fully connected
                 //WriteDebug(molecule);
 
-                var newAtomPositions = molecule.MoleculeStructure.Vertices.Keys
-                    .ToDictionary(vId => vId, vId => molecule.GetAtom(vId).Position);
-                if (settings.StopSimulationWhenAtomAtRest && t > settings.ForceRampUpPeriod)
+                var newAtomPositions = Molecule.MoleculeStructure.Vertices.Keys
+                    .ToDictionary(vId => vId, vId => Molecule.GetAtom(vId).Position);
+                if (simulationSettings.StopSimulationWhenAtomAtRest && t > simulationSettings.ForceRampUpPeriod)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys
                         .Select(atom => currentAtomPositions[atom].DistanceTo(newAtomPositions[atom]).In(SIPrefix.Pico, Unit.Meter))
                         .Max();
-                    if(maximumPositionChange/settings.TimeStep.Value < settings.MovementDetectionThreshold.Value)
+                    if(maximumPositionChange/simulationSettings.TimeStep.Value < simulationSettings.MovementDetectionThreshold.Value)
                         break;
                 }
                 currentAtomPositions = newAtomPositions;
-                OnOneIterationComplete();
+                OnTimestepCompleted(new SimulationTimestepCompleteEventArgs(t, null));
             }
             OnSimulationFinished();
         }
@@ -105,8 +130,7 @@ namespace ChemistryLibrary.Simulation
         private static void ApplyAtomForces(Molecule molecule, 
             UnitValue elapsedTime, 
             ForceCalculatorResult forces, 
-            MoleculeDynamicsSimulationSettings settings, 
-            bool zeroAtomMomentum)
+            MoleculeDynamicsSimulationSettings settings)
         {
             var maxVelocity = 1e2;
             var dT = settings.TimeStep.In(Unit.Second);
@@ -125,7 +149,7 @@ namespace ChemistryLibrary.Simulation
                 if (atom.Velocity.Magnitude().In(Unit.MetersPerSecond) > maxVelocity)
                     atom.Velocity *= maxVelocity / atom.Velocity.Magnitude().In(Unit.MetersPerSecond);
                 atom.Position += dT*atom.Velocity;
-                if (zeroAtomMomentum)
+                if (settings.ResetAtomVelocityAfterEachTimestep)
                     atom.Velocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
                 else
                     atom.Velocity *= 1.0; // TODO: Scale velocity to maintain a specific total energy, matching the environement's temperature
@@ -155,16 +179,18 @@ namespace ChemistryLibrary.Simulation
             }
         }
 
-        public event EventHandler OneIterationComplete;
-        private void OnOneIterationComplete()
+        private void OnTimestepCompleted(SimulationTimestepCompleteEventArgs e)
         {
-            OneIterationComplete?.Invoke(this, EventArgs.Empty);
+            TimestepCompleted?.Invoke(this, e);
         }
 
-        public event EventHandler SimulationFinished;
         private void OnSimulationFinished()
         {
-            SimulationFinished?.Invoke(this, EventArgs.Empty);
+            SimulationCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

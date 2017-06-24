@@ -10,5 +10,6 @@ namespace ChemistryLibrary.Simulation
         public UnitValue MovementDetectionThreshold { get; set; } = 150.To(SIPrefix.Milli, Unit.MetersPerSecond);
         public bool ForceRampUp { get; set; }
         public UnitValue ForceRampUpPeriod { get; set; }
+        public bool ResetAtomVelocityAfterEachTimestep { get; set; }
     }
 }

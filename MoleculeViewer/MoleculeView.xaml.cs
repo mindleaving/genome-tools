@@ -63,7 +63,7 @@ namespace MoleculeViewer
         }
 
         private Point? lastMousePosition;
-        private void Carbon3DView_OnMouseMove(object sender, MouseEventArgs e)
+        private void MoleculeView_OnMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed
                 && e.RightButton != MouseButtonState.Pressed

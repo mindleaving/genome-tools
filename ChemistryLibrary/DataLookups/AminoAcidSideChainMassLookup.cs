@@ -32,7 +32,7 @@ namespace ChemistryLibrary.DataLookups
 
         private static UnitValue GetMass(ElementName carbon)
         {
-            return PeriodicTable.GetMass(carbon);
+            return PeriodicTable.GetSingleAtomMass(carbon);
         }
     }
 }

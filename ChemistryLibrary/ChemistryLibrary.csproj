@@ -63,9 +63,11 @@
     <Compile Include="Builders\AtomConnector.cs" />
     <Compile Include="Simulation\ApproximateAminoAcidForces.cs" />
     <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
+    <Compile Include="Simulation\ApproximatePeptideSimulationSettings.cs" />
     <Compile Include="Simulation\AtomNeighborhoodMap.cs" />
     <Compile Include="Objects\Bond.cs" />
     <Compile Include="Objects\ChemistryException.cs" />
+    <Compile Include="Simulation\BondForceCalculator.cs" />
     <Compile Include="Simulation\CompactingForceCalculator.cs" />
     <Compile Include="Simulation\CustomAtomForce.cs" />
     <Compile Include="Objects\Electron.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="Builders\MoleculeLibrary.cs" />
     <Compile Include="Builders\MoleculePositioner.cs" />
     <Compile Include="Objects\MoleculeReference.cs" />
+    <Compile Include="Simulation\ISimulationRunner.cs" />
     <Compile Include="Simulation\NBodyForceCalculator.cs" />
     <Compile Include="Objects\Orbital.cs" />
     <Compile Include="Objects\OrbitalComparer.cs" />
@@ -106,6 +109,7 @@
     <Compile Include="Objects\SpinType.cs" />
     <Compile Include="Simulation\RamachadranForceCalculator.cs" />
     <Compile Include="Simulation\RamachandranPlotDistribution.cs" />
+    <Compile Include="Simulation\SimulationTimestepCompleteEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Commons\Commons.csproj">

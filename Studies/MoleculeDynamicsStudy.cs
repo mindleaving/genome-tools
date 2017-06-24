@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
-using ChemistryLibrary;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Simulation;
 using Commons;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace Studies
 {
     [TestFixture]
-    public class MoleculeDynamicsRunner
+    public class MoleculeDynamicsStudy
     {
+        private readonly ManualResetEvent simulationCompletedEvent = new ManualResetEvent(true);
+
         [Test]
         public void RunSimulation()
         {
@@ -23,14 +25,21 @@ namespace ChemistryLibraryTest
                 .Add(AminoAcidLibrary.Lysine)
                 .Molecule;
             var customForces = new List<CustomAtomForce>();
-            var moleculeDynamicsSimulator = new MoleculeDynamicsSimulator();
             var settings = new MoleculeDynamicsSimulationSettings
             {
                 SimulationTime = 10.To(SIPrefix.Nano, Unit.Second),
                 TimeStep = 4.To(SIPrefix.Femto, Unit.Second)
             };
-            var cancellationTokenSource = new CancellationTokenSource();
-            moleculeDynamicsSimulator.MinimizeEnergy(molecule, customForces, settings, cancellationTokenSource.Token);
+            var simulator = new MoleculeDynamicsSimulator(molecule, customForces, settings);
+            simulator.SimulationCompleted += Simulator_SimulationCompleted;
+            simulationCompletedEvent.Reset();
+            simulator.StartSimulation();
+            simulationCompletedEvent.WaitOne();
+        }
+
+        private void Simulator_SimulationCompleted(object sender, EventArgs e)
+        {
+            simulationCompletedEvent.Set();
         }
     }
 }

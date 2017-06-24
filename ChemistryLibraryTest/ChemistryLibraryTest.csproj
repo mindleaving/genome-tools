@@ -48,7 +48,6 @@
     <Compile Include="Measurements\CompactnessMeasurerTest.cs" />
     <Compile Include="Pdb\AminoAcidAtomNamerTest.cs" />
     <Compile Include="ApproximatePeptideTest.cs" />
-    <Compile Include="MoleculeDynamicsRunner.cs" />
     <Compile Include="OrbitalComparerTest.cs" />
     <Compile Include="Pdb\OffsetSequenceMatcherTest.cs" />
     <Compile Include="Pdb\PdbGeneratorTool.cs" />

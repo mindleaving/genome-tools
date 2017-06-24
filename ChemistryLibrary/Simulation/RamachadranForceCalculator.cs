@@ -28,7 +28,7 @@ namespace ChemistryLibrary.Simulation
         /// Use Ramachmadran plot position of an amino acid for pushing it 
         /// to keep it away from prohibited zones. 
         /// </summary>
-        public Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> CalculateForce(ApproximatePeptide peptide)
+        public Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> Calculate(ApproximatePeptide peptide)
         {
             var forceDictionary = new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
 
@@ -92,7 +92,7 @@ namespace ChemistryLibrary.Simulation
             var nitrogenCarbonAlphaVector = aminoAcid.NitrogenPosition
                 .VectorTo(aminoAcid.CarbonAlphaPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude2 = 1.0.To(Unit.Newton);
+            var forceMagnitude2 = 1e-9 * 1.0.To(Unit.Newton);
             var forceDirection2 = Math.Sign(omegaDeviation) * nitrogenCarbonAlphaVector
                                       .CrossProduct(carbonNitrogenVector)
                                       .Normalize();
@@ -131,7 +131,7 @@ namespace ChemistryLibrary.Simulation
             var carbonAlphaCarbonVector = aminoAcid.CarbonAlphaPosition
                 .VectorTo(aminoAcid.CarbonPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude2 = phiDeviation * 1.0.To(Unit.Newton);
+            var forceMagnitude2 = 1e-9 * phiDeviation * 1.0.To(Unit.Newton);
             var forceDirection2 = nitrogenCarbonAlphaVector
                 .CrossProduct(carbonAlphaCarbonVector)
                 .Normalize();
@@ -154,7 +154,7 @@ namespace ChemistryLibrary.Simulation
             var carbonAlphaNitrogenVector = aminoAcid.CarbonAlphaPosition
                 .VectorTo(aminoAcid.NitrogenPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude1 = psiDeviation * 1.0.To(Unit.Newton);
+            var forceMagnitude1 = 1e-9 * psiDeviation * 1.0.To(Unit.Newton);
             var forceDirection1 = carbonAlphaCarbonVector
                 .CrossProduct(carbonAlphaNitrogenVector)
                 .Normalize();

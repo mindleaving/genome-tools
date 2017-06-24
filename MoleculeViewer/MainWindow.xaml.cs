@@ -119,6 +119,11 @@ namespace MoleculeViewer
 
             RedistributeCharges(backbone.Molecule);
 
+            var simulationRunner = new MoleculeDynamicsSimulator(backbone.Molecule, customForces, new MoleculeDynamicsSimulationSettings
+            {
+                TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
+                SimulationTime = 10.To(SIPrefix.Pico, Unit.Second)
+            });
             MoleculeViewModel = new MoleculeViewModel(backbone.Molecule);
             SimulationViewModel = new SimulationViewModel(simulationRunner);
 

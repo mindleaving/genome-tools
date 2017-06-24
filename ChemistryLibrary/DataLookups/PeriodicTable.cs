@@ -404,6 +404,11 @@ namespace ChemistryLibrary.DataLookups
             return AtomarWeight[element];
         }
 
+        public static UnitValue GetSingleAtomMass(ElementName element)
+        {
+            return GetMass(element) / PhysicalConstants.AvogradrosNumber;
+        }
+
         private static readonly Dictionary<ElementName, UnitValue> AtomRadius = new Dictionary<ElementName, UnitValue>
         {
             {ElementName.Hydrogen, 37.To(SIPrefix.Pico, Unit.Meter)},

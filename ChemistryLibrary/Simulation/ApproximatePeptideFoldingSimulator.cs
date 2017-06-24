@@ -8,8 +8,9 @@ using Commons;
 
 namespace ChemistryLibrary.Simulation
 {
-    public class ApproximatePeptideFoldingSimulator : IDisposable
+    public class ApproximatePeptideFoldingSimulator : ISimulationRunner
     {
+        private readonly ApproximatePeptideSimulationSettings simulationSettings;
         private CancellationTokenSource cancellationTokenSource;
         private readonly object simulationControlLock = new object();
         public Task SimulationTask { get; private set; }
@@ -17,13 +18,16 @@ namespace ChemistryLibrary.Simulation
         public ApproximatePeptide Peptide { get; }
         public bool IsSimulating { get; private set; }
         public UnitValue CurrentTime { get; private set; }
+        public event EventHandler<SimulationTimestepCompleteEventArgs> TimestepCompleted;
+        public event EventHandler SimulationCompleted;
 
-        public ApproximatePeptideFoldingSimulator(ApproximatePeptide peptide)
+        public ApproximatePeptideFoldingSimulator(ApproximatePeptide peptide, ApproximatePeptideSimulationSettings simulationSettings)
         {
+            this.simulationSettings = simulationSettings;
             Peptide = peptide;
         }
 
-        public void StartSimulation(ApproximatePeptideSimulationSettings simulationSettings)
+        public void StartSimulation()
         {
             if (IsSimulating)
                 return;
@@ -34,7 +38,7 @@ namespace ChemistryLibrary.Simulation
                     return;
                 cancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = cancellationTokenSource.Token;
-                SimulationTask = Task.Run(() => RunSimulation(simulationSettings, cancellationToken), cancellationToken);
+                SimulationTask = Task.Run(() => RunSimulation(cancellationToken), cancellationToken);
                 IsSimulating = true;
             }
         }
@@ -53,12 +57,12 @@ namespace ChemistryLibrary.Simulation
             }
         }
 
-        private void RunSimulation(ApproximatePeptideSimulationSettings simulationSettings,
-            CancellationToken cancellationToken)
+        private void RunSimulation(CancellationToken cancellationToken)
         {
             var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
             var compactnessForceCalculator = new CompactingForceCalculator();
             var ramachadranForceCalculator = new RamachadranForceCalculator(ramachadranDataDirectory);
+            var bondForceCalculator = new BondForceCalculator();
 
             var simulationTime = simulationSettings.SimulationTime;
             var dT = simulationSettings.TimeStep;
@@ -68,7 +72,8 @@ namespace ChemistryLibrary.Simulation
 
                 var compactnessMeasurerResult = CompactnessMeasurer.Measure(Peptide);
                 var compactnessForces = compactnessForceCalculator.Calculate(compactnessMeasurerResult);
-                var ramachandranForces = ramachadranForceCalculator.CalculateForce(Peptide);
+                var ramachandranForces = ramachadranForceCalculator.Calculate(Peptide);
+                var bondForces = bondForceCalculator.Calculate(Peptide);
                 foreach (var aminoAcid in Peptide.AminoAcids)
                 {
                     var resultingForce = new ApproximateAminoAcidForces();
@@ -82,9 +87,17 @@ namespace ChemistryLibrary.Simulation
                         var ramachandranForce = ramachandranForces[aminoAcid];
                         resultingForce += ramachandranForce;
                     }
+                    if (bondForces.ContainsKey(aminoAcid))
+                    {
+                        var bondForce = bondForces[aminoAcid];
+                        resultingForce += bondForce;
+                    }
                     ApplyForce(aminoAcid, resultingForce, dT, simulationSettings.ReservoirTemperature);
                 }
+                OnSimulationTimestepComplete(new SimulationTimestepCompleteEventArgs(CurrentTime, Peptide));
             }
+            SimulationCompleted?.Invoke(this, EventArgs.Empty);
+            IsSimulating = false;
         }
 
         private void ApplyForce(ApproximatedAminoAcid aminoAcid, 
@@ -93,7 +106,7 @@ namespace ChemistryLibrary.Simulation
             UnitValue reservoirTemperature)
         {
             var nitrogenForce = resultingForces.NitrogenForce;
-            var nitrogenMass = PeriodicTable.GetMass(ElementName.Nitrogen);
+            var nitrogenMass = PeriodicTable.GetSingleAtomMass(ElementName.Nitrogen);
             var nitrogenAcceleration = nitrogenForce / nitrogenMass;
             var nitrogenVelocityChange = nitrogenAcceleration * timeStepSize;
             aminoAcid.NitrogenVelocity += nitrogenVelocityChange;
@@ -101,7 +114,7 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.NitrogenPosition += aminoAcid.NitrogenVelocity * timeStepSize;
 
             var carbonAlphaForce = resultingForces.CarbonAlphaForce;
-            var carbonAlphaMass = PeriodicTable.GetMass(ElementName.Carbon) + AminoAcidSideChainMassLookup.SideChainMasses[aminoAcid.Name];
+            var carbonAlphaMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon) + AminoAcidSideChainMassLookup.SideChainMasses[aminoAcid.Name];
             var carbonAlphaAcceleration = carbonAlphaForce / carbonAlphaMass;
             var carbonAlphaVelocityChange = carbonAlphaAcceleration * timeStepSize;
             aminoAcid.CarbonAlphaVelocity += carbonAlphaVelocityChange;
@@ -109,7 +122,7 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.CarbonAlphaPosition += aminoAcid.CarbonAlphaVelocity * timeStepSize;
 
             var carbonForce = resultingForces.CarbonForce;
-            var carbonMass = PeriodicTable.GetMass(ElementName.Carbon);
+            var carbonMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon);
             var carbonAcceleration = carbonForce / carbonMass;
             var carbonVelocityChange = carbonAcceleration * timeStepSize;
             aminoAcid.CarbonVelocity += carbonVelocityChange;
@@ -133,17 +146,16 @@ namespace ChemistryLibrary.Simulation
             return velocity;
         }
 
+        private void OnSimulationTimestepComplete(SimulationTimestepCompleteEventArgs e)
+        {
+            TimestepCompleted?.Invoke(this, e);
+        }
+
         public void Dispose()
         {
             StopSimulation();
             cancellationTokenSource?.Dispose();
             SimulationTask?.Dispose();
         }
-    }
-
-    public class ApproximatePeptideSimulationSettings : MoleculeDynamicsSimulationSettings
-    {
-        public bool FreezeSecondaryStructures { get; set; }
-        public UnitValue ReservoirTemperature { get; set; } = 37.To(Unit.Celcius);
     }
 }
