@@ -4,9 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 using Commons;
 using NUnit.Framework;
 

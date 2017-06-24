@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using ChemistryLibrary;
 using ChemistryLibrary.Builders;
-using ChemistryLibrary.Pdb;
+using ChemistryLibrary.IO.Pdb;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest.Pdb

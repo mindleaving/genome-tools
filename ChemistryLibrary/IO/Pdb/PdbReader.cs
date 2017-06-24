@@ -8,7 +8,7 @@ using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Objects;
 using Commons;
 
-namespace ChemistryLibrary.Pdb
+namespace ChemistryLibrary.IO.Pdb
 {
     public class PdbReaderResult
     {

@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using ChemistryLibrary;
 using ChemistryLibrary.Builders;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Pdb;
 using Commons;
 using NUnit.Framework;
 

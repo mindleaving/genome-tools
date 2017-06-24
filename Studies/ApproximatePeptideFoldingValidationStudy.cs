@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using ChemistryLibrary.Builders;
-using ChemistryLibrary.Pdb;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Simulation;
 using Commons;
 using NUnit.Framework;

@@ -8,9 +8,9 @@ using System.Windows;
 using ChemistryLibrary;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 using ChemistryLibrary.Simulation;
 using Commons;
 
@@ -120,7 +120,7 @@ namespace MoleculeViewer
             RedistributeCharges(backbone.Molecule);
 
             MoleculeViewModel = new MoleculeViewModel(backbone.Molecule);
-            SimulationViewModel = new SimulationViewModel(MoleculeViewModel, customForces);
+            SimulationViewModel = new SimulationViewModel(simulationRunner);
 
             //SimulationViewModel.RunSimulation();
             //SimulationViewModel.RunSimulation().ContinueWith(x => 

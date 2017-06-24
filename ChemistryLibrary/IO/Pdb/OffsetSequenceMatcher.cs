@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ChemistryLibrary.Pdb
+namespace ChemistryLibrary.IO.Pdb
 {
     /// <summary>
     /// Matches two sequences which are identical except for 

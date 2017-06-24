@@ -5,7 +5,7 @@ using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
 using Commons;
 
-namespace ChemistryLibrary.Pdb
+namespace ChemistryLibrary.IO.Pdb
 {
     public static class PdbAminoAcidAtomNamer
     {

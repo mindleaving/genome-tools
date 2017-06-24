@@ -87,13 +87,13 @@
     <Compile Include="Simulation\NBodyForceCalculator.cs" />
     <Compile Include="Objects\Orbital.cs" />
     <Compile Include="Objects\OrbitalComparer.cs" />
-    <Compile Include="Pdb\OffsetSequenceMatcher.cs" />
-    <Compile Include="Pdb\PdbAminoAcidAtomNamer.cs" />
-    <Compile Include="Pdb\PdbSheetLine.cs" />
-    <Compile Include="Pdb\PdbAtomLine.cs" />
-    <Compile Include="Pdb\PdbHelixLine.cs" />
-    <Compile Include="Pdb\PdbReader.cs" />
-    <Compile Include="Pdb\PdbSerializer.cs" />
+    <Compile Include="IO\Pdb\OffsetSequenceMatcher.cs" />
+    <Compile Include="IO\Pdb\PdbAminoAcidAtomNamer.cs" />
+    <Compile Include="IO\Pdb\PdbSheetLine.cs" />
+    <Compile Include="IO\Pdb\PdbAtomLine.cs" />
+    <Compile Include="IO\Pdb\PdbHelixLine.cs" />
+    <Compile Include="IO\Pdb\PdbReader.cs" />
+    <Compile Include="IO\Pdb\PdbSerializer.cs" />
     <Compile Include="Objects\Peptide.cs" />
     <Compile Include="Builders\PeptideBuilder.cs" />
     <Compile Include="DataLookups\PeriodicTable.cs" />
@@ -119,7 +119,9 @@
   <ItemGroup>
     <Content Include="MIConvexHull.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Pdb\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

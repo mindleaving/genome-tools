@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 using NUnit.Framework;
 
 namespace Tools

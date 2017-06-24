@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 using Commons;
 
 namespace ChemistryLibrary.Builders

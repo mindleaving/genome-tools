@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 
 namespace ChemistryLibrary.Builders
 {

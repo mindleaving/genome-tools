@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using ChemistryLibrary;
 using ChemistryLibrary.Builders;
+using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;
-using ChemistryLibrary.Pdb;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest.Pdb

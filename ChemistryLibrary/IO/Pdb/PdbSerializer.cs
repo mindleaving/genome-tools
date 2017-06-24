@@ -5,7 +5,7 @@ using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Pdb
+namespace ChemistryLibrary.IO.Pdb
 {
     public static class PdbSerializer
     {
