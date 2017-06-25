@@ -5,12 +5,13 @@ using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using Commons;
+using Commons.Debug;
 
 namespace ChemistryLibrary.Simulation
 {
     public class RamachadranForceCalculator
     {
-        private const double forceScaling = 1e-6;
+        private const double forceScaling = 1e-5;
 
         private readonly Dictionary<AminoAcidName, RamachandranPlotDistribution> ramachadranPlotDistributions;
 
@@ -94,7 +95,7 @@ namespace ChemistryLibrary.Simulation
             var nitrogenCarbonAlphaVector = aminoAcid.NitrogenPosition
                 .VectorTo(aminoAcid.CarbonAlphaPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude2 = forceScaling * 1.0.To(Unit.Newton);
+            var forceMagnitude2 = forceScaling * 1e-9 * 1.0.To(Unit.Newton);
             var forceDirection2 = Math.Sign(omegaDeviation) * nitrogenCarbonAlphaVector
                                       .CrossProduct(carbonNitrogenVector)
                                       .Normalize();

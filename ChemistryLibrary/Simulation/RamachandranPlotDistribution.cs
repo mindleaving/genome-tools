@@ -35,7 +35,7 @@ namespace ChemistryLibrary.Simulation
                 {
                     // Non-normalized probability density
                     var angles = GetAnglesFromGridPosition(new Point2D(phiStepIdx, psiStepIdx));
-                    var prohibitedZonePhiCenter = -Math.Sin(2 * angles.Psi.In(Unit.Radians));
+                    var prohibitedZonePhiCenter = -30*Math.Sin(2 * angles.Psi.In(Unit.Radians));
                     var prohibitedZoneWidth = 60;
 
                     var phi = angles.Phi.In(Unit.Degree);

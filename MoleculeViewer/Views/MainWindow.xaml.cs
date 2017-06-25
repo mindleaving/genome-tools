@@ -47,7 +47,8 @@ namespace MoleculeViewer.Views
                 new ApproximatePeptideSimulationSettings
                 {
                     TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
-                    SimulationTime = 10.To(SIPrefix.Nano, Unit.Second)
+                    SimulationTime = 10.To(SIPrefix.Nano, Unit.Second),
+                    ResetAtomVelocityAfterEachTimestep = false
                 });
             //var simulationRunner = new MoleculeDynamicsSimulator(peptide.Molecule, new List<CustomAtomForce>(),
             //    new MoleculeDynamicsSimulationSettings

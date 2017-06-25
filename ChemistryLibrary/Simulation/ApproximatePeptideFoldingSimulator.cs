@@ -76,8 +76,8 @@ namespace ChemistryLibrary.Simulation
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var compactnessMeasurerResult = CompactnessMeasurer.Measure(Peptide);
-                var compactnessForces = compactnessForceCalculator.Calculate(compactnessMeasurerResult);
+                //var compactnessMeasurerResult = CompactnessMeasurer.Measure(Peptide);
+                //var compactnessForces = compactnessForceCalculator.Calculate(compactnessMeasurerResult);
                 var ramachandranForces = ramachadranForceCalculator.Calculate(Peptide);
                 var bondForces = bondForceCalculator.Calculate(Peptide);
                 foreach (var aminoAcid in Peptide.AminoAcids)
@@ -111,7 +111,7 @@ namespace ChemistryLibrary.Simulation
             UnitValue timeStepSize,
             UnitValue reservoirTemperature)
         {
-            var scaling = 1e-4;
+            var scaling = 1e0;
             var nitrogenForce = scaling*resultingForces.NitrogenForce;
             var nitrogenMass = PeriodicTable.GetSingleAtomMass(ElementName.Nitrogen);
             var nitrogenAcceleration = nitrogenForce / nitrogenMass;
@@ -119,6 +119,8 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.NitrogenVelocity += nitrogenVelocityChange;
             aminoAcid.NitrogenVelocity = InteractWithReservoir(aminoAcid.NitrogenVelocity, nitrogenMass, reservoirTemperature);
             aminoAcid.NitrogenPosition += aminoAcid.NitrogenVelocity * timeStepSize;
+            if (simulationSettings.ResetAtomVelocityAfterEachTimestep)
+                aminoAcid.NitrogenVelocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
 
             var carbonAlphaForce = scaling * resultingForces.CarbonAlphaForce;
             var carbonAlphaMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon) + AminoAcidSideChainMassLookup.SideChainMasses[aminoAcid.Name];
@@ -127,6 +129,8 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.CarbonAlphaVelocity += carbonAlphaVelocityChange;
             aminoAcid.CarbonAlphaVelocity = InteractWithReservoir(aminoAcid.CarbonAlphaVelocity, carbonAlphaMass, reservoirTemperature);
             aminoAcid.CarbonAlphaPosition += aminoAcid.CarbonAlphaVelocity * timeStepSize;
+            if (simulationSettings.ResetAtomVelocityAfterEachTimestep)
+                aminoAcid.CarbonAlphaVelocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
 
             var carbonForce = scaling * resultingForces.CarbonForce;
             var carbonMass = PeriodicTable.GetSingleAtomMass(ElementName.Carbon);
@@ -135,6 +139,8 @@ namespace ChemistryLibrary.Simulation
             aminoAcid.CarbonVelocity += carbonVelocityChange;
             aminoAcid.CarbonVelocity = InteractWithReservoir(aminoAcid.CarbonVelocity, carbonMass, reservoirTemperature);
             aminoAcid.CarbonPosition += aminoAcid.CarbonVelocity * timeStepSize;
+            if (simulationSettings.ResetAtomVelocityAfterEachTimestep)
+                aminoAcid.CarbonVelocity = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
         }
 
         private UnitVector3D InteractWithReservoir(
