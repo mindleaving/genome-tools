@@ -12,6 +12,9 @@ namespace ChemistryLibrary.Simulation
         public Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> Calculate(
             CompactnessMeasurerResult compactnessMeasurerResult)
         {
+            // VALIDATED: Forces point in the right direction, chain is compacted.
+            // If force is reversed, chain is stretched out to a line.
+
             var forceDictionary = new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
 
             var convexHull = compactnessMeasurerResult.ConvexHull;
@@ -29,7 +32,7 @@ namespace ChemistryLibrary.Simulation
                     var adjacentPosition = adjacentAminoAcid.CarbonAlphaPosition;
                     var connectingVector = vertexPosition.VectorTo(adjacentPosition);
                     var distance = connectingVector.Magnitude();
-                    var forceMagnitude = 1e-9*(1.0 + ForceDistanceScaling * distance.In(SIPrefix.Pico, Unit.Meter));
+                    var forceMagnitude = 1e-7*(1.0 + ForceDistanceScaling * distance.In(SIPrefix.Pico, Unit.Meter));
                     var forceDirection = connectingVector.In(SIPrefix.Pico, Unit.Meter).Normalize();
                     if (!forceDictionary.ContainsKey(adjacentAminoAcid))
                         forceDictionary.Add(adjacentAminoAcid, new ApproximateAminoAcidForces());

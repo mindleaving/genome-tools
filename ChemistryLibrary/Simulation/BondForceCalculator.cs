@@ -10,6 +10,8 @@ namespace ChemistryLibrary.Simulation
     {
         public Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> Calculate(ApproximatePeptide peptide)
         {
+            // VALIDATED: Forces point in the right direction and restore expected bond length
+
             var bondForces = peptide.AminoAcids.ToDictionary(aa => aa, aa => new ApproximateAminoAcidForces());
             var nitrogenCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Nitrogen, ElementName.Carbon);
             var carbonCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Carbon, ElementName.Carbon);

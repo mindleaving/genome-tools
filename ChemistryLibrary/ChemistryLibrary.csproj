@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Builders\ApproximateAminoAcidPositioner.cs" />
     <Compile Include="Builders\ApproximatePeptideBuilder.cs" />
+    <Compile Include="Builders\AtomExtractor.cs" />
     <Compile Include="Builders\OrbitalGenerator.cs" />
     <Compile Include="DataLookups\AminoAcidSideChainMassLookup.cs" />
     <Compile Include="Extensions\AminoAcidExtensions.cs" />

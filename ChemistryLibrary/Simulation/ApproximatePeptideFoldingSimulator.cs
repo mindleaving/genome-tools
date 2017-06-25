@@ -52,7 +52,13 @@ namespace ChemistryLibrary.Simulation
                 if (!IsSimulating)
                     return;
                 cancellationTokenSource?.Cancel();
-                SimulationTask?.Wait();
+                try
+                {
+                    SimulationTask?.Wait();
+                }
+                catch (AggregateException e)
+                {
+                }
                 IsSimulating = false;
             }
         }
@@ -77,11 +83,11 @@ namespace ChemistryLibrary.Simulation
                 foreach (var aminoAcid in Peptide.AminoAcids)
                 {
                     var resultingForce = new ApproximateAminoAcidForces();
-                    if(compactnessForces.ContainsKey(aminoAcid))
-                    {
-                        var compactnessForce = compactnessForces[aminoAcid];
-                        resultingForce += compactnessForce;
-                    }
+                    //if (compactnessForces.ContainsKey(aminoAcid))
+                    //{
+                    //    var compactnessForce = compactnessForces[aminoAcid];
+                    //    resultingForce += compactnessForce;
+                    //}
                     if (ramachandranForces.ContainsKey(aminoAcid))
                     {
                         var ramachandranForce = ramachandranForces[aminoAcid];

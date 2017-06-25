@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using ChemistryLibrary.Builders;
 using ChemistryLibrary.Objects;
 using Commons;
 
@@ -17,31 +17,13 @@ namespace ChemistryLibrary.Simulation
             : this(t)
         {
             PeptideCopy = peptide.DeepClone();
-            Atoms = ToAtoms(PeptideCopy);
-        }
-
-        private List<Atom> ToAtoms(ApproximatePeptide peptide)
-        {
-            var atoms = new List<Atom>();
-            foreach (var aminoAcid in peptide.AminoAcids)
-            {
-                var nitrogenAtom = Atom.FromStableIsotope(ElementName.Nitrogen);
-                nitrogenAtom.Position = aminoAcid.NitrogenPosition;
-                var carbonAlphaAtom = Atom.FromStableIsotope(ElementName.Carbon);
-                carbonAlphaAtom.Position = aminoAcid.CarbonAlphaPosition;
-                var carbonAtom = Atom.FromStableIsotope(ElementName.Carbon);
-                carbonAtom.Position = aminoAcid.CarbonPosition;
-                atoms.Add(nitrogenAtom);
-                atoms.Add(carbonAlphaAtom);
-                atoms.Add(carbonAtom);
-            }
-            return atoms;
+            Atoms = AtomExtractor.FromApproximatePeptide(peptide);
         }
 
         public SimulationTimestepCompleteEventArgs(UnitValue t, Molecule molecule)
             : this(t)
         {
-            Atoms = molecule.Atoms.ToList();
+            Atoms = AtomExtractor.FromMolecule(molecule);
         }
 
         public UnitValue SimulationTime { get; }

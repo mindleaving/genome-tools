@@ -6,7 +6,8 @@
         xmlns:views="clr-namespace:MoleculeViewer.Views"
         mc:Ignorable="d"
         Title="Molecule viewer" Height="350" Width="525"
-        Name="Self">
+        Name="Self"
+        Closing="MainWindow_OnClosing">
     <Window.InputBindings>
         <KeyBinding Key="R" Command="{Binding ElementName=Self, Path=MoleculeViewModel.ResetViewCommand}"></KeyBinding>
     </Window.InputBindings>

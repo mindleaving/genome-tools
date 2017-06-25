@@ -1,9 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.IO;
+using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation;
 using Commons;
 using MoleculeViewer.ViewModels;
@@ -24,19 +27,27 @@ namespace MoleculeViewer.Views
         {
             InitializeComponent();
 
-            var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5hhe.pdb";
-            //var filename = @"G:\Projects\HumanGenome\AminoseqFiles\CFTR.aminoseq";
-            var peptide = PeptideLoader.Load(filename);
-            peptide.Molecule.MarkBackbone(peptide.MoleculeReference);
-            peptide.Molecule.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
-            var approximatePeptide = ApproximatePeptideBuilder.FromPeptide(peptide);
-            //approximatePeptide.UpdatePositions();
+            //var filename = @"G:\Projects\HumanGenome\Protein-PDBs\5hhe.pdb";
+            var filename = @"G:\Projects\HumanGenome\AminoseqFiles\AAA.aminoseq";
+            ApproximatePeptide approximatePeptide;
+            if (filename.ToLowerInvariant().EndsWith(".pdb"))
+            {
+                var peptide = PeptideLoader.Load(filename);
+                peptide.Molecule.MarkBackbone(peptide.MoleculeReference);
+                peptide.Molecule.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
+                approximatePeptide = ApproximatePeptideBuilder.FromPeptide(peptide);
+            }
+            else
+            {
+                approximatePeptide = ApproximatePeptideBuilder.FromSequence(File.ReadAllLines(filename).Aggregate((a,b) => a + b));
+                approximatePeptide.UpdatePositions();
+            }
 
             var simulationRunner = new ApproximatePeptideFoldingSimulator(approximatePeptide,
                 new ApproximatePeptideSimulationSettings
                 {
                     TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
-                    SimulationTime = 10.To(SIPrefix.Pico, Unit.Second)
+                    SimulationTime = 10.To(SIPrefix.Nano, Unit.Second)
                 });
             //var simulationRunner = new MoleculeDynamicsSimulator(peptide.Molecule, new List<CustomAtomForce>(),
             //    new MoleculeDynamicsSimulationSettings
@@ -45,7 +56,7 @@ namespace MoleculeViewer.Views
             //        SimulationTime = 10.To(SIPrefix.Pico, Unit.Second)
             //    });
             MoleculeViewModel = new MoleculeViewModel();
-            MoleculeViewModel.DrawAtoms(peptide.Molecule.Atoms);
+            MoleculeViewModel.DrawAtoms(AtomExtractor.FromApproximatePeptide(approximatePeptide));
             simulationRunner.TimestepCompleted += (sender, args) => Application.Current.Dispatcher.BeginInvoke(new Action(() => MoleculeViewModel.DrawAtoms(args.Atoms)));
             SimulationViewModel = new SimulationViewModel(simulationRunner);
         }
@@ -59,6 +70,11 @@ namespace MoleculeViewer.Views
         {
             get { return (MoleculeViewModel) GetValue(MoleculeViewModelProperty); }
             set { SetValue(MoleculeViewModelProperty, value); }
+        }
+
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            SimulationViewModel.StopSimulationCommand.Execute(null);
         }
     }
 }
