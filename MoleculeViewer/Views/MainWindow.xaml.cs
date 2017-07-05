@@ -43,13 +43,15 @@ namespace MoleculeViewer.Views
                 approximatePeptide.UpdatePositions();
             }
 
-            var simulationRunner = new ApproximatePeptideFoldingSimulator(approximatePeptide,
-                new ApproximatePeptideSimulationSettings
-                {
-                    TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
-                    SimulationTime = 10.To(SIPrefix.Nano, Unit.Second),
-                    ResetAtomVelocityAfterEachTimestep = false
-                });
+            var simulationSettings = new ApproximatePeptideSimulationSettings
+            {
+                TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
+                SimulationTime = 10.To(SIPrefix.Nano, Unit.Second),
+                ResetAtomVelocityAfterEachTimestep = false
+            };
+            var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var simulationRunner = ApproximatePeptideFoldingSimulatorFactory.Create(
+                approximatePeptide, simulationSettings, ramachadranDataDirectory);
             //var simulationRunner = new MoleculeDynamicsSimulator(peptide.Molecule, new List<CustomAtomForce>(),
             //    new MoleculeDynamicsSimulationSettings
             //    {

@@ -68,6 +68,7 @@
     <Compile Include="Objects\PeptideSecondaryStructure.cs" />
     <Compile Include="Simulation\ApproximateAminoAcidForces.cs" />
     <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
+    <Compile Include="Simulation\ApproximatePeptideFoldingSimulatorFactory.cs" />
     <Compile Include="Simulation\ApproximatePeptideSimulationSettings.cs" />
     <Compile Include="Simulation\AtomNeighborhoodMap.cs" />
     <Compile Include="Objects\Bond.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Builders\MoleculeLibrary.cs" />
     <Compile Include="Builders\MoleculePositioner.cs" />
     <Compile Include="Objects\MoleculeReference.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\IRamachandranPlotDistribution.cs" />
     <Compile Include="Simulation\ISimulationRunner.cs" />
     <Compile Include="Simulation\NBodyForceCalculator.cs" />
     <Compile Include="Objects\Orbital.cs" />
@@ -113,8 +115,12 @@
     <Compile Include="Simulation\MoleculeDynamicsSimulator.cs" />
     <Compile Include="Builders\SpherePointDistributor.cs" />
     <Compile Include="Objects\SpinType.cs" />
-    <Compile Include="Simulation\RamachadranForceCalculator.cs" />
-    <Compile Include="Simulation\RamachandranPlotDistribution.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\IRamachandranPlotDistributionSource.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\RamachandranForceCalculator.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotFixedDistribution.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotGridDistribution.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotDistributionFileSource.cs" />
+    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotDistributionFixedSource.cs" />
     <Compile Include="Simulation\SimulationTimestepCompleteEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>

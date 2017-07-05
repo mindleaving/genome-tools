@@ -8,13 +8,17 @@ using ChemistryLibrary.Objects;
 using Commons;
 using Commons.IO;
 
-namespace ChemistryLibrary.Simulation
+namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    internal class RamachandranPlotDistribution
+    public class RamachandranPlotGridDistribution : IRamachandranPlotDistribution
     {
         private readonly int gridSteps;
 
-        public RamachandranPlotDistribution(AminoAcidName aminoAcidName, string distributionFilePath, int gridSteps = 360)
+        public AminoAcidName AminoAcidName { get; }
+        public double[,] DistributionPlot { get; }
+        public Vector2D[,] GradientPlot { get; }
+
+        public RamachandranPlotGridDistribution(AminoAcidName aminoAcidName, string distributionFilePath, int gridSteps = 360)
         {
             AminoAcidName = aminoAcidName;
             this.gridSteps = gridSteps;
@@ -59,10 +63,6 @@ namespace ChemistryLibrary.Simulation
                 Directory.CreateDirectory(directory);
             CsvWriter.Write(DistributionPlot, distributionCacheFilename);
         }
-
-        public AminoAcidName AminoAcidName { get; }
-        public double[,] DistributionPlot { get; }
-        public Vector2D[,] GradientPlot { get; }
 
         private double[,] GenerateDistributionPlot(List<AminoAcidAngles> aminoAcidAngles)
         {
@@ -206,12 +206,12 @@ namespace ChemistryLibrary.Simulation
             return angles;
         }
 
-        public Vector2D GetGradient(UnitValue phi, UnitValue psi)
+        public UnitVector2D GetPhiPsiVector(UnitValue phi, UnitValue psi)
         {
             var xIdx = (int)GetPhiGridPosition(phi);
             var yIdx = (int)GetPPsiGridPosition(psi);
 
-            return GradientPlot[xIdx, yIdx];
+            return GradientPlot[xIdx, yIdx].To(Unit.Newton);
         }
 
         private AminoAcidAngles GetAnglesFromGridPosition(Point2D gridPosition)

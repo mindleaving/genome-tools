@@ -25,7 +25,9 @@ namespace Studies
                 SimulationTime = 10.To(SIPrefix.Pico, Unit.Second),
                 TimeStep = 2.To(SIPrefix.Femto, Unit.Second)
             };
-            var simulator = new ApproximatePeptideFoldingSimulator(approximatePeptide, simulationSettings);
+            var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var simulator = ApproximatePeptideFoldingSimulatorFactory.Create(
+                approximatePeptide, simulationSettings, ramachadranDataDirectory);
             simulator.TimestepCompleted += Simulator_TimestepCompleted;
             simulator.SimulationCompleted += Simulator_SimulationCompleted;
             simulationWaitHandle.Reset();

@@ -1,30 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using Commons;
-using Commons.Debug;
 
-namespace ChemistryLibrary.Simulation
+namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    public class RamachadranForceCalculator
+    public class RamachandranForceCalculator
     {
         private const double forceScaling = 1e-5;
 
-        private readonly Dictionary<AminoAcidName, RamachandranPlotDistribution> ramachadranPlotDistributions;
+        private readonly IRamachandranPlotDistributionSource distributionSource;
 
-        public RamachadranForceCalculator(string ramachadranDataDirectory)
+        public RamachandranForceCalculator(IRamachandranPlotDistributionSource distributionSource)
         {
-            ramachadranPlotDistributions = new Dictionary<AminoAcidName, RamachandranPlotDistribution>();
-            var aminoAcidNames = (AminoAcidName[]) Enum.GetValues(typeof(AminoAcidName));
-            foreach (var aminoAcidName in aminoAcidNames)
-            {
-                var distributionFilePath = Path.Combine(ramachadranDataDirectory, aminoAcidName.ToThreeLetterCode() + ".csv");
-                var distribution = new RamachandranPlotDistribution(aminoAcidName, distributionFilePath);
-                ramachadranPlotDistributions.Add(aminoAcidName, distribution);
-            }
+            this.distributionSource = distributionSource;
         }
 
         /// <summary>
@@ -44,7 +34,7 @@ namespace ChemistryLibrary.Simulation
                     ? peptide.AminoAcids[aminoAcidIdx + 1]
                     : null;
 
-                var plotDistribution = ramachadranPlotDistributions[aminoAcid.Name];
+                var plotDistribution = distributionSource.GetDistribution(aminoAcid.Name);
                 var aminoAcidAngles = aminoAcidAnglesDictionary[aminoAcid];
 
                 if (aminoAcidAngles.Omega != null && !aminoAcidAngles.Omega.Value.IsNaN())
@@ -53,7 +43,7 @@ namespace ChemistryLibrary.Simulation
                 }
                 if (aminoAcidAngles.Phi != null && aminoAcidAngles.Psi != null)
                 {
-                    var plotGradient = plotDistribution.GetGradient(aminoAcid.PhiAngle, aminoAcid.PsiAngle);
+                    var plotGradient = plotDistribution.GetPhiPsiVector(aminoAcid.PhiAngle, aminoAcid.PsiAngle);
                     var phiDeviation = plotGradient.X;
                     var psiDeviation = plotGradient.Y;
 
@@ -64,7 +54,10 @@ namespace ChemistryLibrary.Simulation
             return forceDictionary;
         }
 
-        private static void ApplyOmegaDeviationForce(ApproximatedAminoAcid lastAminoAcid, ApproximatedAminoAcid aminoAcid, AminoAcidAngles aminoAcidAngles, Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> forceDictionary)
+        private static void ApplyOmegaDeviationForce(ApproximatedAminoAcid lastAminoAcid, 
+            ApproximatedAminoAcid aminoAcid, 
+            AminoAcidAngles aminoAcidAngles, 
+            Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> forceDictionary)
         {
             if (lastAminoAcid == null)
                 return;
@@ -95,8 +88,8 @@ namespace ChemistryLibrary.Simulation
             var nitrogenCarbonAlphaVector = aminoAcid.NitrogenPosition
                 .VectorTo(aminoAcid.CarbonAlphaPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude2 = forceScaling * 1e-9 * 1.0.To(Unit.Newton);
-            var forceDirection2 = Math.Sign(omegaDeviation) * nitrogenCarbonAlphaVector
+            var forceMagnitude2 = forceScaling * 1.0.To(Unit.Newton);
+            var forceDirection2 = -Math.Sign(omegaDeviation) * nitrogenCarbonAlphaVector
                                       .CrossProduct(carbonNitrogenVector)
                                       .Normalize();
             aminoAcidForces.CarbonAlphaForce += forceMagnitude2 * forceDirection2;

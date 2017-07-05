@@ -18,7 +18,7 @@ namespace ChemistryLibrary.Builders
             return FromSequence(aminoAcidNames);
         }
 
-        public static ApproximatePeptide FromSequence(List<AminoAcidName> sequence)
+        public static ApproximatePeptide FromSequence(IList<AminoAcidName> sequence)
         {
             var aminoAcids = sequence
                 .Select(aaName => new ApproximatedAminoAcid(aaName))

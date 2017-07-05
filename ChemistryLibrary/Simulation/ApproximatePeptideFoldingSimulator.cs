@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
+using ChemistryLibrary.Simulation.RamachadranPlotForce;
 using Commons;
 
 namespace ChemistryLibrary.Simulation
@@ -13,6 +15,9 @@ namespace ChemistryLibrary.Simulation
         private readonly ApproximatePeptideSimulationSettings simulationSettings;
         private CancellationTokenSource cancellationTokenSource;
         private readonly object simulationControlLock = new object();
+        private readonly CompactingForceCalculator compactnessForceCalculator;
+        private readonly RamachandranForceCalculator ramachandranForceCalculator;
+        private readonly BondForceCalculator bondForceCalculator;
         public Task SimulationTask { get; private set; }
 
         public ApproximatePeptide Peptide { get; }
@@ -21,10 +26,20 @@ namespace ChemistryLibrary.Simulation
         public event EventHandler<SimulationTimestepCompleteEventArgs> TimestepCompleted;
         public event EventHandler SimulationCompleted;
 
-        public ApproximatePeptideFoldingSimulator(ApproximatePeptide peptide, ApproximatePeptideSimulationSettings simulationSettings)
+        public ApproximatePeptideFoldingSimulator(ApproximatePeptide peptide, 
+            ApproximatePeptideSimulationSettings simulationSettings,
+            CompactingForceCalculator compactnessForceCalculator, 
+            RamachandranForceCalculator ramachandranForceCalculator, 
+            BondForceCalculator bondForceCalculator)
         {
             this.simulationSettings = simulationSettings;
+            this.compactnessForceCalculator = compactnessForceCalculator;
+            this.ramachandranForceCalculator = ramachandranForceCalculator;
+            this.bondForceCalculator = bondForceCalculator;
             Peptide = peptide;
+
+            if (peptide.AminoAcids.Count <= 3)
+                simulationSettings.UseCompactingForce = false; // Cannot be done
         }
 
         public void StartSimulation()
@@ -65,29 +80,27 @@ namespace ChemistryLibrary.Simulation
 
         private void RunSimulation(CancellationToken cancellationToken)
         {
-            var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
-            var compactnessForceCalculator = new CompactingForceCalculator();
-            var ramachadranForceCalculator = new RamachadranForceCalculator(ramachadranDataDirectory);
-            var bondForceCalculator = new BondForceCalculator();
-
             var simulationTime = simulationSettings.SimulationTime;
             var dT = simulationSettings.TimeStep;
             for (CurrentTime = 0.To(Unit.Second); CurrentTime < simulationTime; CurrentTime += dT)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                //var compactnessMeasurerResult = CompactnessMeasurer.Measure(Peptide);
-                //var compactnessForces = compactnessForceCalculator.Calculate(compactnessMeasurerResult);
-                var ramachandranForces = ramachadranForceCalculator.Calculate(Peptide);
+                var compactnessForces = simulationSettings.UseCompactingForce
+                    ? compactnessForceCalculator.Calculate(CompactnessMeasurer.Measure(Peptide))
+                    : new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
+                var ramachandranForces = simulationSettings.UseRamachadranForce
+                    ? ramachandranForceCalculator.Calculate(Peptide)
+                    : new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
                 var bondForces = bondForceCalculator.Calculate(Peptide);
                 foreach (var aminoAcid in Peptide.AminoAcids)
                 {
                     var resultingForce = new ApproximateAminoAcidForces();
-                    //if (compactnessForces.ContainsKey(aminoAcid))
-                    //{
-                    //    var compactnessForce = compactnessForces[aminoAcid];
-                    //    resultingForce += compactnessForce;
-                    //}
+                    if (compactnessForces.ContainsKey(aminoAcid))
+                    {
+                        var compactnessForce = compactnessForces[aminoAcid];
+                        resultingForce += compactnessForce;
+                    }
                     if (ramachandranForces.ContainsKey(aminoAcid))
                     {
                         var ramachandranForce = ramachandranForces[aminoAcid];
