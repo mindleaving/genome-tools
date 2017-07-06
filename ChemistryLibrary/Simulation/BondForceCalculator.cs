@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using Commons;
@@ -13,55 +14,120 @@ namespace ChemistryLibrary.Simulation
             // VALIDATED: Forces point in the right direction and restore expected bond length
 
             var bondForces = peptide.AminoAcids.ToDictionary(aa => aa, aa => new ApproximateAminoAcidForces());
-            var nitrogenCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Nitrogen, ElementName.Carbon);
-            var carbonCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Carbon, ElementName.Carbon);
             for (var aminoAcidIdx = 0; aminoAcidIdx < peptide.AminoAcids.Count; aminoAcidIdx++)
             {
                 var aminoAcid = peptide.AminoAcids[aminoAcidIdx];
                 var previousAminoAcid = aminoAcidIdx > 0 
                     ? peptide.AminoAcids[aminoAcidIdx - 1] 
                     : null;
-                var aminoAcidForces = bondForces[aminoAcid];
 
-                // Carbon - nitrogen bond
-                if (previousAminoAcid != null)
-                {
-                    var carbonNitrogenForceVector = CalculateBondForce(previousAminoAcid.CarbonPosition, 
-                        aminoAcid.NitrogenPosition, 
-                        nitrogenCarbonBondLength);
-                    var previousAminoAcidForces = bondForces[previousAminoAcid];
-                    previousAminoAcidForces.CarbonForce += carbonNitrogenForceVector;
-                    aminoAcidForces.NitrogenForce += -carbonNitrogenForceVector;
-                }
-
-                // Nitrogen - carbon alpha bond
-                var nitrogenCarbonAlphaForceVector = CalculateBondForce(aminoAcid.NitrogenPosition,
-                    aminoAcid.CarbonAlphaPosition,
-                    nitrogenCarbonBondLength);
-                aminoAcidForces.NitrogenForce += nitrogenCarbonAlphaForceVector;
-                aminoAcidForces.CarbonAlphaForce += -nitrogenCarbonAlphaForceVector;
-
-                // Carbon alpha - carbon bond
-                var carbonAlphaCarbonForceVector = CalculateBondForce(aminoAcid.CarbonAlphaPosition,
-                    aminoAcid.CarbonPosition,
-                    carbonCarbonBondLength);
-                aminoAcidForces.CarbonAlphaForce += carbonAlphaCarbonForceVector;
-                aminoAcidForces.CarbonForce += -carbonAlphaCarbonForceVector;
-
+                CalculateBondLengthForces(previousAminoAcid, aminoAcid, bondForces);
+                CalculateBondAngleForces(previousAminoAcid, aminoAcid, bondForces);
             }
             return bondForces;
         }
 
-        private UnitVector3D CalculateBondForce(UnitPoint3D atom1Position, UnitPoint3D atom2Position, UnitValue equilibriumBondLength)
+        private void CalculateBondLengthForces(ApproximatedAminoAcid previousAminoAcid, ApproximatedAminoAcid aminoAcid,
+            Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> bondForces)
+        {
+            var nitrogenCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Nitrogen, ElementName.Carbon);
+            var carbonCarbonBondLength = BondLengthCalculator.CalculateApproximate(ElementName.Carbon, ElementName.Carbon);
+
+            var aminoAcidForces = bondForces[aminoAcid];
+            // Carbon - nitrogen bond
+            if (previousAminoAcid != null)
+            {
+                var carbonNitrogenForceVector = CalculateBondLengthForce(previousAminoAcid.CarbonPosition,
+                    aminoAcid.NitrogenPosition,
+                    nitrogenCarbonBondLength);
+                var previousAminoAcidForces = bondForces[previousAminoAcid];
+                previousAminoAcidForces.CarbonForce += carbonNitrogenForceVector;
+                aminoAcidForces.NitrogenForce += -carbonNitrogenForceVector;
+            }
+
+            // Nitrogen - carbon alpha bond
+            var nitrogenCarbonAlphaForceVector = CalculateBondLengthForce(aminoAcid.NitrogenPosition,
+                aminoAcid.CarbonAlphaPosition,
+                nitrogenCarbonBondLength);
+            aminoAcidForces.NitrogenForce += nitrogenCarbonAlphaForceVector;
+            aminoAcidForces.CarbonAlphaForce += -nitrogenCarbonAlphaForceVector;
+
+            // Carbon alpha - carbon bond
+            var carbonAlphaCarbonForceVector = CalculateBondLengthForce(aminoAcid.CarbonAlphaPosition,
+                aminoAcid.CarbonPosition,
+                carbonCarbonBondLength);
+            aminoAcidForces.CarbonAlphaForce += carbonAlphaCarbonForceVector;
+            aminoAcidForces.CarbonForce += -carbonAlphaCarbonForceVector;
+        }
+
+        private UnitVector3D CalculateBondLengthForce(UnitPoint3D atom1Position, UnitPoint3D atom2Position, UnitValue equilibriumBondLength)
         {
             // Settings
-            const double bondSpringConstant = 1e5;
+            const double BondSpringConstant = 1e4;
 
             var atomDistance = atom1Position.DistanceTo(atom2Position);
             var deviationFromEquilibrium = atomDistance - equilibriumBondLength;
-            var forceMagnitude = (bondSpringConstant * deviationFromEquilibrium.In(Unit.Meter)).To(Unit.Newton);
+            var forceMagnitude = (BondSpringConstant * deviationFromEquilibrium.In(Unit.Meter)).To(Unit.Newton);
             var forceDirection = atom1Position.VectorTo(atom2Position).Normalize();
             return forceMagnitude * forceDirection;
+        }
+
+        private void CalculateBondAngleForces(ApproximatedAminoAcid previousAminoAcid, ApproximatedAminoAcid aminoAcid,
+            Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces> bondForces)
+        {
+            const double RestoreForceScaling = 1e-11;
+
+            var aminoAcidForces = bondForces[aminoAcid];
+            var nitrogenCarbonAlphaVector = aminoAcid.NitrogenPosition.VectorTo(aminoAcid.CarbonAlphaPosition);
+
+            if (previousAminoAcid != null)
+            {
+                var previousAminoAcidForces = bondForces[previousAminoAcid];
+
+                // Carbon alpha - carbon - nitrogen bond pair
+                var carbonAlphaCarbonVector = previousAminoAcid.CarbonAlphaPosition
+                    .VectorTo(previousAminoAcid.CarbonPosition);
+                var carbonNitrogenVector = previousAminoAcid.CarbonPosition
+                    .VectorTo(aminoAcid.NitrogenPosition);
+                var cacnAngle = carbonAlphaCarbonVector.AngleWith(carbonNitrogenVector);
+                var cacnPlaneNormal = carbonAlphaCarbonVector.CrossProduct(carbonNitrogenVector);
+                var cacnForceMagnitude = RestoreForceScaling *
+                                         (cacnAngle.In(Unit.Degree) - AminoAcidBondAngles.CaCNAngle.In(Unit.Degree))
+                                         .To(Unit.Newton);
+                var carbonAlpha1ForceDirection = -carbonAlphaCarbonVector.CrossProduct(cacnPlaneNormal).Normalize();
+                var nitrogenForceDirection = carbonNitrogenVector.CrossProduct(cacnPlaneNormal).Normalize();
+                previousAminoAcidForces.CarbonAlphaForce += cacnForceMagnitude * carbonAlpha1ForceDirection;
+                previousAminoAcidForces.CarbonForce += -(cacnForceMagnitude * carbonAlpha1ForceDirection
+                                                       + cacnForceMagnitude * nitrogenForceDirection);
+                aminoAcidForces.NitrogenForce += cacnForceMagnitude * nitrogenForceDirection;
+
+                // Carbon - nitrogen - carbon alpha bond pair
+                var cncaAngle = carbonNitrogenVector.AngleWith(nitrogenCarbonAlphaVector);
+                var cncaPlaneNormal = carbonNitrogenVector.CrossProduct(nitrogenCarbonAlphaVector);
+                var cncaForceMagnitude = RestoreForceScaling *
+                                         (cncaAngle.In(Unit.Degree) - AminoAcidBondAngles.CNCaAngle.In(Unit.Degree))
+                                         .To(Unit.Newton);
+                var carbonForceDirection = carbonNitrogenVector.CrossProduct(cncaPlaneNormal).Normalize();
+                var carbonAlpha2ForceDirection = nitrogenCarbonAlphaVector.CrossProduct(cncaPlaneNormal).Normalize();
+                previousAminoAcidForces.CarbonForce += cncaForceMagnitude * carbonForceDirection;
+                aminoAcidForces.NitrogenForce += -(cncaForceMagnitude * carbonForceDirection +
+                                                   cncaForceMagnitude * carbonAlpha2ForceDirection);
+                aminoAcidForces.CarbonAlphaForce += cncaForceMagnitude * carbonAlpha2ForceDirection;
+            }
+
+            // Nitrogen - carbon alpha - carbon bond pair
+            var carbonAlphaCarbon2Vector = aminoAcid.CarbonAlphaPosition.VectorTo(aminoAcid.CarbonPosition);
+            var ncacAngle = nitrogenCarbonAlphaVector.AngleWith(carbonAlphaCarbon2Vector);
+            var ncacPlaneNormal = nitrogenCarbonAlphaVector.CrossProduct(carbonAlphaCarbon2Vector);
+            var ncacForceMagnitude = RestoreForceScaling *
+                                     (ncacAngle.In(Unit.Degree) - AminoAcidBondAngles.NCaCAngle.In(Unit.Degree))
+                                     .To(Unit.Newton);
+            var nitrogenForceDirection2 = nitrogenCarbonAlphaVector.CrossProduct(ncacPlaneNormal).Normalize();
+            var carbonForceDirection2 = carbonAlphaCarbon2Vector.CrossProduct(ncacPlaneNormal).Normalize();
+            aminoAcidForces.NitrogenForce += ncacForceMagnitude * nitrogenForceDirection2;
+            aminoAcidForces.CarbonAlphaForce += -(ncacForceMagnitude * nitrogenForceDirection2 +
+                                                  ncacForceMagnitude * carbonForceDirection2);
+            aminoAcidForces.CarbonForce += ncacForceMagnitude * carbonForceDirection2;
         }
     }
 }

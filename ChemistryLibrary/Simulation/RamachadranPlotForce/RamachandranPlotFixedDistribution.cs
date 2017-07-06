@@ -18,8 +18,15 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
         public AminoAcidName AminoAcidName { get; }
         public UnitVector2D GetPhiPsiVector(UnitValue phi, UnitValue psi)
         {
-            // TODO: Handle wrap-around
-            return new UnitVector2D(phi - targetPhi, psi - targetPsi);
+            var phiDiff = phi - targetPhi;
+            var phiComponent = phiDiff.In(Unit.Degree) > 180 ? targetPhi + 360.To(Unit.Degree) - phi
+                : phiDiff.In(Unit.Degree) < -180 ? targetPhi - phi - 360.To(Unit.Degree)
+                : -phiDiff;
+            var psiDiff = psi - targetPsi;
+            var psiComponent = psiDiff.In(Unit.Degree) > 180 ? targetPsi + 360.To(Unit.Degree) - psi
+                : psiDiff.In(Unit.Degree) < -180 ? targetPsi - psi - 360.To(Unit.Degree)
+                : -psiDiff;
+            return new UnitVector2D(phiComponent, psiComponent);
         }
     }
 }

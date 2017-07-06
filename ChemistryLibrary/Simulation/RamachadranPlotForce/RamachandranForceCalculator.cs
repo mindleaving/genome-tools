@@ -8,7 +8,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranForceCalculator
     {
-        private const double forceScaling = 1e-5;
+        private const double forceScaling = 1e-6;
 
         private readonly IRamachandranPlotDistributionSource distributionSource;
 
@@ -43,7 +43,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
                 }
                 if (aminoAcidAngles.Phi != null && aminoAcidAngles.Psi != null)
                 {
-                    var plotGradient = plotDistribution.GetPhiPsiVector(aminoAcid.PhiAngle, aminoAcid.PsiAngle);
+                    var plotGradient = plotDistribution.GetPhiPsiVector(aminoAcidAngles.Phi, aminoAcidAngles.Psi).In(Unit.Degree);
                     var phiDeviation = plotGradient.X;
                     var psiDeviation = plotGradient.Y;
 
@@ -79,19 +79,19 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             var previousCarbonCarbonAlphaVector = lastAminoAcid.CarbonPosition
                 .VectorTo(lastAminoAcid.CarbonAlphaPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude1 = forceScaling * 1.0.To(Unit.Newton);
-            var forceDirection1 = Math.Sign(omegaDeviation) * previousCarbonCarbonAlphaVector
-                                      .CrossProduct(carbonNitrogenVector)
-                                      .Normalize();
+            var forceMagnitude1 = forceScaling * omegaDeviation * 1.0.To(Unit.Newton);
+            var forceDirection1 = previousCarbonCarbonAlphaVector
+                .CrossProduct(carbonNitrogenVector)
+                .Normalize();
             lastAminoAcidForces.CarbonAlphaForce += forceMagnitude1 * forceDirection1;
 
             var nitrogenCarbonAlphaVector = aminoAcid.NitrogenPosition
                 .VectorTo(aminoAcid.CarbonAlphaPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude2 = forceScaling * 1.0.To(Unit.Newton);
-            var forceDirection2 = -Math.Sign(omegaDeviation) * nitrogenCarbonAlphaVector
-                                      .CrossProduct(carbonNitrogenVector)
-                                      .Normalize();
+            var forceMagnitude2 = forceScaling * omegaDeviation * 1.0.To(Unit.Newton);
+            var forceDirection2 = -nitrogenCarbonAlphaVector
+                .CrossProduct(carbonNitrogenVector)
+                .Normalize();
             aminoAcidForces.CarbonAlphaForce += forceMagnitude2 * forceDirection2;
         }
 
@@ -114,7 +114,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
                     .VectorTo(previousAminoAcid.CarbonPosition)
                     .In(SIPrefix.Pico, Unit.Meter);
                 var forceMagnitude1 = forceScaling * phiDeviation * 1.0.To(Unit.Newton);
-                var forceDirection1 = nitrogenCarbonAlphaVector
+                var forceDirection1 = -nitrogenCarbonAlphaVector
                     .CrossProduct(nitrogenCarbonVector)
                     .Normalize();
                 previousAminoAcidForces.CarbonForce += forceMagnitude1 * forceDirection1;
@@ -150,7 +150,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             var carbonAlphaNitrogenVector = aminoAcid.CarbonAlphaPosition
                 .VectorTo(aminoAcid.NitrogenPosition)
                 .In(SIPrefix.Pico, Unit.Meter);
-            var forceMagnitude1 = forceScaling * psiDeviation * 1.0.To(Unit.Newton);
+            var forceMagnitude1 = -forceScaling * psiDeviation * 1.0.To(Unit.Newton);
             var forceDirection1 = carbonAlphaCarbonVector
                 .CrossProduct(carbonAlphaNitrogenVector)
                 .Normalize();

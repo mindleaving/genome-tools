@@ -54,6 +54,7 @@
     <Compile Include="Pdb\PdbGeneratorTool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Simulation\RamachadranForceCalculatorTest.cs" />
+    <Compile Include="Simulation\RamachandranPlotForce\RamachandranPlotFixedDistributionTest.cs" />
     <Compile Include="SpherePointDistributorTest.cs" />
   </ItemGroup>
   <ItemGroup>

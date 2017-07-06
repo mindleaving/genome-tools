@@ -8,6 +8,7 @@ using ChemistryLibrary.Extensions;
 using ChemistryLibrary.IO;
 using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation;
+using ChemistryLibrary.Simulation.RamachadranPlotForce;
 using Commons;
 using MoleculeViewer.ViewModels;
 
@@ -47,11 +48,19 @@ namespace MoleculeViewer.Views
             {
                 TimeStep = 2.To(SIPrefix.Femto, Unit.Second),
                 SimulationTime = 10.To(SIPrefix.Nano, Unit.Second),
-                ResetAtomVelocityAfterEachTimestep = false
+                ResetAtomVelocityAfterEachTimestep = false,
+                UseCompactingForce = false,
+                UseRamachadranForce = true
             };
             var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
-            var simulationRunner = ApproximatePeptideFoldingSimulatorFactory.Create(
-                approximatePeptide, simulationSettings, ramachadranDataDirectory);
+            //var simulationRunner = ApproximatePeptideFoldingSimulatorFactory.Create(
+            //    approximatePeptide, simulationSettings, ramachadranDataDirectory);
+            var simulationRunner = new ApproximatePeptideFoldingSimulator(approximatePeptide,
+                simulationSettings,
+                new CompactingForceCalculator(), 
+                new RamachandranForceCalculator(new RamachandranPlotDistributionFixedSource(
+                    new RamachandranPlotFixedDistribution(AminoAcidName.Alanine, new UnitPoint2D(-57.To(Unit.Degree), -47.To(Unit.Degree))))),
+                new BondForceCalculator());
             //var simulationRunner = new MoleculeDynamicsSimulator(peptide.Molecule, new List<CustomAtomForce>(),
             //    new MoleculeDynamicsSimulationSettings
             //    {

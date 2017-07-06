@@ -25,9 +25,6 @@ namespace ChemistryLibrary.Builders
             var nitrogenCarbonDistance = PeriodicTable.GetRadius(ElementName.Nitrogen) +
                                          PeriodicTable.GetRadius(ElementName.Carbon);
             var CaCDistance = 2 * PeriodicTable.GetRadius(ElementName.Carbon);
-            var NCaCAngle = 109.5 * Math.PI / 180;
-            var CaCNAngle = 116.0 * Math.PI / 180;
-            var CNCaAngle = 122.0 * Math.PI / 180;
 
             UnitPoint3D carbonPosition;
             UnitPoint3D carbonAlphaPosition;
@@ -56,19 +53,19 @@ namespace ChemistryLibrary.Builders
                 carbonAlphaCarbonBondDirection,
                 nitrogenCarbonAlphaBondDirection,
                 nitrogenCarbonDistance,
-                CaCNAngle,
+                AminoAcidBondAngles.CaCNAngle,
                 psi);
             carbonAlphaPosition = CalculateAtomPosition(nitrogenPosition,
                 carbonPosition.VectorTo(nitrogenPosition),
                 carbonAlphaCarbonBondDirection,
                 nitrogenCarbonDistance,
-                CNCaAngle,
+                AminoAcidBondAngles.CNCaAngle,
                 omega);
             carbonPosition = CalculateAtomPosition(carbonAlphaPosition,
                 nitrogenPosition.VectorTo(carbonAlphaPosition),
                 carbonPosition.VectorTo(nitrogenPosition),
                 CaCDistance,
-                NCaCAngle,
+                AminoAcidBondAngles.NCaCAngle,
                 phi);
             aminoAcid.NitrogenPosition = nitrogenPosition;
             aminoAcid.CarbonAlphaPosition = carbonAlphaPosition;
@@ -85,7 +82,7 @@ namespace ChemistryLibrary.Builders
             Vector3D vector1,
             Vector3D vector2,
             UnitValue bondLength,
-            double bondAngle,
+            UnitValue bondAngle,
             double bondTorsion)
         {
             var basisVector1 = vector1.Normalize();
@@ -93,10 +90,11 @@ namespace ChemistryLibrary.Builders
             var basisVector2 = (normalizedVector2 - basisVector1.DotProduct(normalizedVector2) * basisVector1).Normalize();
             var basisVector3 = basisVector1.CrossProduct(basisVector2);
 
+            var bondAngleRadians = bondAngle.In(Unit.Radians);
             var bondVector = bondLength.In(SIPrefix.Pico, Unit.Meter) * new Vector3D(
-                                 -Math.Cos(bondAngle),
-                                 -Math.Sin(bondAngle) * Math.Cos(bondTorsion),
-                                 -Math.Sin(bondAngle) * Math.Sin(bondTorsion));
+                                 -Math.Cos(bondAngleRadians),
+                                 -Math.Sin(bondAngleRadians) * Math.Cos(bondTorsion),
+                                 -Math.Sin(bondAngleRadians) * Math.Sin(bondTorsion));
 
             var transformMatrix = new Matrix3X3();
             transformMatrix.SetColumn(0, basisVector1.Data);

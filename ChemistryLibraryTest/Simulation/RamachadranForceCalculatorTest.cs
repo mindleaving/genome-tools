@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Measurements;
@@ -50,8 +53,8 @@ namespace ChemistryLibraryTest.Simulation
         [Test]
         public void DihedralAnglesConverge()
         {
-            var targetPhi = -90.To(Unit.Degree);
-            var targetPsi = -20.To(Unit.Degree);
+            var targetPhi = 40.To(Unit.Degree);
+            var targetPsi = -10.To(Unit.Degree);
 
             var approximatePeptide = ApproximatePeptideBuilder.FromSequence(new [] { AminoAcidName.Alanine, AminoAcidName.Alanine, AminoAcidName.Alanine });
             approximatePeptide.UpdatePositions();
@@ -72,10 +75,21 @@ namespace ChemistryLibraryTest.Simulation
                 new CompactingForceCalculator(),
                 sut,
                 new BondForceCalculator());
+            var angleHistory = new List<AminoAcidAngles>();
             var simulationEndedWaitHandle = new ManualResetEvent(false);
             simulator.SimulationCompleted += (sender, args) => simulationEndedWaitHandle.Set();
+            simulator.TimestepCompleted += (sender, args) =>
+            {
+                var angles = AminoAcidAngleMeasurer.MeasureAngles(args.PeptideCopy);
+                var midAminoAcid = args.PeptideCopy.AminoAcids[1];
+                angleHistory.Add(angles[midAminoAcid]);
+            };
             simulator.StartSimulation();
             simulationEndedWaitHandle.WaitOne();
+            File.WriteAllLines(@"G:\Projects\HumanGenome\angles.csv",
+                angleHistory.Select(angle => $"{angle.Omega.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)};" +
+                                             $"{angle.Phi.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)};" +
+                                             $"{angle.Psi.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)}"));
 
             var finalAngles = AminoAcidAngleMeasurer.MeasureAngles(approximatePeptide);
             var middleAminoAcid = approximatePeptide.AminoAcids[1];
