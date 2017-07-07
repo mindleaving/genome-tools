@@ -89,12 +89,12 @@ namespace ChemistryLibrary.Simulation
                     .VectorTo(previousAminoAcid.CarbonPosition);
                 var carbonNitrogenVector = previousAminoAcid.CarbonPosition
                     .VectorTo(aminoAcid.NitrogenPosition);
-                var cacnAngle = carbonAlphaCarbonVector.AngleWith(carbonNitrogenVector);
+                var cacnAngle = 180.To(Unit.Degree) - carbonAlphaCarbonVector.AngleWith(carbonNitrogenVector);
                 var cacnPlaneNormal = carbonAlphaCarbonVector.CrossProduct(carbonNitrogenVector);
                 var cacnForceMagnitude = RestoreForceScaling *
                                          (cacnAngle.In(Unit.Degree) - AminoAcidBondAngles.CaCNAngle.In(Unit.Degree))
                                          .To(Unit.Newton);
-                var carbonAlpha1ForceDirection = -carbonAlphaCarbonVector.CrossProduct(cacnPlaneNormal).Normalize();
+                var carbonAlpha1ForceDirection = carbonAlphaCarbonVector.CrossProduct(cacnPlaneNormal).Normalize();
                 var nitrogenForceDirection = carbonNitrogenVector.CrossProduct(cacnPlaneNormal).Normalize();
                 previousAminoAcidForces.CarbonAlphaForce += cacnForceMagnitude * carbonAlpha1ForceDirection;
                 previousAminoAcidForces.CarbonForce += -(cacnForceMagnitude * carbonAlpha1ForceDirection
@@ -102,7 +102,7 @@ namespace ChemistryLibrary.Simulation
                 aminoAcidForces.NitrogenForce += cacnForceMagnitude * nitrogenForceDirection;
 
                 // Carbon - nitrogen - carbon alpha bond pair
-                var cncaAngle = carbonNitrogenVector.AngleWith(nitrogenCarbonAlphaVector);
+                var cncaAngle = 180.To(Unit.Degree) - carbonNitrogenVector.AngleWith(nitrogenCarbonAlphaVector);
                 var cncaPlaneNormal = carbonNitrogenVector.CrossProduct(nitrogenCarbonAlphaVector);
                 var cncaForceMagnitude = RestoreForceScaling *
                                          (cncaAngle.In(Unit.Degree) - AminoAcidBondAngles.CNCaAngle.In(Unit.Degree))
@@ -117,7 +117,7 @@ namespace ChemistryLibrary.Simulation
 
             // Nitrogen - carbon alpha - carbon bond pair
             var carbonAlphaCarbon2Vector = aminoAcid.CarbonAlphaPosition.VectorTo(aminoAcid.CarbonPosition);
-            var ncacAngle = nitrogenCarbonAlphaVector.AngleWith(carbonAlphaCarbon2Vector);
+            var ncacAngle = 180.To(Unit.Degree) - nitrogenCarbonAlphaVector.AngleWith(carbonAlphaCarbon2Vector);
             var ncacPlaneNormal = nitrogenCarbonAlphaVector.CrossProduct(carbonAlphaCarbon2Vector);
             var ncacForceMagnitude = RestoreForceScaling *
                                      (ncacAngle.In(Unit.Degree) - AminoAcidBondAngles.NCaCAngle.In(Unit.Degree))

@@ -7,6 +7,6 @@ namespace ChemistryLibrary.Simulation
         public bool FreezeSecondaryStructures { get; set; }
         public UnitValue ReservoirTemperature { get; set; } = 37.To(Unit.Celcius);
         public bool UseCompactingForce { get; set; } = true;
-        public bool UseRamachadranForce { get; set; } = true;
+        public bool UseRamachandranForce { get; set; } = true;
     }
 }

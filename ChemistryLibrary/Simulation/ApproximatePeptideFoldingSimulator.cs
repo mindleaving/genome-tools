@@ -89,7 +89,7 @@ namespace ChemistryLibrary.Simulation
                 var compactnessForces = simulationSettings.UseCompactingForce
                     ? compactnessForceCalculator.Calculate(CompactnessMeasurer.Measure(Peptide))
                     : new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
-                var ramachandranForces = simulationSettings.UseRamachadranForce
+                var ramachandranForces = simulationSettings.UseRamachandranForce
                     ? ramachandranForceCalculator.Calculate(Peptide)
                     : new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
                 var bondForces = bondForceCalculator.Calculate(Peptide);
@@ -165,8 +165,8 @@ namespace ChemistryLibrary.Simulation
             var targetVelocity = Math.Sqrt(3*(PhysicalConstants.BoltzmannsConstant*reservoirTemperature/mass).Value).To(Unit.MetersPerSecond);
             if(velocityMagnitude > targetVelocity)
             {
-                const double dampingSpeed = 0.5; // Between 0 (no damping) and 1 (full damping)
-                var damping = 1 - dampingSpeed * (velocityMagnitude - targetVelocity).Value / velocityMagnitude.Value;
+                const double DampingSpeed = 0.5; // Between 0 (no damping) and 1 (full damping)
+                var damping = 1 - DampingSpeed * (velocityMagnitude - targetVelocity).Value / velocityMagnitude.Value;
                 return damping * velocity;
             }
             return velocity;
