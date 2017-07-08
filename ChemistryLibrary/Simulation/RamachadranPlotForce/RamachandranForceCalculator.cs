@@ -8,7 +8,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranForceCalculator
     {
-        private const double forceScaling = 1e-9;
+        private const double forceScaling = 1e-10;
 
         private readonly IRamachandranPlotDistributionSource distributionSource;
 
