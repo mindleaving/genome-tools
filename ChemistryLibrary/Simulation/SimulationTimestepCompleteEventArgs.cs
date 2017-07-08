@@ -18,6 +18,7 @@ namespace ChemistryLibrary.Simulation
         {
             PeptideCopy = peptide.DeepClone();
             Atoms = AtomExtractor.FromApproximatePeptide(peptide);
+            Atoms.ForEach(atom => atom.IsBackbone = true);
         }
 
         public SimulationTimestepCompleteEventArgs(UnitValue t, Molecule molecule)
