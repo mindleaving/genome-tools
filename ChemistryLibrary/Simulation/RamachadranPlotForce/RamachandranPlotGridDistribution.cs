@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading.Tasks;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
@@ -15,7 +16,6 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
         private readonly int gridSteps;
 
         public AminoAcidName AminoAcidName { get; }
-        public double[,] DistributionPlot { get; }
         public Vector2D[,] GradientPlot { get; }
 
         public RamachandranPlotGridDistribution(AminoAcidName aminoAcidName, string distributionFilePath, int gridSteps = 360)
@@ -23,19 +23,16 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             AminoAcidName = aminoAcidName;
             this.gridSteps = gridSteps;
             var distributionCacheFilename = GetCachedFilename(distributionFilePath);
-            if (File.Exists(distributionCacheFilename))
+            try
             {
-                DistributionPlot = LoadDistributionGrid(distributionCacheFilename);
+                GradientPlot = LoadGradientGrid(distributionCacheFilename);
             }
-            if(DistributionPlot == null 
-                || DistributionPlot.GetLength(0) != gridSteps
-                || DistributionPlot.GetLength(1) != gridSteps)
+            catch (Exception)
             {
                 var angles = ParseDistributionFile(distributionFilePath);
-                DistributionPlot = GenerateDistributionPlot(angles);
+                GradientPlot = GenerateGradientPlot(angles);
                 StoreDistibutionPlot(distributionCacheFilename);
             }
-            GradientPlot = GenerateGradientPlot(DistributionPlot);
         }
 
         private string GetCachedFilename(string distributionFilePath)
@@ -51,9 +48,25 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
                 AminoAcidName.ToThreeLetterCode() + ".csv");
         }
 
-        private double[,] LoadDistributionGrid(string distributionCacheFilename)
+        private Vector2D[,] LoadGradientGrid(string distributionCacheFilename)
         {
-            return CsvReader.ReadDoubleArray(distributionCacheFilename);
+            var xGridFilename = distributionCacheFilename.Replace(".csv", "_X.csv");
+            var xGrid = CsvReader.ReadDoubleArray(xGridFilename);
+            if(xGrid.GetLength(0) != gridSteps || xGrid.GetLength(1) != gridSteps)
+                throw new Exception("Cached grid has wrong dimension");
+            var yGridFilename = distributionCacheFilename.Replace(".csv", "_Y.csv");
+            var yGrid = CsvReader.ReadDoubleArray(yGridFilename);
+            if (yGrid.GetLength(0) != gridSteps || yGrid.GetLength(1) != gridSteps)
+                throw new Exception("Cached grid has wrong dimension");
+            var gradientGrid = new Vector2D[gridSteps,gridSteps];
+            for (var rowIdx = 0; rowIdx < gridSteps; rowIdx++)
+            {
+                for (var columnIdx = 0; columnIdx < gridSteps; columnIdx++)
+                {
+                    gradientGrid[rowIdx, columnIdx] = new Vector2D(xGrid[rowIdx, columnIdx], yGrid[rowIdx, columnIdx]);
+                }
+            }
+            return gradientGrid;
         }
 
         private void StoreDistibutionPlot(string distributionCacheFilename)
@@ -61,119 +74,73 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             var directory = Path.GetDirectoryName(distributionCacheFilename);
             if (directory != null && !Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-            CsvWriter.Write(DistributionPlot, distributionCacheFilename);
-        }
-
-        private double[,] GenerateDistributionPlot(List<AminoAcidAngles> aminoAcidAngles)
-        {
-            var distribution = new double[gridSteps, gridSteps];
-            var probabilityDensitySum = 0.0;
-            foreach (var aminoAcidAngle in aminoAcidAngles)
+            string xGridFilename;
+            string yGridFilename;
+            if (distributionCacheFilename.EndsWith(".csv"))
             {
-                probabilityDensitySum += ApplyPointDistribution(aminoAcidAngle.Phi, aminoAcidAngle.Psi, distribution);
+                xGridFilename = distributionCacheFilename.Replace(".csv", "_X.csv");
+                yGridFilename = distributionCacheFilename.Replace(".csv", "_Y.csv");
             }
-            // Prohibited zone
-            var prohibitedZoneStrength = 1.0/(gridSteps*gridSteps) * probabilityDensitySum;
-            for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
+            else
             {
-                for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
+                xGridFilename = distributionCacheFilename + "_X.csv";
+                yGridFilename = distributionCacheFilename + "_Y.csv";
+            }
+            var xGrid = new double[gridSteps,gridSteps];
+            var yGrid = new double[gridSteps, gridSteps];
+            for (var rowIdx = 0; rowIdx < gridSteps; rowIdx++)
+            {
+                for (var columnIdx = 0; columnIdx < gridSteps; columnIdx++)
                 {
-                    // Non-normalized probability density
-                    var angles = GetAnglesFromGridPosition(new Point2D(phiStepIdx, psiStepIdx));
-                    var prohibitedZonePhiCenter = -30 * Math.Sin(2 * angles.Psi.In(Unit.Radians));
-                    var prohibitedZoneWidth = 60;
-
-                    var phi = angles.Phi.In(Unit.Degree);
-                    var distanceFromCenter = phi - prohibitedZonePhiCenter;
-                    var distanceSquared = distanceFromCenter * distanceFromCenter;
-                    var zoneWidthSquared = prohibitedZoneWidth * prohibitedZoneWidth;
-                    var probabilityDensity = prohibitedZoneStrength*(1.0 - Math.Exp(-distanceSquared / zoneWidthSquared));
-
-                    distribution[psiStepIdx, phiStepIdx] += probabilityDensity;
-                    probabilityDensitySum += probabilityDensity;
+                    xGrid[rowIdx, columnIdx] = GradientPlot[rowIdx, columnIdx].X;
+                    yGrid[rowIdx, columnIdx] = GradientPlot[rowIdx, columnIdx].Y;
                 }
             }
-            // Normalize probability densities
-            for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
-            {
-                for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
-                {
-                    distribution[psiStepIdx, phiStepIdx] /= probabilityDensitySum;
-                }
-            }
-            return distribution;
+            CsvWriter.Write(xGrid, xGridFilename);
+            CsvWriter.Write(yGrid, yGridFilename);
         }
 
-        private double ApplyPointDistribution(UnitValue phi, UnitValue psi, double[,] distribution)
+        private Vector2D[,] GenerateGradientPlot(List<AminoAcidAngles> aminoAcidAngles)
         {
-            const double Sigma = 10;
-            var sigmaSteps = gridSteps * Sigma / 360;
-            var sigmaStepsSquared = sigmaSteps * sigmaSteps;
-            var cutoffSteps = Math.Min(4 * sigmaSteps, gridSteps/2.0);
+            const double Sigma = 10.0;
 
-            var phiGridPosition = GetPhiGridPosition(phi);
-            var psiGridPosition = GetPPsiGridPosition(psi);
-
-            var phiStart = (int)Math.Floor(phiGridPosition - cutoffSteps);
-            var phiEnd = (int) Math.Ceiling(phiGridPosition + cutoffSteps);
-            var psiStart = (int) Math.Floor(psiGridPosition - cutoffSteps);
-            var psiEnd = (int) Math.Ceiling(psiGridPosition + cutoffSteps);
-
-            var probabilityDensitySum = 0.0;
-            for (int psiIdx = psiStart; psiIdx <= psiEnd; psiIdx++)
-            {
-                int y;
-                if (psiIdx < 0)
-                    y = psiIdx + gridSteps;
-                else if (psiIdx >= gridSteps)
-                    y = psiIdx - gridSteps;
-                else
-                    y = psiIdx;
-                for (int phiIdx = phiStart; phiIdx <= phiEnd; phiIdx++)
-                {
-                    int x;
-                    if (phiIdx < 0)
-                        x = phiIdx + gridSteps;
-                    else if (phiIdx >= gridSteps)
-                        x = phiIdx - gridSteps;
-                    else
-                        x = phiIdx;
-                    var xDistance = x - phiGridPosition;
-                    var yDistance = y - psiGridPosition;
-                    var distanceFromPointSquared = xDistance * xDistance + yDistance * yDistance;
-                    var probabilityDensity = Math.Exp(-distanceFromPointSquared / (2* sigmaStepsSquared));
-                    distribution[y, x] += probabilityDensity;
-                    probabilityDensitySum += probabilityDensity;
-                }
-            }
-            return probabilityDensitySum;
-        }
-
-        private static Vector2D[,] GenerateGradientPlot(double[,] distributionPlot)
-        {
-            var gridSteps = distributionPlot.GetLength(0);
             var gradientPlot = new Vector2D[gridSteps, gridSteps];
-            for (int psiStepIdx = 0; psiStepIdx < gridSteps; psiStepIdx++)
+            Parallel.For(0, gridSteps, psiStepIdx =>
             {
                 for (int phiStepIdx = 0; phiStepIdx < gridSteps; phiStepIdx++)
                 {
-                    var leftPixel = phiStepIdx == 0
-                        ? distributionPlot[psiStepIdx, gridSteps - 1]
-                        : distributionPlot[psiStepIdx, phiStepIdx - 1];
-                    var rightPixel = phiStepIdx == gridSteps - 1
-                        ? distributionPlot[psiStepIdx, 0]
-                        : distributionPlot[psiStepIdx, phiStepIdx+1];
-                    var upperPixel = psiStepIdx == 0
-                        ? distributionPlot[gridSteps - 1, phiStepIdx]
-                        : distributionPlot[psiStepIdx-1, phiStepIdx];
-                    var lowerPixel = psiStepIdx == gridSteps-1
-                        ? distributionPlot[0, phiStepIdx]
-                        : distributionPlot[psiStepIdx + 1, phiStepIdx];
-                    var gradientX = (rightPixel - leftPixel) / 2.0;
-                    var gradientY = (lowerPixel - upperPixel) / 2.0;
-                    gradientPlot[psiStepIdx, phiStepIdx] = new Vector2D(gradientX, gradientY);
+                    var gridAngle = GetAnglesFromGridPosition(new Point2D(phiStepIdx, psiStepIdx));
+                    var gradientVector = new Vector2D(0, 0);
+                    var totalWeight = 0.0;
+                    foreach (var aminoAcidAngle in aminoAcidAngles)
+                    {
+                        var phiDiff = gridAngle.Phi - aminoAcidAngle.Phi;
+                        var psiDiff = gridAngle.Psi - aminoAcidAngle.Psi;
+                        var phiComponent = phiDiff.In(Unit.Degree) > 180
+                            ? aminoAcidAngle.Phi + 360.To(Unit.Degree) - gridAngle.Phi
+                            : phiDiff.In(Unit.Degree) < -180
+                                ? aminoAcidAngle.Phi - gridAngle.Phi - 360.To(Unit.Degree)
+                                : -phiDiff;
+                        var psiComponent = psiDiff.In(Unit.Degree) > 180
+                            ? aminoAcidAngle.Psi + 360.To(Unit.Degree) - gridAngle.Psi
+                            : psiDiff.In(Unit.Degree) < -180
+                                ? aminoAcidAngle.Psi - gridAngle.Psi - 360.To(Unit.Degree)
+                                : -psiDiff;
+                        var phiComponentDegree = phiComponent.In(Unit.Degree);
+                        var psiComponentDegree = psiComponent.In(Unit.Degree);
+                        var distanceToPhiPsiSquared = phiComponentDegree * phiComponentDegree
+                                                      + psiComponentDegree * psiComponentDegree;
+                        var distanceToPhiPsi = Math.Sqrt(distanceToPhiPsiSquared);
+                        var weight = (1 - Math.Exp(-distanceToPhiPsiSquared / (2 * Sigma * Sigma))) / distanceToPhiPsi;
+                        totalWeight += weight;
+                        gradientVector.X += weight * phiComponentDegree;
+                        gradientVector.Y += weight * psiComponentDegree;
+                    }
+                    gradientVector.X /= totalWeight;
+                    gradientVector.Y /= totalWeight;
+                    gradientPlot[psiStepIdx, phiStepIdx] = gradientVector;
                 }
-            }
+            });
             return gradientPlot;
         }
 
@@ -211,7 +178,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             var xIdx = (int)GetPhiGridPosition(phi);
             var yIdx = (int)GetPPsiGridPosition(psi);
 
-            return GradientPlot[xIdx, yIdx].To(Unit.Newton);
+            return GradientPlot[xIdx, yIdx].To(Unit.Degree);
         }
 
         private AminoAcidAngles GetAnglesFromGridPosition(Point2D gridPosition)
