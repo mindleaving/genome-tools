@@ -28,3 +28,8 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 packages/
+
+#Ignore thumbnails created by Windows
+#Ignore files built by Visual Studio
+.vs/
+#Nuget packages folder
