@@ -19,7 +19,7 @@ namespace Studies
         public void ApproximatePeptideIsFoldedToKnownStableState(string pdbFilePath)
         {
             var pdbReadResult = PdbReader.ReadFile(pdbFilePath);
-            var peptide = pdbReadResult.Chains.First();
+            var peptide = pdbReadResult.Models.First().Chains.First();
             var approximatePeptide = ApproximatePeptideBuilder.FromPeptide(peptide);
 
             var simulationSettings = new ApproximatePeptideSimulationSettings

@@ -16,7 +16,7 @@ namespace ChemistryLibrary.IO
             {
                 case ".pdb":
                     var result = PdbReader.ReadFile(filename);
-                    return result.Chains.First();
+                    return result.Models.First().Chains.First();
                 case ".aminoseq":
                     return AminoseqReader.ReadFile(filename);
                 default:

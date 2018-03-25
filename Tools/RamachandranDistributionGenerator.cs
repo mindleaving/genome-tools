@@ -87,7 +87,7 @@ namespace Tools
         {
             var result = PdbReader.ReadFile(pdbFilename);
             var angleMeasurements = new Dictionary<AminoAcidReference, AminoAcidAngles>();
-            foreach (var chain in result.Chains)
+            foreach (var chain in result.Models.First().Chains)
             {
                 var angleMeasurement = AminoAcidAngleMeasurer.MeasureAngles(chain);
                 foreach (var kvp in angleMeasurement)

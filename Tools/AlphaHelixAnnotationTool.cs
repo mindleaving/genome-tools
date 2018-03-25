@@ -25,10 +25,10 @@ namespace Tools
                 try
                 {
                     var pdbResult = PdbReader.ReadFile(pdbFile);
-                    if (!pdbResult.Chains.Any())
+                    if (!pdbResult.Models.Any() || !pdbResult.Models.First().Chains.Any())
                         continue;
                     output.Add("#" + Path.GetFileNameWithoutExtension(pdbFile));
-                    foreach (var chain in pdbResult.Chains)
+                    foreach (var chain in pdbResult.Models.First().Chains)
                     {
                         var helixAnnotations = chain.Annotations
                             .Where(annot => annot.Type == PeptideSecondaryStructure.AlphaHelix)

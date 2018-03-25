@@ -14,7 +14,17 @@ namespace ChemistryLibrary.IO.Pdb
 {
     public class PdbReaderResult
     {
-        public PdbReaderResult(params Peptide[] chains)
+        public PdbReaderResult(params PdbModel[] models)
+        {
+            Models.AddRange(models);
+        }
+
+        public List<PdbModel> Models { get; } = new List<PdbModel>();
+    }
+
+    public class PdbModel
+    {
+        public PdbModel(params Peptide[] chains)
         {
             Chains.AddRange(chains);
         }
@@ -27,13 +37,43 @@ namespace ChemistryLibrary.IO.Pdb
         public static PdbReaderResult ReadFile(string filename)
         {
             var lines = File.ReadAllLines(filename);
-            var chainIds = ExtractChainIds(lines);
+            var models = ExtractModels(lines);
+            return new PdbReaderResult(models);
+        }
+
+        private static PdbModel[] ExtractModels(string[] lines)
+        {
+            var models = new List<PdbModel>();
+            var modelLines = new List<string>();
+            var modelStarted = false;
+            foreach (var line in lines)
+            {
+                if (!modelStarted && ReadLineCode(line).InSet("MODEL", "ATOM"))
+                    modelStarted = true;
+                if(!modelStarted)
+                    continue;
+                modelLines.Add(line);
+                if (ReadLineCode(line) == "ENDMDL")
+                {
+                    models.Add(ConstructModel(modelLines));
+                    modelStarted = false;
+                }
+            }
+            if(modelStarted)
+                models.Add(ConstructModel(modelLines));
+
+            return models.ToArray();
+        }
+
+        private static PdbModel ConstructModel(IList<string> modelLines)
+        {
+            var chainIds = ExtractChainIds(modelLines);
             var chains = new List<Peptide>();
             foreach (var chainId in chainIds)
             {
                 try
                 {
-                    var chain = ExtractChain(lines, chainId);
+                    var chain = ExtractChain(modelLines, chainId);
                     chains.Add(chain);
                 }
                 catch (ChemistryException chemException)
@@ -41,7 +81,7 @@ namespace ChemistryLibrary.IO.Pdb
                     // TODO: Log
                 }
             }
-            return new PdbReaderResult(chains.ToArray());
+            return new PdbModel(chains.ToArray());
         }
 
         private static Peptide ExtractChain(IList<string> lines, char chainId)
@@ -58,7 +98,8 @@ namespace ChemistryLibrary.IO.Pdb
         private static void ReadAtomPositions(IList<string> lines, char chainId, Peptide peptide, int firstResidueNumber)
         {
             var aminoAcidAtomGroups = lines
-                .Where(line => ReadLineCode(line) == "ATOM")
+                .SkipWhile(line => ReadLineCode(line) != "ATOM")
+                .TakeWhile(line => ReadLineCode(line) == "ATOM")
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .Where(atom => atom.AlternateConformationId == ' ' || atom.AlternateConformationId == 'A')
@@ -80,6 +121,7 @@ namespace ChemistryLibrary.IO.Pdb
                         100*atomInfo.X,
                         100*atomInfo.Y,
                         100*atomInfo.Z);
+                    correspondingAtom.IsPositioned = true;
                     correspondingAtom.IsPositionFixed = true;
                 }
             }
@@ -123,28 +165,30 @@ namespace ChemistryLibrary.IO.Pdb
 
         private class AminoAcidSequence
         {
-            public AminoAcidSequence(IList<AminoAcidName> aminoAcidNames, int firstResidueNumber)
+            public AminoAcidSequence(
+                IList<AminoAcidName> aminoAcidNames, 
+                int firstResidueNumber,
+                bool anyRandomAminoAcids)
             {
                 Sequence = new List<AminoAcidName>(aminoAcidNames);
                 FirstResidueNumber = firstResidueNumber;
+                AnyRandomAminoAcids = anyRandomAminoAcids;
             }
 
             public int FirstResidueNumber { get; }
+            public bool AnyRandomAminoAcids { get; }
             public IList<AminoAcidName> Sequence { get; }
         }
         private static AminoAcidSequence ExtractSequence(IList<string> lines, char chainId)
         {
-            //var seqresSequence = ExtractSequenceFromSeqresLines(lines, chainId);
             var atomSequence = ExtractSequenceFromAtomLines(lines, chainId);
-            //var matchedSequences = new OffsetSequenceMatcher<AminoAcidName>(
-            //    seqresSequence.Select(x => x.AminoAcidName).ToList(), 
-            //    atomSequence.Select(x => x.AminoAcidName).ToList());
 
             // Build sequence from atom sequence
             var startResidueNumber = atomSequence.First().ResidueNumber;
             var lastResidueNumber = atomSequence.Last().ResidueNumber;
             var sequence = new List<AminoAcidName>();
             var residueMap = atomSequence.ToDictionary(x => x.ResidueNumber, x => x.AminoAcidName);
+            var anyRandomAminoAcids = false;
             for (int residueIdx = startResidueNumber; residueIdx <= lastResidueNumber; residueIdx++)
             {
                 AminoAcidName aminoAcidName;
@@ -153,10 +197,12 @@ namespace ChemistryLibrary.IO.Pdb
                 else
                 {
                     aminoAcidName = (AminoAcidName)StaticRandom.Rng.Next(20); // !!!!!!! Random residue generation !!!!!!
+                    anyRandomAminoAcids = true;
                 }
                 sequence.Add(aminoAcidName);
             }
-            return new AminoAcidSequence(sequence, startResidueNumber);
+
+            return new AminoAcidSequence(sequence, startResidueNumber, anyRandomAminoAcids);
         }
 
         private static IList<ResidueSequenceItem> ExtractSequenceFromSeqresLines(IList<string> lines, char chainId)
@@ -217,7 +263,8 @@ namespace ChemistryLibrary.IO.Pdb
         {
             // Extract sequence from atom entries
             var aminoAcidMap = lines
-                .Where(line => ReadLineCode(line) == "ATOM")
+                .SkipWhile(line => ReadLineCode(line) != "ATOM")
+                .TakeWhile(line => ReadLineCode(line) == "ATOM")
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .GroupBy(atom => atom.ResidueNumber)
