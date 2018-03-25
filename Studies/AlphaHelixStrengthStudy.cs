@@ -6,8 +6,10 @@ using System.Linq;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Objects;
 using Commons;
+using Commons.Extensions;
 using NUnit.Framework;
 using Commons.Optimization;
+using Commons.Physics;
 
 namespace Studies
 {

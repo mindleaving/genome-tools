@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {
@@ -21,14 +23,14 @@ namespace ChemistryLibrary.Simulation
             //CalculateIonicForces(molecule, forceLookup, neighborhoodMap);
             CalculateAtomShellRepulsion(molecule, forceLookup, neighborhoodMap);
             var lonePairForceLookup = CalculateLonePairRepulsion(graph, forceLookup);
-            if(forceLookup.Values.Any(v => MathExtensions.IsNaN(v.X)))
+            if(forceLookup.Values.Any(v => v.X.IsNaN()))
                 throw new Exception("Force cannot be 'NaN'");
             if (lonePairForceLookup.Values.Any(v => v.X.IsNaN()))
                 throw new Exception("Lone pair repulsion cannot be 'NaN'");
             return new ForceCalculatorResult(forceLookup, lonePairForceLookup, neighborhoodMap);
         }
 
-        private static Dictionary<uint, Vector3D> CalculateBondForces(Graph graph)
+        private static Dictionary<uint, Vector3D> CalculateBondForces(Graph<Atom,Bond> graph)
         {
             var forceLookup = graph.Vertices.ToDictionary(
                 kvp => kvp.Key, 
@@ -39,9 +41,9 @@ namespace ChemistryLibrary.Simulation
             {
                 var vertex1 = graph.Vertices[edge.Vertex1Id];
                 var vertex2 = graph.Vertices[edge.Vertex2Id];
-                var atom1 = (Atom) vertex1.Object;
-                var atom2 = (Atom) vertex2.Object;
-                var bond = (Bond) edge.Object;
+                var atom1 = vertex1.Object;
+                var atom2 = vertex2.Object;
+                var bond = edge.Object;
 
                 var v1V2Vector = atom1.Position.VectorTo(atom2.Position);
                 var forceDirection = v1V2Vector.Normalize();
@@ -123,17 +125,17 @@ namespace ChemistryLibrary.Simulation
             }
         }
 
-        private static Dictionary<Orbital, Vector3D> CalculateLonePairRepulsion(Graph graph, 
+        private static Dictionary<Orbital, Vector3D> CalculateLonePairRepulsion(Graph<Atom,Bond> graph, 
             IDictionary<uint, Vector3D> forceLookup)
         {
             var lonePairForceLookup = graph.Vertices.Values
-                .Select(v => (Atom)v.Object)
+                .Select(v => v.Object)
                 .SelectMany(atom => atom.LonePairs)
                 .ToDictionary(o => o, o => new Vector3D(0,0,0));
             foreach(var vertex in graph.Vertices.Values)
             {
                 var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).ToList();
-                var currentAtom = (Atom) vertex.Object;
+                var currentAtom = vertex.Object;
                 var filledOuterOrbitals = currentAtom.OuterOrbitals.Where(o => o.IsFull).ToList();
                 var orbitalNeighborVertexMap = MapBondOrbitalToNeighborVertex(
                     filledOuterOrbitals, currentAtom, adjacentVertices);
@@ -181,8 +183,8 @@ namespace ChemistryLibrary.Simulation
             return lonePairForceLookup;
         }
 
-        private static Dictionary<Orbital, Vertex> MapBondOrbitalToNeighborVertex(
-            List<Orbital> filledOuterOrbitals, Atom currentAtom, List<Vertex> adjacentVertices)
+        private static Dictionary<Orbital, Vertex<Atom>> MapBondOrbitalToNeighborVertex(
+            List<Orbital> filledOuterOrbitals, Atom currentAtom, List<Vertex<Atom>> adjacentVertices)
         {
             var orbitalNeighborVertexMap = filledOuterOrbitals
                 .Where(o => o.IsPartOfBond)

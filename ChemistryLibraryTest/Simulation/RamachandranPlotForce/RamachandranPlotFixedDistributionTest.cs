@@ -1,6 +1,7 @@
 ﻿using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation.RamachadranPlotForce;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest.Simulation.RamachandranPlotForce

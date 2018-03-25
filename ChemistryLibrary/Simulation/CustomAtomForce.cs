@@ -1,6 +1,7 @@
 ﻿using System;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

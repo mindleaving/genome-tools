@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Measurements
 {

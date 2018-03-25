@@ -4,7 +4,8 @@ using System.Linq;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Measurements;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Commons;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {

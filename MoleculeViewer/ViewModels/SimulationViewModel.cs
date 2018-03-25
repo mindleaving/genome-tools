@@ -1,6 +1,8 @@
 ﻿using System.Windows.Input;
 using ChemistryLibrary.Simulation;
 using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 using Commons.Wpf;
 
 namespace MoleculeViewer.ViewModels

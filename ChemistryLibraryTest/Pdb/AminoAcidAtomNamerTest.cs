@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using ChemistryLibrary;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;

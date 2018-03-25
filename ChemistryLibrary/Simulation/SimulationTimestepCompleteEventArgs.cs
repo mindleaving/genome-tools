@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

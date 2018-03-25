@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Measurements;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {

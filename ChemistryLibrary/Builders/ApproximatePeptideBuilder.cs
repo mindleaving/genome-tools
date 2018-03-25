@@ -5,7 +5,7 @@ using ChemistryLibrary.Extensions;
 using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Builders
 {

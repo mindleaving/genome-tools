@@ -6,7 +6,8 @@ using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation.RamachadranPlotForce;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

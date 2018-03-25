@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary;
 using ChemistryLibrary.Builders;
-using Commons;
+using Commons.Mathematics;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest

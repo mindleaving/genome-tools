@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.DataLookups
 {

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using ChemistryLibrary.Measurements;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {

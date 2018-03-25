@@ -2,6 +2,7 @@
 using System.Drawing.Imaging;
 using System.IO;
 using Commons;
+using Commons.Mathematics;
 using NUnit.Framework;
 
 namespace CommonsTest

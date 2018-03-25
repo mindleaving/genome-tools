@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

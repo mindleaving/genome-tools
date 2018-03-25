@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
 
 namespace ChemistryLibrary.IO.Pdb
 {
@@ -77,7 +78,7 @@ namespace ChemistryLibrary.IO.Pdb
             }
         }
 
-        private static IEnumerable<Vertex> GetNeighbors(Molecule molecule, Vertex vertex)
+        private static IEnumerable<Vertex<Atom>> GetNeighbors(Molecule molecule, Vertex<Atom> vertex)
         {
             return vertex.EdgeIds
                 .Select(edgeId => molecule.MoleculeStructure.Edges[edgeId])
@@ -88,7 +89,7 @@ namespace ChemistryLibrary.IO.Pdb
 
         private class AtomChainInfo
         {
-            public Vertex Vertex { get; set; }
+            public Vertex<Atom> Vertex { get; set; }
             public int ChainIdx { get; set; }
         }
 

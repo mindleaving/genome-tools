@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Commons;
+using Commons.Mathematics;
 
 namespace ChromosomeRBMTraining
 {

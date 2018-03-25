@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Builders
 {

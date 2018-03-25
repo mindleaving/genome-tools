@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

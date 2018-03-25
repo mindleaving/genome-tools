@@ -1,6 +1,7 @@
 ﻿using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Measurements
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Media.Media3D;
-using Commons;
+using Commons.Extensions;
 using Point3D = System.Windows.Media.Media3D.Point3D;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
@@ -22,7 +22,7 @@ namespace MoleculeViewer.ViewModels
 
         public void MoveBackForth(double change)
         {
-            const double Scaling = 60.0; // Determined from user experience
+            const double Scaling = 600.0; // Determined from user experience
 
             var lookDirection = ToPantoVector3D(Camera.LookDirection);
             var positionChange = lookDirection.Normalize().Multiply(Scaling * change);
@@ -42,7 +42,7 @@ namespace MoleculeViewer.ViewModels
 
         public void Pan(double deltaHorizontal, double deltaVertical)
         {
-            const double PositionChangeScale = 30.0; // Determined from user experience
+            const double PositionChangeScale = 300.0; // Determined from user experience
             var positionChange = CalculatePositionChange(deltaHorizontal, deltaVertical)
                 .Multiply(PositionChangeScale);
             Camera.Position = new Point3D(
@@ -62,7 +62,7 @@ namespace MoleculeViewer.ViewModels
                 Camera.LookDirection.Z + lookDirectionChange.Z);
         }
 
-        private Commons.Vector3D CalculatePositionChange(double deltaHorizontal, double deltaVertical)
+        private Commons.Mathematics.Vector3D CalculatePositionChange(double deltaHorizontal, double deltaVertical)
         {
             var upDirection = ToPantoVector3D(Camera.UpDirection);
             var imagePlaneNormal = ToPantoVector3D(Camera.LookDirection);
@@ -72,9 +72,9 @@ namespace MoleculeViewer.ViewModels
             return positionChange;
         }
 
-        private static Commons.Vector3D ToPantoVector3D(Vector3D cameraUpDirection)
+        private static Commons.Mathematics.Vector3D ToPantoVector3D(Vector3D cameraUpDirection)
         {
-            return new Commons.Vector3D(cameraUpDirection.X, cameraUpDirection.Y, cameraUpDirection.Z);
+            return new Commons.Mathematics.Vector3D(cameraUpDirection.X, cameraUpDirection.Y, cameraUpDirection.Z);
         }
 
         public void RotateObject(double horizontalRotation, double verticalRotation, Point3D objectCenter)
@@ -113,7 +113,7 @@ namespace MoleculeViewer.ViewModels
                 Camera.Position.Z + positionChange.Z);
 
             // Point camera at rotation point
-            var newLookDirection = new Commons.Vector3D(
+            var newLookDirection = new Commons.Mathematics.Vector3D(
                     rotationPoint.X - pannedPosition.X,
                     rotationPoint.Y - pannedPosition.Y,
                     rotationPoint.Z - pannedPosition.Z)

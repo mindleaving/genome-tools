@@ -8,7 +8,8 @@ using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation;
 using ChemistryLibrary.Simulation.RamachadranPlotForce;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest.Simulation

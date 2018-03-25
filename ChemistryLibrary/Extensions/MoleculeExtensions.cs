@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
 
 namespace ChemistryLibrary.Extensions
 {

@@ -1,5 +1,4 @@
-﻿using ChemistryLibrary;
-using ChemistryLibrary.Objects;
+﻿using ChemistryLibrary.Objects;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest

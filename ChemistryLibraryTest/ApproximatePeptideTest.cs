@@ -1,8 +1,8 @@
-﻿using ChemistryLibrary;
-using ChemistryLibrary.Builders;
+﻿using ChemistryLibrary.Builders;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 using NUnit.Framework;
 
 namespace ChemistryLibraryTest

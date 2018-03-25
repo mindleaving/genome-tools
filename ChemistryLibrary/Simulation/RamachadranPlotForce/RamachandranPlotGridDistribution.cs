@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
 using Commons.IO;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {

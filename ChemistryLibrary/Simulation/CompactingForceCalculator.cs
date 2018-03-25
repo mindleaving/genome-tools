@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {

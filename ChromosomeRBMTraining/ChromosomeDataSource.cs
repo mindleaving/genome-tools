@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using Commons;
+using Commons.Collections;
+using Commons.DataProcessing;
 
 namespace ChromosomeRBMTraining
 {

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using ChemistryLibrary;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.IO.Pdb;
 using NUnit.Framework;

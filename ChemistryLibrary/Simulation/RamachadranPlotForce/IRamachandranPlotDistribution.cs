@@ -1,5 +1,5 @@
 ﻿using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {

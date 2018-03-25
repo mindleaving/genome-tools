@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Builders;
-using Commons;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {

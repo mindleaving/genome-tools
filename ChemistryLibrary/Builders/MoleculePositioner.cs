@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 
 namespace ChemistryLibrary.Builders
 {
@@ -15,7 +17,7 @@ namespace ChemistryLibrary.Builders
                 .Select(v => (Atom)v.Object)
                 .ForEach(atom => atom.IsPositioned = false);
 
-            var positionableVertices = new Queue<Vertex>();
+            var positionableVertices = new Queue<Vertex<Atom>>();
 
             // If first and last atom is specified, position atoms between those two first
             // Usually the case when a peptide is positioned, in which case the backbone
@@ -24,7 +26,7 @@ namespace ChemistryLibrary.Builders
             {
                 // Position first atom
                 var firstVertex = molecule.MoleculeStructure.Vertices[firstAtomId];
-                var firstAtom = (Atom) firstVertex.Object;
+                var firstAtom = firstVertex.Object;
                 if (firstAtom.Position == null)
                     firstAtom.Position = new UnitPoint3D(Unit.Meter, 0, 0, 0);
                 firstAtom.IsPositioned = true;
@@ -69,9 +71,9 @@ namespace ChemistryLibrary.Builders
             }
         }
 
-        private static IEnumerable<Vertex> PositionNeighborsAndLonePairs(Molecule molecule, Vertex vertex)
+        private static IEnumerable<Vertex<Atom>> PositionNeighborsAndLonePairs(Molecule molecule, Vertex<Atom> vertex)
         {
-            var currentAtom = (Atom) vertex.Object;
+            var currentAtom = vertex.Object;
 
             var vertextEdges = vertex.EdgeIds.Select(edgeId => molecule.MoleculeStructure.Edges[edgeId]).ToList();
             var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(molecule.MoleculeStructure, vertex).ToList();
@@ -80,10 +82,10 @@ namespace ChemistryLibrary.Builders
             var evenlyDistributedPoints = GetAtomSpherePoints(currentAtom, adjacentVertices);
             var evenlySpacePointsQueue = new Queue<Point3D>(evenlyDistributedPoints);
 
-            var neighborsReadyForPositioning = new List<Vertex>();
+            var neighborsReadyForPositioning = new List<Vertex<Atom>>();
             foreach (var neighbor in unpositionedNeighbors)
             {
-                var atom = (Atom) neighbor.Object;
+                var atom = neighbor.Object;
                 if (atom.IsPositioned)
                     continue;
                 neighborsReadyForPositioning.Add(neighbor);
@@ -113,10 +115,10 @@ namespace ChemistryLibrary.Builders
             return neighborsReadyForPositioning;
         }
 
-        private static void PositionSpecificNeighborAlongXAxis(Molecule molecule, Vertex currentVertex, Vertex neighborVertex)
+        private static void PositionSpecificNeighborAlongXAxis(Molecule molecule, Vertex<Atom> currentVertex, Vertex<Atom> neighborVertex)
         {
-            var currentAtom = (Atom)currentVertex.Object;
-            var neighborAtom = (Atom) neighborVertex.Object;
+            var currentAtom = currentVertex.Object;
+            var neighborAtom = neighborVertex.Object;
             if(neighborAtom.IsPositioned)
                 return;
             if (neighborAtom.IsPositionFixed)
@@ -128,12 +130,12 @@ namespace ChemistryLibrary.Builders
             var evenlyDistributedPoints = GetAtomSpherePoints(currentAtom, adjacentVertices);
             var edgesToNeighbor = currentVertex.EdgeIds
                 .Select(edgeId => molecule.MoleculeStructure.Edges[edgeId])
-                .Where(edge => edge.HasVertex(neighborVertex))
+                .Where(edge => edge.HasVertex(neighborVertex.Id))
                 .ToList();
             if(!edgesToNeighbor.Any())
                 throw new ArgumentException("Vertex to be positioned is not a neighbor of the current vertex");
 
-            var bonds = edgesToNeighbor.Select(edge => (Bond)edge.Object);
+            var bonds = edgesToNeighbor.Select(edge => edge.Object);
             var bondLength = bonds.Select(bond => bond.BondLength.Value).Average();
             var candidateAtomPositions = evenlyDistributedPoints
                 .Select(bondDirection => currentAtom.Position + bondLength*bondDirection)
@@ -154,13 +156,13 @@ namespace ChemistryLibrary.Builders
             neighborAtom.IsPositioned = true;
         }
 
-        private static IEnumerable<Point3D> GetAtomSpherePoints(Atom currentAtom, IEnumerable<Vertex> adjacentVertices)
+        private static IEnumerable<Point3D> GetAtomSpherePoints(Atom currentAtom, IEnumerable<Vertex<Atom>> adjacentVertices)
         {
             var positionedNeighbors = adjacentVertices
-                .Where(v => ((Atom) v.Object).IsPositioned || ((Atom)v.Object).IsPositionFixed)
+                .Where(v => v.Object.IsPositioned || v.Object.IsPositionFixed)
                 .ToList();
             var existingPoints = positionedNeighbors
-                .Select(v => (Atom) v.Object)
+                .Select(v => v.Object)
                 .Select(a => currentAtom.Position.VectorTo(a.Position))
                 .ToList();
             var neighborAndLonePairCount = currentAtom.OuterOrbitals.Count(o => o.IsFull);

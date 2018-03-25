@@ -4,6 +4,8 @@ using ChemistryLibrary.Builders;
 using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Simulation;
 using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 using NUnit.Framework;
 
 namespace Studies

@@ -2,21 +2,23 @@
 using System.Linq;
 using System.Threading;
 using ChemistryLibrary.Objects;
-using Commons;
+using Commons.Extensions;
+using Commons.Mathematics;
+using Commons.Physics;
 using MIConvexHull;
 
 namespace ChemistryLibrary.Measurements
 {
     public class CompactnessMeasurerResult
     {
-        public CompactnessMeasurerResult(UnitValue volume, Graph convexHull)
+        public CompactnessMeasurerResult(UnitValue volume, Graph<ApproximatedAminoAcid,Bond> convexHull)
         {
             Volume = volume;
             ConvexHull = convexHull;
         }
 
         public UnitValue Volume { get; }
-        public Graph ConvexHull { get; }
+        public Graph<ApproximatedAminoAcid,Bond> ConvexHull { get; }
     }
 
     /// <summary>
@@ -55,15 +57,15 @@ namespace ChemistryLibrary.Measurements
                 volume*cubicPicoMeterMultiplier );
         }
 
-        private static Graph ToGraph(ConvexHull<ApproximateAminoAcidVertex3D, DefaultConvexFace<ApproximateAminoAcidVertex3D>> convexHull)
+        private static Graph<ApproximatedAminoAcid,Bond> ToGraph(ConvexHull<ApproximateAminoAcidVertex3D, DefaultConvexFace<ApproximateAminoAcidVertex3D>> convexHull)
         {
-            var graph = new Graph();
+            var graph = new Graph<ApproximatedAminoAcid,Bond>();
 
             // Add vertices
             var convexHullToGraphVertexIdMap = new Dictionary<long, uint>();
             foreach (var hullVertex in convexHull.Points)
             {
-                var graphVertex = new Vertex(graph.GetUnusedVertexId())
+                var graphVertex = new Vertex<ApproximatedAminoAcid>(graph.GetUnusedVertexId())
                 {
                     Object = hullVertex.AminoAcid
                 };
@@ -85,7 +87,7 @@ namespace ChemistryLibrary.Measurements
                         var graphVertex1 = graph.Vertices[vertex1GraphId];
                         var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, graphVertex1);
                         if(!adjacentVertices.Select(v => v.Id).Contains(vertex2GraphId))
-                            graph.AddEdge(new Edge(graph.GetUnusedEdgeId(), vertex1GraphId, vertex2GraphId));
+                            graph.AddEdge(new Edge<Bond>(graph.GetUnusedEdgeId(), vertex1GraphId, vertex2GraphId));
                     }
                 }
             }

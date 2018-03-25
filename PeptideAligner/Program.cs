@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Commons;
+using Commons.Extensions;
 using Domain;
 
 namespace PeptideAligner

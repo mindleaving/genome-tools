@@ -7,6 +7,8 @@ using ChemistryLibrary.Builders;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Objects;
 using Commons;
+using Commons.Extensions;
+using Commons.Physics;
 
 namespace ChemistryLibrary.IO.Pdb
 {

@@ -2,6 +2,8 @@
 using System.IO;
 using System.Linq;
 using Commons;
+using Commons.Collections;
+using Commons.DataProcessing;
 using Domain;
 
 namespace SequenceAnalysis

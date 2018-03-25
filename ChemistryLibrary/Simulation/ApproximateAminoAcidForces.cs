@@ -1,4 +1,4 @@
-﻿using Commons;
+﻿using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation
 {
