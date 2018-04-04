@@ -57,6 +57,7 @@ namespace ChemistryLibrary.IO.Pdb
                 {
                     models.Add(ConstructModel(modelLines));
                     modelStarted = false;
+                    modelLines.Clear();
                 }
             }
             if(modelStarted)
@@ -98,11 +99,11 @@ namespace ChemistryLibrary.IO.Pdb
         private static void ReadAtomPositions(IList<string> lines, char chainId, Peptide peptide, int firstResidueNumber)
         {
             var aminoAcidAtomGroups = lines
-                .SkipWhile(line => ReadLineCode(line) != "ATOM")
-                .TakeWhile(line => ReadLineCode(line) == "ATOM")
+                .Where(line => ReadLineCode(line) == "ATOM")
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .Where(atom => atom.AlternateConformationId == ' ' || atom.AlternateConformationId == 'A')
+                .Where(atom => !atom.IsAlternative)
                 .GroupBy(atom => atom.ResidueNumber);
             foreach (var aminoAcidAtomInfos in aminoAcidAtomGroups)
             {
@@ -238,8 +239,6 @@ namespace ChemistryLibrary.IO.Pdb
             {
                 if (ReferenceEquals(this, obj))
                     return true;
-                if (ReferenceEquals(obj, null))
-                    return false;
                 if (!(obj is ResidueSequenceItem))
                     return false;
                 var otherItem = (ResidueSequenceItem) obj;
@@ -263,8 +262,7 @@ namespace ChemistryLibrary.IO.Pdb
         {
             // Extract sequence from atom entries
             var aminoAcidMap = lines
-                .SkipWhile(line => ReadLineCode(line) != "ATOM")
-                .TakeWhile(line => ReadLineCode(line) == "ATOM")
+                .Where(line => ReadLineCode(line) == "ATOM")
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .GroupBy(atom => atom.ResidueNumber)
@@ -280,14 +278,6 @@ namespace ChemistryLibrary.IO.Pdb
         private static AminoAcidName ParseAminoAcidName(string redidueName)
         {
             return redidueName.ToAminoAcidName();
-            //try
-            //{
-            //    return redidueName.ToAminoAcidName();
-            //}
-            //catch (ChemistryException)
-            //{
-            //    return AminoAcidName.Alanine;
-            //}
         }
 
         private static string ReadLineCode(string line)
@@ -330,6 +320,7 @@ namespace ChemistryLibrary.IO.Pdb
                 ChainId = line[21],
                 AlternateConformationId = line[16],
                 ResidueNumber = int.Parse(line.Substring(22, 4).Trim()),
+                IsAlternative = line[26] != ' ',
                 X = double.Parse(line.Substring(30, 8).Trim(), CultureInfo.InvariantCulture),
                 Y = double.Parse(line.Substring(38, 8).Trim(), CultureInfo.InvariantCulture),
                 Z = double.Parse(line.Substring(46, 8).Trim(), CultureInfo.InvariantCulture),

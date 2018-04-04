@@ -17,5 +17,6 @@ namespace ChemistryLibrary.IO.Pdb
         public double TemperatureFactor { get; set; }
         public ElementSymbol Element { get; set; }
         public int Charge { get; set; }
+        public bool IsAlternative { get; set; }
     }
 }
