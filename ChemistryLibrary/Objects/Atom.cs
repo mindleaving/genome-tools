@@ -9,11 +9,9 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {
-    public class Atom
+    public class Atom : IEquatable<Atom>
     {
-        private UnitPoint3D position;
-
-        public string Id { get; } = Guid.NewGuid().ToString();
+        private string Id { get; } = Guid.NewGuid().ToString();
 
         public int Protons { get; }
         public int Neutrons { get; }
@@ -25,6 +23,8 @@ namespace ChemistryLibrary.Objects
         public UnitValue FormalCharge { get; }
         public UnitValue EffectiveCharge { get; set; }
         public List<Orbital> Orbitals { get; }
+
+        private UnitPoint3D position;
         /// <summary>
         /// Position in units of picometer
         /// </summary>
@@ -38,6 +38,7 @@ namespace ChemistryLibrary.Objects
                 position = value;
             }
         }
+
         /// <summary>
         /// Velocity in meters per second
         /// </summary>
@@ -173,6 +174,18 @@ namespace ChemistryLibrary.Objects
             if (!(obj is Atom))
                 return false;
             return Id == ((Atom)obj).Id;
+        }
+
+        public bool Equals(Atom other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Id, other.Id);
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode();
         }
 
         public override string ToString()

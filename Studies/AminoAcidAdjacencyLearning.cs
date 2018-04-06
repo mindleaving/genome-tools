@@ -70,21 +70,19 @@ namespace Studies
                 //cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 try
                 {
-                    using (var pdbResult = PdbReader.ReadFile(pdbFile))
+                    var pdbResult = PdbReader.ReadFile(pdbFile);
+                    var maxChainCount = pdbResult.Models.Max(model => model.Chains.Count);
+                    if (maxChainCount == 0)
                     {
-                        var maxChainCount = pdbResult.Models.Max(model => model.Chains.Count);
-                        if (maxChainCount == 0)
-                        {
-                            File.Move(pdbFile, Path.Combine(inputDirectory, "NoChain", Path.GetFileName(pdbFile)));
-                        }
-                        else if (maxChainCount == 1)
-                        {
-                            File.Move(pdbFile, Path.Combine(inputDirectory, "SingleChain", Path.GetFileName(pdbFile)));
-                        }
-                        else
-                        {
-                            File.Move(pdbFile, Path.Combine(inputDirectory, "MultiChain", Path.GetFileName(pdbFile)));
-                        }
+                        File.Move(pdbFile, Path.Combine(inputDirectory, "NoChain", Path.GetFileName(pdbFile)));
+                    }
+                    else if (maxChainCount == 1)
+                    {
+                        File.Move(pdbFile, Path.Combine(inputDirectory, "SingleChain", Path.GetFileName(pdbFile)));
+                    }
+                    else
+                    {
+                        File.Move(pdbFile, Path.Combine(inputDirectory, "MultiChain", Path.GetFileName(pdbFile)));
                     }
                 }
                 catch
