@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ChemistryLibrary.Objects
 {
-    public class Peptide
+    public class Peptide : IDisposable
     {
         public Peptide(MoleculeReference moleculeReference,
             List<AminoAcidReference> aminoAcids)
@@ -24,5 +24,14 @@ namespace ChemistryLibrary.Objects
         public MoleculeReference MoleculeReference { get; }
         public List<AminoAcidReference> AminoAcids { get; }
         public List<PeptideAnnotation> Annotations { get; }
+
+        public void Dispose()
+        {
+            MoleculeReference.Dispose();
+            AminoAcids.ForEach(aminoAcid => aminoAcid.Dispose());
+            Annotations.ForEach(annotation => annotation.Dispose());
+            AminoAcids.Clear();
+            Annotations.Clear();
+        }
     }
 }

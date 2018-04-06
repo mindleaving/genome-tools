@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary.IO.Pdb;
-using Commons.Extensions;
 using NUnit.Framework;
 
 namespace Studies
@@ -70,19 +68,21 @@ namespace Studies
                 //cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 try
                 {
-                    var pdbResult = PdbReader.ReadFile(pdbFile);
-                    var maxChainCount = pdbResult.Models.Max(model => model.Chains.Count);
-                    if (maxChainCount == 0)
+                    using (var pdbResult = PdbReader.ReadFile(pdbFile))
                     {
-                        File.Move(pdbFile, Path.Combine(inputDirectory, "NoChain", Path.GetFileName(pdbFile)));
-                    }
-                    else if (maxChainCount == 1)
-                    {
-                        File.Move(pdbFile, Path.Combine(inputDirectory, "SingleChain", Path.GetFileName(pdbFile)));
-                    }
-                    else
-                    {
-                        File.Move(pdbFile, Path.Combine(inputDirectory, "MultiChain", Path.GetFileName(pdbFile)));
+                        var maxChainCount = pdbResult.Models.Max(model => model.Chains.Count);
+                        if (maxChainCount == 0)
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "NoChain", Path.GetFileName(pdbFile)));
+                        }
+                        else if (maxChainCount == 1)
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "SingleChain", Path.GetFileName(pdbFile)));
+                        }
+                        else
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "MultiChain", Path.GetFileName(pdbFile)));
+                        }
                     }
                 }
                 catch

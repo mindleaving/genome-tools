@@ -12,7 +12,7 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.IO.Pdb
 {
-    public class PdbReaderResult
+    public class PdbReaderResult : IDisposable
     {
         public PdbReaderResult(params PdbModel[] models)
         {
@@ -20,9 +20,15 @@ namespace ChemistryLibrary.IO.Pdb
         }
 
         public List<PdbModel> Models { get; } = new List<PdbModel>();
+
+        public void Dispose()
+        {
+            Models.ForEach(model => model.Dispose());
+            Models.Clear();
+        }
     }
 
-    public class PdbModel
+    public class PdbModel : IDisposable
     {
         public PdbModel(params Peptide[] chains)
         {
@@ -30,6 +36,12 @@ namespace ChemistryLibrary.IO.Pdb
         }
 
         public List<Peptide> Chains { get; } = new List<Peptide>();
+
+        public void Dispose()
+        {
+            Chains.ForEach(chain => chain.Dispose());
+            Chains.Clear();
+        }
     }
 
     public static class PdbReader
@@ -46,22 +58,30 @@ namespace ChemistryLibrary.IO.Pdb
             var models = new List<PdbModel>();
             var modelLines = new List<string>();
             var modelStarted = false;
-            foreach (var line in lines)
+            try
             {
-                if (!modelStarted && ReadLineCode(line).InSet("MODEL", "ATOM"))
-                    modelStarted = true;
-                if(!modelStarted)
-                    continue;
-                modelLines.Add(line);
-                if (ReadLineCode(line) == "ENDMDL")
+                foreach (var line in lines)
                 {
-                    models.Add(ConstructModel(modelLines));
-                    modelStarted = false;
-                    modelLines.Clear();
+                    if (!modelStarted && ReadLineCode(line).InSet("MODEL", "ATOM"))
+                        modelStarted = true;
+                    if(!modelStarted)
+                        continue;
+                    modelLines.Add(line);
+                    if (ReadLineCode(line) == "ENDMDL")
+                    {
+                        models.Add(ConstructModel(modelLines));
+                        modelStarted = false;
+                        modelLines.Clear();
+                    }
                 }
+                if(modelStarted)
+                    models.Add(ConstructModel(modelLines));
             }
-            if(modelStarted)
-                models.Add(ConstructModel(modelLines));
+            catch
+            {
+                models.ForEach(model => model.Dispose());
+                throw;
+            }
 
             return models.ToArray();
         }
@@ -80,6 +100,11 @@ namespace ChemistryLibrary.IO.Pdb
                 catch (ChemistryException chemException)
                 {
                     // TODO: Log
+                }
+                catch
+                {
+                    chains.ForEach(chain => chain.Dispose());
+                    throw;
                 }
             }
             return new PdbModel(chains.ToArray());

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ChemistryLibrary.Objects
 {
-    public class MoleculeReference
+    public class MoleculeReference : IDisposable
     {
         private uint firstAtomId = uint.MaxValue;
         private readonly List<uint> vertexIds;
@@ -59,5 +59,10 @@ namespace ChemistryLibrary.Objects
             }
         }
         public uint LastAtomId { get; private set; }
+
+        public void Dispose()
+        {
+            Molecule.Dispose();
+        }
     }
 }

@@ -8,7 +8,7 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {
-    public class Molecule
+    public class Molecule : IDisposable
     {
         public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => v.Object);
         public Graph<Atom,SimpleBond> MoleculeStructure { get; } = new Graph<Atom,SimpleBond>();
@@ -107,6 +107,11 @@ namespace ChemistryLibrary.Objects
                 var edge = MoleculeStructure.ConnectVertices(atomId1, atomId2);
                 edge.Object = bond;
             }
+        }
+
+        public void Dispose()
+        {
+            MoleculeStructure.Dispose();
         }
     }
 }
