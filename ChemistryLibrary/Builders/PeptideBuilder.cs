@@ -11,7 +11,7 @@ namespace ChemistryLibrary.Builders
         public static Peptide PeptideFromString(string peptideString)
         {
             var sequence = Regex.Replace(peptideString.ToUpperInvariant(), "[^A-Z]", "")
-                .Select(aminoAcidCode => AminoAcidExtensions.ToAminoAcidName((char) aminoAcidCode));
+                .Select(aminoAcidCode => aminoAcidCode.ToAminoAcidName());
             return PeptideFromSequence(sequence);
         }
 

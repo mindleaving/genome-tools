@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using ChemistryLibrary.Objects;
-using Commons;
 using Commons.DataProcessing;
 using Commons.Mathematics;
 using Commons.Wpf;

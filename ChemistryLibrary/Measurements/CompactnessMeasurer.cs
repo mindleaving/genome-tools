@@ -11,14 +11,14 @@ namespace ChemistryLibrary.Measurements
 {
     public class CompactnessMeasurerResult
     {
-        public CompactnessMeasurerResult(UnitValue volume, Graph<ApproximatedAminoAcid,Bond> convexHull)
+        public CompactnessMeasurerResult(UnitValue volume, Graph<ApproximatedAminoAcid,OrbitalBond> convexHull)
         {
             Volume = volume;
             ConvexHull = convexHull;
         }
 
         public UnitValue Volume { get; }
-        public Graph<ApproximatedAminoAcid,Bond> ConvexHull { get; }
+        public Graph<ApproximatedAminoAcid,OrbitalBond> ConvexHull { get; }
     }
 
     /// <summary>
@@ -57,9 +57,9 @@ namespace ChemistryLibrary.Measurements
                 volume*cubicPicoMeterMultiplier );
         }
 
-        private static Graph<ApproximatedAminoAcid,Bond> ToGraph(ConvexHull<ApproximateAminoAcidVertex3D, DefaultConvexFace<ApproximateAminoAcidVertex3D>> convexHull)
+        private static Graph<ApproximatedAminoAcid,OrbitalBond> ToGraph(ConvexHull<ApproximateAminoAcidVertex3D, DefaultConvexFace<ApproximateAminoAcidVertex3D>> convexHull)
         {
-            var graph = new Graph<ApproximatedAminoAcid,Bond>();
+            var graph = new Graph<ApproximatedAminoAcid,OrbitalBond>();
 
             // Add vertices
             var convexHullToGraphVertexIdMap = new Dictionary<long, uint>();
@@ -87,7 +87,7 @@ namespace ChemistryLibrary.Measurements
                         var graphVertex1 = graph.Vertices[vertex1GraphId];
                         var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, graphVertex1);
                         if(!adjacentVertices.Select(v => v.Id).Contains(vertex2GraphId))
-                            graph.AddEdge(new Edge<Bond>(graph.GetUnusedEdgeId(), vertex1GraphId, vertex2GraphId));
+                            graph.AddEdge(new Edge<OrbitalBond>(graph.GetUnusedEdgeId(), vertex1GraphId, vertex2GraphId));
                     }
                 }
             }

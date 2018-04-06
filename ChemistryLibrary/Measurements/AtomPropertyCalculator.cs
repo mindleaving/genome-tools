@@ -12,7 +12,7 @@ namespace ChemistryLibrary.Measurements
             return protons*PhysicalConstants.ProtonMass + neutrons*PhysicalConstants.NeutronMass;
         }
 
-        public static UnitValue CalculateOrbitalEnergy(Atom atom, Orbital orbital)
+        public static UnitValue CalculateOrbitalEnergy(AtomWithOrbitals atom, Orbital orbital)
         {
             return -(1.0/(OrbitalComparer.CalculateOrbitalOrder(orbital) + 1)).To(Unit.ElectronVolts);
         }

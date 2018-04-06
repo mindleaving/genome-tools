@@ -10,8 +10,8 @@ namespace ChemistryLibrary.Objects
 {
     public class Molecule
     {
-        public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => (Atom) v.Object);
-        public Graph<Atom,Bond> MoleculeStructure { get; } = new Graph<Atom,Bond>();
+        public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => v.Object);
+        public Graph<Atom,SimpleBond> MoleculeStructure { get; } = new Graph<Atom,SimpleBond>();
         public UnitValue Charge => Atoms.Sum(atom => atom.FormalCharge, Unit.ElementaryCharge);
         public bool IsPositioned { get; private set; }
 
@@ -30,7 +30,7 @@ namespace ChemistryLibrary.Objects
 
             if(!MoleculeStructure.Vertices.ContainsKey(existingAtomId))
                 throw new KeyNotFoundException("Adding atom to molecule failed, because the reference to an existing atom was not found");
-            var existingAtom = (Atom)MoleculeStructure.Vertices[existingAtomId].Object;
+            var existingAtom = MoleculeStructure.Vertices[existingAtomId].Object;
             var vertex = new Vertex<Atom>(MoleculeStructure.GetUnusedVertexId())
             {
                 Object = atom
@@ -40,7 +40,7 @@ namespace ChemistryLibrary.Objects
             var bonds = AtomConnector.CreateBonds(atom, existingAtom, bondMultiplicity);
             foreach (var bond in bonds)
             {
-                var edge = new Edge<Bond>(MoleculeStructure.GetUnusedEdgeId(), existingAtomId, vertex.Id)
+                var edge = new Edge<SimpleBond>(MoleculeStructure.GetUnusedEdgeId(), existingAtomId, vertex.Id)
                 {
                     Object = bond
                 };
@@ -54,9 +54,9 @@ namespace ChemistryLibrary.Objects
             uint connectionAtomId,
             BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
         {
-            MoleculeReference temp;
-            return AddMolecule(moleculeToBeAdded, firstAtomId, connectionAtomId, out temp, bondMultiplicity);
+            return AddMolecule(moleculeToBeAdded, firstAtomId, connectionAtomId, out _, bondMultiplicity);
         }
+
         public MoleculeReference AddMolecule(MoleculeReference moleculeToBeAdded, 
             uint firstAtomId,
             uint connectionAtomId, 
@@ -66,8 +66,8 @@ namespace ChemistryLibrary.Objects
             var mergeInfo = MoleculeStructure.AddGraph(moleculeToBeAdded.Molecule.MoleculeStructure);
             var vertex1 = connectionAtomId;
             var vertex2 = mergeInfo.VertexIdMap[moleculeToBeAdded.FirstAtomId];
-            var atom1 = (Atom)MoleculeStructure.Vertices[vertex1].Object;
-            var atom2 = (Atom)MoleculeStructure.Vertices[vertex2].Object;
+            var atom1 = MoleculeStructure.Vertices[vertex1].Object;
+            var atom2 = MoleculeStructure.Vertices[vertex2].Object;
             var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
             foreach (var bond in bonds)
             {
@@ -94,7 +94,7 @@ namespace ChemistryLibrary.Objects
 
         public Atom GetAtom(uint atomId)
         {
-            return (Atom) MoleculeStructure.Vertices[atomId].Object;
+            return MoleculeStructure.Vertices[atomId].Object;
         }
 
         public void ConnectAtoms(uint atomId1, uint atomId2, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)

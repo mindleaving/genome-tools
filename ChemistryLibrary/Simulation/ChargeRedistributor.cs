@@ -11,7 +11,7 @@ namespace ChemistryLibrary.Simulation
         public void RedistributeCharges(Molecule aminoAcid)
         {
             var newCharges = aminoAcid.MoleculeStructure.Vertices
-                .ToDictionary(vId => vId.Key, vertex => ((Atom)vertex.Value.Object).EffectiveCharge);
+                .ToDictionary(vId => vId.Key, vertex => vertex.Value.Object.EffectiveCharge);
             double chargeChange;
             do
             {
@@ -21,9 +21,9 @@ namespace ChemistryLibrary.Simulation
                 foreach (var vertex in vertices)
                 {
                     var neighbors = GraphAlgorithms.GetAdjacentVertices(aminoAcid.MoleculeStructure, vertex)
-                        .Select(v => (Atom)v.Object)
+                        .Select(v => v.Object)
                         .ToList();
-                    var atoms = new[] { (Atom)vertex.Object }.Concat(neighbors).ToList();
+                    var atoms = new[] { vertex.Object }.Concat(neighbors).ToList();
                     var chargeSum = atoms.Sum(x => x.EffectiveCharge.In(Unit.ElementaryCharge))
                                     - atoms.Count;
                     var electroNegativitySum = atoms.Sum(x => x.ElectroNegativity);
@@ -33,7 +33,7 @@ namespace ChemistryLibrary.Simulation
                     }
                 }
                 newCharges = aminoAcid.MoleculeStructure.Vertices
-                    .ToDictionary(vId => vId.Key, vertex => ((Atom)vertex.Value.Object).EffectiveCharge);
+                    .ToDictionary(vId => vId.Key, vertex => vertex.Value.Object.EffectiveCharge);
                 chargeChange = aminoAcid.MoleculeStructure.Vertices.Keys
                     .Select(vId => (newCharges[vId] - currentCharges[vId]).Abs().In(Unit.ElementaryCharge))
                     .Max();

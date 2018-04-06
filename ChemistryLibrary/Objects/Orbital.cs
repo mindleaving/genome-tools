@@ -10,16 +10,16 @@ namespace ChemistryLibrary.Objects
 {
     public class Orbital
     {
-        public string Id { get; } = Guid.NewGuid().ToString();
+        private string Id { get; } = Guid.NewGuid().ToString();
 
-        public Orbital(Atom atom, int period, OrbitalType type)
+        public Orbital(AtomWithOrbitals atom, int period, OrbitalType type)
         {
             Atom = atom;
             Period = period;
             Type = type;
         }
 
-        public Atom Atom { get; }
+        public AtomWithOrbitals Atom { get; }
         public OrbitalType Type { get; }
         public int Period { get; }
         public List<Electron> Electrons { get; } = new List<Electron>(2);
@@ -27,7 +27,7 @@ namespace ChemistryLibrary.Objects
         public bool IsFull => Electrons.Count == 2;
         public bool IsEmpty => Electrons.Count == 0;
         public bool IsOuterOrbital => Period >= Atom.Period;
-        public Bond AssociatedBond { get; set; }
+        public OrbitalBond AssociatedBond { get; set; }
         public bool IsPartOfBond => AssociatedBond != null;
 
         private Point3D electronDensityMaximumPosition;
@@ -112,7 +112,7 @@ namespace ChemistryLibrary.Objects
 
         public void BreakBond()
         {
-            Electrons.RemoveAll(electron => electron.AssociatedOrbital != this);
+            Electrons.RemoveAll(electron => !ReferenceEquals(electron.AssociatedOrbital, this));
             Electrons.ForEach(e => e.AssociatedBond = null);
             AssociatedBond = null;
         }

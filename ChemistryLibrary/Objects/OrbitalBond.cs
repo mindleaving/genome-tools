@@ -1,23 +1,17 @@
 ﻿using System.Linq;
-using ChemistryLibrary.Measurements;
 using Commons.Extensions;
 using Commons.Physics;
 
 namespace ChemistryLibrary.Objects
 {
-    public enum BondMultiplicity
+    public class OrbitalBond : SimpleBond
     {
-        Single = 1,
-        Double = 2,
-        Triple = 3
-    }
-    public class Bond
-    {
-        public Bond(
-            Atom atom1, 
+        public OrbitalBond(
+            AtomWithOrbitals atom1, 
             Orbital orbital1, 
-            Atom atom2, 
+            AtomWithOrbitals atom2, 
             Orbital orbital2)
+            : base(atom1, atom2)
         {
             if (orbital1.AssociatedBond != null
                 || orbital2.AssociatedBond != null)
@@ -32,19 +26,11 @@ namespace ChemistryLibrary.Objects
             {
                 throw new ChemistryException("Cannot create bond between orbitals if any is full");
             }
-            Atom1 = atom1;
-            Atom2 = atom2;
             Orbital1 = orbital1;
             Orbital2 = orbital2;
 
-            BondLength = BondLengthCalculator.Calculate(atom1, orbital1, atom2, orbital2);
-            BondEnergy = BondEnergyCalculator.Calculate(atom1, orbital1, atom2, orbital2);
-
             ShareElectrons(Orbital1, Orbital2);
         }
-
-        public Atom Atom1 { get; }
-        public Atom Atom2 { get; }
 
         public Orbital Orbital1 { get; }
         public Orbital Orbital2 { get; }
@@ -88,13 +74,5 @@ namespace ChemistryLibrary.Objects
             isBroken = true;
         }
         
-    }
-
-    public static class BondEnergyCalculator
-    {
-        public static UnitValue Calculate(Atom atom1, Orbital orbital1, Atom atom2, Orbital orbital2)
-        {
-            return -5.To(Unit.ElectronVolts);
-        }
     }
 }

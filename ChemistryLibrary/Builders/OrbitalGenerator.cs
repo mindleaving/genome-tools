@@ -5,7 +5,7 @@ namespace ChemistryLibrary.Builders
 {
     public static class OrbitalGenerator
     {
-        public static List<Orbital> Generate(Atom atom, int maximumPeriod)
+        public static List<Orbital> Generate(AtomWithOrbitals atom, int maximumPeriod)
         {
             var orbitals = new List<Orbital>();
             for (var period = 1; period <= maximumPeriod; period++)

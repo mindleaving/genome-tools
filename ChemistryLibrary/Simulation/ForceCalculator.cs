@@ -30,7 +30,7 @@ namespace ChemistryLibrary.Simulation
             return new ForceCalculatorResult(forceLookup, lonePairForceLookup, neighborhoodMap);
         }
 
-        private static Dictionary<uint, Vector3D> CalculateBondForces(Graph<Atom,Bond> graph)
+        private static Dictionary<uint, Vector3D> CalculateBondForces(Graph<Atom,SimpleBond> graph)
         {
             var forceLookup = graph.Vertices.ToDictionary(
                 kvp => kvp.Key, 
@@ -43,7 +43,7 @@ namespace ChemistryLibrary.Simulation
                 var vertex2 = graph.Vertices[edge.Vertex2Id];
                 var atom1 = vertex1.Object;
                 var atom2 = vertex2.Object;
-                var bond = edge.Object;
+                var bond = (OrbitalBond)edge.Object;
 
                 var v1V2Vector = atom1.Position.VectorTo(atom2.Position);
                 var forceDirection = v1V2Vector.Normalize();
@@ -125,17 +125,17 @@ namespace ChemistryLibrary.Simulation
             }
         }
 
-        private static Dictionary<Orbital, Vector3D> CalculateLonePairRepulsion(Graph<Atom,Bond> graph, 
+        private static Dictionary<Orbital, Vector3D> CalculateLonePairRepulsion(Graph<Atom,SimpleBond> graph, 
             IDictionary<uint, Vector3D> forceLookup)
         {
             var lonePairForceLookup = graph.Vertices.Values
-                .Select(v => v.Object)
+                .Select(v => (AtomWithOrbitals)v.Object)
                 .SelectMany(atom => atom.LonePairs)
                 .ToDictionary(o => o, o => new Vector3D(0,0,0));
             foreach(var vertex in graph.Vertices.Values)
             {
                 var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).ToList();
-                var currentAtom = vertex.Object;
+                var currentAtom = (AtomWithOrbitals)vertex.Object;
                 var filledOuterOrbitals = currentAtom.OuterOrbitals.Where(o => o.IsFull).ToList();
                 var orbitalNeighborVertexMap = MapBondOrbitalToNeighborVertex(
                     filledOuterOrbitals, currentAtom, adjacentVertices);
@@ -184,7 +184,7 @@ namespace ChemistryLibrary.Simulation
         }
 
         private static Dictionary<Orbital, Vertex<Atom>> MapBondOrbitalToNeighborVertex(
-            List<Orbital> filledOuterOrbitals, Atom currentAtom, List<Vertex<Atom>> adjacentVertices)
+            List<Orbital> filledOuterOrbitals, AtomWithOrbitals currentAtom, List<Vertex<Atom>> adjacentVertices)
         {
             var orbitalNeighborVertexMap = filledOuterOrbitals
                 .Where(o => o.IsPartOfBond)

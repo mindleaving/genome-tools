@@ -33,12 +33,12 @@ namespace ChemistryLibrary.IO.Pdb
 
             var carbonEndNeighborVertices = GetNeighbors(molecule, carbonEndVertex).ToList();
 
-            var oxygenVertex = carbonEndNeighborVertices.Single(v => ((Atom) v.Object).Element == ElementName.Oxygen);
+            var oxygenVertex = carbonEndNeighborVertices.Single(v => v.Object.Element == ElementName.Oxygen);
             oxygenVertex.AlgorithmData = true;
-            var oxygen = (Atom)oxygenVertex.Object;
+            var oxygen = oxygenVertex.Object;
             oxygen.AminoAcidAtomName = "O";
 
-            var sideChainCarbonVertex = carbonEndNeighborVertices.Single(v => ((Atom)v.Object).Element == ElementName.Carbon);
+            var sideChainCarbonVertex = carbonEndNeighborVertices.Single(v => v.Object.Element == ElementName.Carbon);
 
             var activeChains = new Queue<AtomChainInfo>(new []
             {
@@ -54,7 +54,7 @@ namespace ChemistryLibrary.IO.Pdb
                     if(atomChain.Vertex.AlgorithmData.Equals(true))
                         continue;
                     atomChain.Vertex.AlgorithmData = true;
-                    var atom = (Atom) atomChain.Vertex.Object;
+                    var atom = atomChain.Vertex.Object;
                     var elementSymbol = atom.Element.ToElementSymbol().ToString();
                     var levelLetter = MapLevelToLetter(level);
                     var chainSuffix = atomChains.Select(chain => chain.Vertex.Id).Distinct().Count() > 1
@@ -65,7 +65,7 @@ namespace ChemistryLibrary.IO.Pdb
 
                     // Add unvisited non-hydrogen neighbors to chain
                     GetNeighbors(molecule, atomChain.Vertex)
-                        .Where(v => ((Atom)v.Object).Element != ElementName.Hydrogen)
+                        .Where(v => v.Object.Element != ElementName.Hydrogen)
                         .Where(v => v.AlgorithmData.Equals(false))
                         .Select((v,idx) => new AtomChainInfo
                         {

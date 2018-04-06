@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ChemistryLibrary.Objects
 {
@@ -13,7 +14,7 @@ namespace ChemistryLibrary.Objects
             List<AminoAcidReference> aminoAcids,
             List<PeptideAnnotation> annotations)
         {
-            MoleculeReference = moleculeReference;
+            MoleculeReference = moleculeReference ?? throw new ArgumentNullException(nameof(moleculeReference));
             AminoAcids = aminoAcids;
             Annotations = annotations;
         }

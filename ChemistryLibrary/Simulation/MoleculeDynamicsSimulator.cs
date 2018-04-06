@@ -120,7 +120,9 @@ namespace ChemistryLibrary.Simulation
         private void WriteDebug(Molecule molecule)
         {
             var oxygen = molecule.Atoms.Single(atom => atom.Element == ElementName.Oxygen);
-            var fullOuterOrbitals = oxygen.OuterOrbitals.Where(o => o.IsFull);
+            if(!(oxygen is AtomWithOrbitals fullAtom))
+                return;
+            var fullOuterOrbitals = fullAtom.OuterOrbitals.Where(o => o.IsFull);
             var output = fullOuterOrbitals
                              .Select(o => o.Atom.Position.VectorTo(o.MaximumElectronDensityPosition).Normalize())
                              .Select(v => v.X + ";" + v.Y + ";" + v.Z)

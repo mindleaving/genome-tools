@@ -12,6 +12,6 @@ namespace ChemistryLibrary.Objects
         public UnitValue Energy => AssociatedOrbital?.Energy ?? 0.To(Unit.ElectronVolts);
 
         public Orbital AssociatedOrbital { get; set; }
-        public Bond AssociatedBond { get; set; }
+        public OrbitalBond AssociatedBond { get; set; }
     }
 }
