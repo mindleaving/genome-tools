@@ -18,4 +18,4 @@ Some useful classes:
 
 **Other repositories:**
 
-This repository includes my personal Commons-repository, which is much more structured and provides a wide range of helpful (and tested) classes. Check it out.
+This repository references my Commons-repository, which is much more structured and provides a wide range of helpful (and tested) classes. Check it out.
