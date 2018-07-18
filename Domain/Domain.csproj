@@ -46,7 +46,9 @@
     <Compile Include="NucleotideSequenceParser.cs" />
     <Compile Include="Peptide.cs" />
     <Compile Include="PeptideFileReader.cs" />
+    <Compile Include="PeptideFrequencyAnalysis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WholeGenomeFrequencyAnalysis.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Commons\Commons.csproj">

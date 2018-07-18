@@ -1,9 +1,16 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ChemistryLibrary.Extensions;
 using ChemistryLibrary.IO.Pdb;
+using Commons.Extensions;
+using Commons.Physics;
+using Domain;
 using NUnit.Framework;
+using Peptide = Domain.Peptide;
 
 namespace Studies
 {
@@ -63,7 +70,8 @@ namespace Studies
             Directory.CreateDirectory(Path.Combine(inputDirectory, "MultiChain"));
 
             var cancellationTokenSource = new CancellationTokenSource();
-            Parallel.ForEach(Directory.EnumerateFiles(inputDirectory, "*.ent"), pdbFile =>
+            var files = Directory.EnumerateFiles(inputDirectory, "*.ent");
+            Parallel.ForEach(files, pdbFile =>
             {
                 //cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 try
@@ -94,6 +102,175 @@ namespace Studies
             if(cancellationTokenSource.IsCancellationRequested)
                 Assert.Fail();
             Assert.Pass();
+        }
+
+        [Test]
+        public void FilterByPositionedMolecules()
+        {
+            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain";
+            Directory.CreateDirectory(Path.Combine(inputDirectory, "FullyPositioned"));
+            Directory.CreateDirectory(Path.Combine(inputDirectory, "PartiallyPositioned"));
+            Directory.CreateDirectory(Path.Combine(inputDirectory, "NotPositioned"));
+
+            var files = Directory.EnumerateFiles(inputDirectory, "*.ent");
+            Parallel.ForEach(files, pdbFile =>
+            {
+                using (var pdbResult = PdbReader.ReadFile(pdbFile))
+                {
+                    foreach (var model in pdbResult.Models)
+                    {
+                        if(model.Chains.Count != 1)
+                            continue;
+                        var chain = model.Chains.Single();
+                        var carbonAlphaAtoms = chain.Molecule.Atoms.Where(atom => atom.AminoAcidAtomName == "CA").ToList();
+                        if (carbonAlphaAtoms.All(atom => atom.IsPositioned))
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "FullyPositioned", Path.GetFileName(pdbFile)));
+                        }
+                        else if (carbonAlphaAtoms.Any(atom => atom.IsPositioned))
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "PartiallyPositioned", Path.GetFileName(pdbFile)));
+                        }
+                        else
+                        {
+                            File.Move(pdbFile, Path.Combine(inputDirectory, "NotPositioned", Path.GetFileName(pdbFile)));
+                        }
+                        break;
+                    }
+                }
+            });
+        }
+
+        [Test]
+        public void ExtractAminoAcidPositions()
+        {
+            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            var failedDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\Failed";
+            var outputDirection = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var files = Directory.EnumerateFiles(inputDirectory, "pdb5uak.ent");
+            Parallel.ForEach(files, pdbFile =>
+            {
+                try
+                {
+                    using (var pdbResult = PdbReader.ReadFile(pdbFile))
+                    {
+                        for (var modelIdx = 0; modelIdx < pdbResult.Models.Count; modelIdx++)
+                        {
+                            var model = pdbResult.Models[modelIdx];
+                            if (model.Chains.Count != 1)
+                                continue;
+                            var chain = model.Chains.Single();
+                            var carbonAlphaAtoms = chain.Molecule.Atoms.Where(atom => atom.AminoAcidAtomName == "CA").ToList();
+                            if (!carbonAlphaAtoms.All(atom => atom.IsPositioned))
+                                continue;
+                            var lines = new List<string>();
+                            var allPositioned = true;
+                            foreach (var aminoAcid in chain.AminoAcids)
+                            {
+                                var carbonAlpha = aminoAcid.GetAtomFromName("CA");
+                                if (carbonAlpha == null || !carbonAlpha.IsPositioned)
+                                {
+                                    allPositioned = false;
+                                    break;
+                                }
+                                lines.Add($"{aminoAcid.Name.ToOneLetterCode()};{carbonAlpha.Position.In(SIPrefix.Pico, Unit.Meter)}");
+                            }
+                            if(!allPositioned)
+                                continue;
+                            File.WriteAllLines(
+                                Path.Combine(outputDirection, $"{Path.GetFileNameWithoutExtension(pdbFile)}_model{modelIdx:D3}.csv"),
+                                lines);
+                        }
+                    }
+                }
+                catch
+                {
+                    File.Move(pdbFile, Path.Combine(failedDirectory, Path.GetFileName(pdbFile)));
+                }
+            });
+        }
+
+        [Test]
+        public void SequenceLengthHistogramFromPositionFiles()
+        {
+            var directory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var files = Directory.EnumerateFiles(directory, "*model000.csv");
+            var histogram = new Dictionary<int, int>();
+            foreach (var file in files)
+            {
+                var lineCount = File.ReadLines(file).Count();
+                if(!histogram.ContainsKey(lineCount))
+                    histogram.Add(lineCount, 0);
+                histogram[lineCount]++;
+            }
+            Console.WriteLine(
+                histogram
+                .OrderByDescending(kvp => kvp.Value)
+                .Select(kvp => $"{kvp.Key.ToString().PadRight(5,' ')}\t{kvp.Value}")
+                .Aggregate((a,b) => a + Environment.NewLine + b)
+            );
+        }
+
+        [Test]
+        public void PdbIdsWithSequenceLength()
+        {
+            var sequenceLength = 115;
+            var directory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var files = Directory.EnumerateFiles(directory, "*.csv");
+            var outputDirectory = Path.Combine(directory, $"SequenceLength {sequenceLength:0000}");
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+
+            foreach (var file in files)
+            {
+                var lineCount = File.ReadLines(file).Count();
+                if(lineCount != sequenceLength)
+                    continue;
+                File.Copy(file, Path.Combine(outputDirectory, Path.GetFileName(file)), true);
+            }
+        }
+
+        [Test]
+        public void FullyPositionedSingleChainPeptideSequences()
+        {
+            // Similar to PeptideFrequencyStudy.FindCommonPeptideSequences,
+            // but restricted to peptides where we know the positions of the amino acids in the protein
+            var positionFilesDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var outputDirectory = @"G:\Projects\HumanGenome\sequenceFrequencies\FullyPositionedSingleChainPeptides";
+            var positionFiles = Directory.EnumerateFiles(positionFilesDirectory, "*_model000.csv");
+            var peptides = new List<Peptide>();
+            foreach (var positionFile in positionFiles)
+            {
+                var peptideSequence = File.ReadAllLines(positionFile)
+                    .Where(line => !string.IsNullOrEmpty(line))
+                    .Select(line => line[0])
+                    .ToList();
+                var peptide = new Peptide();
+                peptide.Sequence.AddRange(peptideSequence);                
+                peptides.Add(peptide);
+            }
+            PeptideFrequencyAnalysis.Analyze(peptides, outputDirectory);
+        }
+
+        [Test]
+        public void FilterPositionFilesBySubsequence()
+        {
+            var subsequence = "CAQYWPQKEEKEMIFEDTNLKLTLISEDIK";
+            var positionFilesDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var outputDirectory = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\sequence_{subsequence}";
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+            var positionFiles = Directory.EnumerateFiles(positionFilesDirectory, "*_model000.csv");
+            foreach (var positionFile in positionFiles)
+            {
+                var peptideSequence = File.ReadAllLines(positionFile)
+                    .Where(line => !string.IsNullOrEmpty(line))
+                    .Select(line => line[0])
+                    .ToArray();
+                var sequenceString = new string(peptideSequence).ToUpperInvariant();
+                if(sequenceString.Contains(subsequence))
+                    File.Copy(positionFile, Path.Combine(outputDirectory, Path.GetFileName(positionFile)));
+            }
         }
 
         [Test]

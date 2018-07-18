@@ -95,6 +95,8 @@ namespace ChemistryLibrary.IO.Pdb
                 try
                 {
                     var chain = ExtractChain(modelLines, chainId);
+                    if(!chain.AminoAcids.Any())
+                        continue;
                     chains.Add(chain);
                 }
                 catch (ChemistryException chemException)
@@ -113,6 +115,8 @@ namespace ChemistryLibrary.IO.Pdb
         private static Peptide ExtractChain(IList<string> lines, char chainId)
         {
             var aminoAcidSequence = ExtractSequence(lines, chainId);
+            if(!aminoAcidSequence.Sequence.Any())
+                return new Peptide(new MoleculeReference(new Molecule()), new List<AminoAcidReference>());
             var peptide = PeptideBuilder.PeptideFromSequence(aminoAcidSequence.Sequence);
             peptide.ChainId = chainId;
             var annotations = ExtractAnnotations(lines, chainId, peptide, aminoAcidSequence.FirstResidueNumber);
@@ -208,6 +212,8 @@ namespace ChemistryLibrary.IO.Pdb
         private static AminoAcidSequence ExtractSequence(IList<string> lines, char chainId)
         {
             var atomSequence = ExtractSequenceFromAtomLines(lines, chainId);
+            if(!atomSequence.Any())
+                return new AminoAcidSequence(new List<AminoAcidName>(), -1, false);
 
             // Build sequence from atom sequence
             var startResidueNumber = atomSequence.First().ResidueNumber;
@@ -291,11 +297,13 @@ namespace ChemistryLibrary.IO.Pdb
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .GroupBy(atom => atom.ResidueNumber)
+                .Where(atomGroup => atomGroup.First().ResidueName != "UNK")
                 .Select(atomGroup => new ResidueSequenceItem
                     {
                         AminoAcidName = ParseAminoAcidName(atomGroup.First().ResidueName),
                         ResidueNumber = atomGroup.Key
                     })
+                .OrderBy(x => x.ResidueNumber)
                 .ToList();
             return aminoAcidMap;
         }
