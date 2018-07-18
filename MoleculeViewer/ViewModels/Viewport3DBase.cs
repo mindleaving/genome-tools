@@ -25,7 +25,7 @@ namespace MoleculeViewer.ViewModels
             const double Scaling = 600.0; // Determined from user experience
 
             var lookDirection = ToPantoVector3D(Camera.LookDirection);
-            var positionChange = lookDirection.Normalize().Multiply(Scaling * change);
+            var positionChange = lookDirection.Normalize().Multiply(Scaling * change).ToVector3D();
             Camera.Position = new Point3D(
                 Camera.Position.X + positionChange.X,
                 Camera.Position.Y + positionChange.Y,
@@ -44,7 +44,8 @@ namespace MoleculeViewer.ViewModels
         {
             const double PositionChangeScale = 300.0; // Determined from user experience
             var positionChange = CalculatePositionChange(deltaHorizontal, deltaVertical)
-                .Multiply(PositionChangeScale);
+                .Multiply(PositionChangeScale)
+                .ToVector3D();
             Camera.Position = new Point3D(
                 Camera.Position.X + positionChange.X,
                 Camera.Position.Y + positionChange.Y,
@@ -55,7 +56,8 @@ namespace MoleculeViewer.ViewModels
         {
             const double RotationSpeedScale = 0.03; // Determined from user experience
             var lookDirectionChange = CalculatePositionChange(horizontalRotation, verticalRotation)
-                .Multiply(RotationSpeedScale);
+                .Multiply(RotationSpeedScale)
+                .ToVector3D();
             Camera.LookDirection = new Vector3D(
                 Camera.LookDirection.X + lookDirectionChange.X,
                 Camera.LookDirection.Y + lookDirectionChange.Y,
@@ -66,10 +68,10 @@ namespace MoleculeViewer.ViewModels
         {
             var upDirection = ToPantoVector3D(Camera.UpDirection);
             var imagePlaneNormal = ToPantoVector3D(Camera.LookDirection);
-            var verticalDirection = (upDirection - upDirection.ProjectOnto(imagePlaneNormal)).Normalize();
+            var verticalDirection = (upDirection - upDirection.ProjectOnto(imagePlaneNormal)).Normalize().ToVector3D();
             var horizontalDirection = verticalDirection.CrossProduct(imagePlaneNormal).Normalize();
             var positionChange = verticalDirection.Multiply(deltaVertical) + horizontalDirection.Multiply(deltaHorizontal);
-            return positionChange;
+            return positionChange.ToVector3D();
         }
 
         private static Commons.Mathematics.Vector3D ToPantoVector3D(Vector3D cameraUpDirection)
@@ -106,7 +108,8 @@ namespace MoleculeViewer.ViewModels
             var distanceToRotationPoint = ToPantoVector3D(rotationPoint - Camera.Position).Magnitude();
             // Move camera up and sideways in current image plane
             var positionChange = CalculatePositionChange(horizontalRotation, verticalRotation)
-                .Multiply(PositionChangeScale);
+                .Multiply(PositionChangeScale)
+                .ToVector3D();
             var pannedPosition = new Point3D(
                 Camera.Position.X + positionChange.X,
                 Camera.Position.Y + positionChange.Y,
@@ -117,7 +120,8 @@ namespace MoleculeViewer.ViewModels
                     rotationPoint.X - pannedPosition.X,
                     rotationPoint.Y - pannedPosition.Y,
                     rotationPoint.Z - pannedPosition.Z)
-                .Normalize();
+                .Normalize()
+                .ToVector3D();
             // Do not transform if new look direction almost straight up/down
             if (Math.Abs(newLookDirection.Y) / newLookDirection.Magnitude() > 0.9) // Found from user experience
                 return;

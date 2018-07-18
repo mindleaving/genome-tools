@@ -87,9 +87,9 @@ namespace ChemistryLibrary.Builders
             UnitValue bondAngle,
             UnitValue bondTorsion)
         {
-            var basisVector1 = vector1.Normalize();
+            var basisVector1 = vector1.Normalize().ToVector3D();
             var normalizedVector2 = vector2.Normalize();
-            var basisVector2 = (normalizedVector2 - basisVector1.DotProduct(normalizedVector2) * basisVector1).Normalize();
+            var basisVector2 = (normalizedVector2 - basisVector1.DotProduct(normalizedVector2) * basisVector1).Normalize().ToVector3D();
             var basisVector3 = basisVector1.CrossProduct(basisVector2);
 
             var bondAngleRadians = bondAngle.In(Unit.Radians);

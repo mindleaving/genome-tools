@@ -40,8 +40,8 @@ namespace ChemistryLibrary.Objects
                     var atom1 = AssociatedBond.Atom1;
                     var atom2 = AssociatedBond.Atom2;
                     var v1V2Vector = atom1.Position.VectorTo(atom2.Position).Normalize();
-                    var overlapCenter = 0.5*(atom1.Position + atom1.Radius.Value*v1V2Vector)
-                                        + 0.5*(atom2.Position + atom2.Radius.Value*-v1V2Vector);
+                    var overlapCenter = 0.5*(atom1.Position + atom1.Radius.Value*v1V2Vector.ToVector3D())
+                                        + 0.5*(atom2.Position + atom2.Radius.Value*-v1V2Vector.ToVector3D());
                     return overlapCenter;
                     //var chargeImbalance = atom1.ElectroNegativity/(atom1.ElectroNegativity + atom2.ElectroNegativity);
                     //return new UnitPoint3D(

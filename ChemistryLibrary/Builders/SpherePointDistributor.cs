@@ -15,7 +15,7 @@ namespace ChemistryLibrary.Builders
             //File.Delete(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv");
 
             var scaledExistingPoints = existingPoints
-                .Select(v => (Vector3DExtensions.Magnitude(v)/radius)*v)
+                .Select(v => (v.Magnitude()/radius)*v)
                 .Select(v => v.ToPoint3D())
                 .ToList();
             
@@ -68,7 +68,7 @@ namespace ChemistryLibrary.Builders
                         : tangentialForce;
                     if (displacement.Magnitude() > maxDisplacement)
                         maxDisplacement = displacement.Magnitude();
-                    var displacedPoint = point + displacement;
+                    var displacedPoint = point + displacement.ToVector3D();
                     var distanceToCenter = displacedPoint.ToVector3D().Magnitude();
                     var scaling = radius/distanceToCenter;
                     point.X = scaling * displacedPoint.X;

@@ -46,7 +46,7 @@ namespace ChemistryLibrary.Simulation
                 var bond = (OrbitalBond)edge.Object;
 
                 var v1V2Vector = atom1.Position.VectorTo(atom2.Position);
-                var forceDirection = v1V2Vector.Normalize();
+                var forceDirection = v1V2Vector.Normalize().ToVector3D();
                 var atomDistance = v1V2Vector.Magnitude();
                 var forceStrength = 1e4*-bond.BondEnergy.In(Unit.ElectronVolts)
                                     *(atomDistance - 0.9*bond.BondLength);
@@ -80,7 +80,7 @@ namespace ChemistryLibrary.Simulation
                     var chargeProduct = PhysicalConstants.CoulombsConstant.Value
                                         *charge1.Value
                                         *charge2.Value;
-                    var ionicForce = -5*1e-1*(chargeProduct/(distance*distance))*r.Normalize();
+                    var ionicForce = -5*1e-1*(chargeProduct/(distance*distance))*r.Normalize().ToVector3D();
 
                     forceLookup[vertex] += ionicForce;
                     forceLookup[neighborVertex] += -ionicForce;
@@ -117,7 +117,7 @@ namespace ChemistryLibrary.Simulation
 
                     var shellRepulsionForce = -(1e-5*(1e-12/distance)
                                                 *Math.Exp(Math.Min(1e12*(atomRadiusSum - distance), 0)))
-                                              *r.Normalize();
+                                              *r.Normalize().ToVector3D();
 
                     forceLookup[vertex] += shellRepulsionForce;
                     forceLookup[neighborVertex] += -shellRepulsionForce;
@@ -151,13 +151,13 @@ namespace ChemistryLibrary.Simulation
                             .VectorTo(orbital1.MaximumElectronDensityPosition)
                             .Normalize();
                         var orbital1ParallelForce = repulsiveForce.ProjectOnto(orbtial1Vector);
-                        var orbital1RepulsiveForce = (repulsiveForce - orbital1ParallelForce);
+                        var orbital1RepulsiveForce = (repulsiveForce - orbital1ParallelForce).ToVector3D();
 
                         var orbtial2Vector = currentAtom.Position
                             .VectorTo(orbital2.MaximumElectronDensityPosition)
                             .Normalize();
                         var orbital2ParallelForce = repulsiveForce.ProjectOnto(orbtial2Vector);
-                        var orbital2RepulsiveForce = (repulsiveForce - orbital2ParallelForce);
+                        var orbital2RepulsiveForce = (repulsiveForce - orbital2ParallelForce).ToVector3D();
 
                         if (orbital1.IsPartOfBond)
                         {
@@ -218,7 +218,8 @@ namespace ChemistryLibrary.Simulation
                 return new Vector3D(0,0,0);
             var forceVector = orbital1.MaximumElectronDensityPosition
                 .VectorTo(orbital2.MaximumElectronDensityPosition)
-                .Normalize();
+                .Normalize()
+                .ToVector3D();
             var chargeProduct = PhysicalConstants.CoulombsConstant.Value
                 *(2*PhysicalConstants.ElementaryCharge.Value)
                 *(2*PhysicalConstants.ElementaryCharge.Value);

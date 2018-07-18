@@ -57,6 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="Views\MoleculeView.xaml.cs">
       <DependentUpon>MoleculeView.xaml</DependentUpon>
     </Compile>

@@ -124,7 +124,7 @@ namespace ChemistryLibrary.Simulation
                 return;
             var fullOuterOrbitals = fullAtom.OuterOrbitals.Where(o => o.IsFull);
             var output = fullOuterOrbitals
-                             .Select(o => o.Atom.Position.VectorTo(o.MaximumElectronDensityPosition).Normalize())
+                             .Select(o => o.Atom.Position.VectorTo(o.MaximumElectronDensityPosition).Normalize().ToVector3D())
                              .Select(v => v.X + ";" + v.Y + ";" + v.Z)
                              .Aggregate((a,b) => a + ";" + b)
                          + Environment.NewLine;
@@ -174,7 +174,7 @@ namespace ChemistryLibrary.Simulation
 
                 var lonePairVector = atom.Position.VectorTo(orbital.MaximumElectronDensityPosition);
                 var displacementNormal = displacementDirection.ProjectOnto(lonePairVector.Normalize());
-                var tangentialDisplacement = displacementDirection - displacementNormal;
+                var tangentialDisplacement = (displacementDirection - displacementNormal).ToVector3D();
                 var displacedLonePair = orbital.MaximumElectronDensityPosition
                                         + atomRadius*tangentialDisplacement;
                 lonePairVector = atom.Position.VectorTo(displacedLonePair);

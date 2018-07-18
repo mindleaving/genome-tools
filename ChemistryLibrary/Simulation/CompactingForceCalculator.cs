@@ -36,7 +36,7 @@ namespace ChemistryLibrary.Simulation
                     var connectingVector = vertexPosition.VectorTo(adjacentPosition);
                     var distance = connectingVector.Magnitude();
                     var forceMagnitude = ForceScaling * (1.0 + ForceDistanceScaling * distance.In(SIPrefix.Pico, Unit.Meter));
-                    var forceDirection = connectingVector.In(SIPrefix.Pico, Unit.Meter).Normalize();
+                    var forceDirection = connectingVector.In(SIPrefix.Pico, Unit.Meter).Normalize().ToVector3D();
                     if (!forceDictionary.ContainsKey(adjacentAminoAcid))
                         forceDictionary.Add(adjacentAminoAcid, new ApproximateAminoAcidForces());
                     AddForce(forceDictionary[aminoAcid], forceDirection, forceMagnitude);
