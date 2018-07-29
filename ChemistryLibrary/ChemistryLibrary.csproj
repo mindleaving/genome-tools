@@ -59,6 +59,7 @@
     <Compile Include="IO\Aminoseq\AminoseqReader.cs" />
     <Compile Include="IO\PeptideLoader.cs" />
     <Compile Include="Measurements\BondEnergyCalculator.cs" />
+    <Compile Include="Measurements\DihedralAngleCalculator.cs" />
     <Compile Include="Objects\AminoAcidName.cs" />
     <Compile Include="Objects\AminoAcidReference.cs" />
     <Compile Include="Objects\ApproximatedAminoAcid.cs" />

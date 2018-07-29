@@ -80,9 +80,9 @@ namespace ChemistryLibrary.Builders
                 lastAminoAcid.PsiAngle = psi;
         }
 
-        private static UnitPoint3D CalculateAtomPosition(UnitPoint3D currentPosition,
-            Vector3D vector1,
-            Vector3D vector2,
+        public static UnitPoint3D CalculateAtomPosition(UnitPoint3D currentPosition,
+            Vector vector1,
+            Vector vector2,
             UnitValue bondLength,
             UnitValue bondAngle,
             UnitValue bondTorsion)
@@ -108,12 +108,12 @@ namespace ChemistryLibrary.Builders
             var bondDirection = transformMatrix.Data.Multiply(bondVector.Data.ConvertToMatrix()).Vectorize();
 
             // Debug
-            var actualBondAngle = (-basisVector1).AngleWith(new Vector3D(bondDirection));
-            var actualTorsionAngle = new Vector3D(bondDirection).CrossProduct(basisVector1).AngleWith(-basisVector3);
-            if ((actualBondAngle - bondAngle).Abs().In(Unit.Degree) > 1)
-                throw new Exception("Bug!");
-            if ((actualTorsionAngle - bondTorsion).Abs().In(Unit.Degree) > 1)
-                throw new Exception("Bug!");
+            //var actualBondAngle = (-basisVector1).AngleWith(new Vector3D(bondDirection));
+            //var actualTorsionAngle = new Vector3D(bondDirection).CrossProduct(basisVector1).AngleWith(-basisVector3);
+            //if ((actualBondAngle - bondAngle).Abs().In(Unit.Degree) > 1)
+            //    throw new Exception("Bug!");
+            //if ((actualTorsionAngle.Abs() - bondTorsion.Abs()).Abs().In(Unit.Degree) > 1)
+            //    throw new Exception("Bug!");
 
             var atomPosition = currentPosition + new UnitVector3D(SIPrefix.Pico, Unit.Meter, bondDirection[0], bondDirection[1], bondDirection[2]);
             return atomPosition;

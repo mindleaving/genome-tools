@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary.Extensions;
@@ -139,6 +141,88 @@ namespace Studies
                     }
                 }
             });
+        }
+
+        [Test]
+        public void FilterByMethod()
+        {
+            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            Directory.CreateDirectory(Path.Combine(inputDirectory, "ByMethod"));
+            var methodMap = new Dictionary<string, List<string>>
+            {
+                {"Other", new List<string>()}
+            };
+            var files = Directory.EnumerateFiles(inputDirectory, "*.ent");
+            Parallel.ForEach(files, pdbFile =>
+            {
+                var lines = File.ReadAllLines(pdbFile);
+                Match experimentTypeMatch = null;
+                foreach (var line in lines)
+                {
+                    experimentTypeMatch = Regex.Match(line, "EXPDTA\\s+([A-Z].+)");
+                    if (experimentTypeMatch.Success)
+                        break;
+                }
+
+                if (experimentTypeMatch == null || !experimentTypeMatch.Success)
+                {
+                    methodMap["Other"].Add(pdbFile);
+                    return;
+                }
+                var experimentMethod = experimentTypeMatch.Groups[1].Value.Trim().ToUpperInvariant();
+                if (!methodMap.ContainsKey(experimentMethod))
+                    methodMap.Add(experimentMethod, new List<string>());
+                methodMap[experimentMethod].Add(pdbFile);
+            });
+            foreach (var kvp in methodMap)
+            {
+                var method = kvp.Key;
+                File.WriteAllLines(
+                    Path.Combine(inputDirectory, "ByMethod", $"{method}.csv"),
+                    kvp.Value);
+            }
+        }
+
+        [Test]
+        public void FilterByProtein()
+        {
+            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            var outputDirectory = Path.Combine(inputDirectory, "ByProtein");
+            Directory.CreateDirectory(outputDirectory);
+            Directory.EnumerateFiles(outputDirectory).ForEach(File.Delete);
+            var moleculeMap = new ConcurrentDictionary<string, ConcurrentBag<string>>();
+            moleculeMap.TryAdd("Other", new ConcurrentBag<string>());
+            var files = Directory.EnumerateFiles(inputDirectory, "*.ent");
+            Parallel.ForEach(files, pdbFile =>
+            {
+                var lines = File.ReadAllLines(pdbFile);
+                Match moleculeNameMatch = null;
+                foreach (var line in lines)
+                {
+                    moleculeNameMatch = Regex.Match(line, "COMPND.+MOLECULE.*:([^;]+).*");
+                    if (moleculeNameMatch.Success)
+                        break;
+                }
+
+                if (moleculeNameMatch == null || !moleculeNameMatch.Success)
+                {
+                    moleculeMap["Other"].Add(pdbFile);
+                    return;
+                }
+                var moleculeName = moleculeNameMatch.Groups[1].Value.Trim().ToUpperInvariant();
+                if (!moleculeMap.ContainsKey(moleculeName))
+                    moleculeMap.TryAdd(moleculeName, new ConcurrentBag<string>());
+                moleculeMap[moleculeName].Add(pdbFile);
+            });
+            foreach (var kvp in moleculeMap)
+            {
+                var moleculeName = kvp.Key;
+                moleculeName = Regex.Replace(moleculeName,"[^A-Z0-9-,\\s]","_");
+                moleculeName = Regex.Replace(moleculeName, "\\s+", " ");
+                File.WriteAllLines(
+                    Path.Combine(outputDirectory, $"{moleculeName}.csv"),
+                    kvp.Value);
+            }
         }
 
         [Test]
