@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ChemistryLibrary</RootNamespace>
     <AssemblyName>ChemistryLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,12 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics, Version=4.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.4.4.0\lib\net40\MathNet.Numerics.dll</HintPath>
-    </Reference>
-    <Reference Include="MIConvexHull, Version=1.0.17.1019, Culture=neutral, PublicKeyToken=bdc96d69606221fd, processorArchitecture=MSIL">
-      <HintPath>..\packages\MIConvexHull.1.1.17.1019\lib\netstandard1.0\MIConvexHull.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
@@ -57,11 +52,15 @@
     <Compile Include="Extensions\AminoAcidExtensions.cs" />
     <Compile Include="Builders\AminoAcidLibrary.cs" />
     <Compile Include="IO\Aminoseq\AminoseqReader.cs" />
+    <Compile Include="IO\Pdb\PdbModel.cs" />
+    <Compile Include="IO\Pdb\PdbReaderResult.cs" />
     <Compile Include="IO\PeptideLoader.cs" />
     <Compile Include="Measurements\BondEnergyCalculator.cs" />
     <Compile Include="Measurements\DihedralAngleCalculator.cs" />
     <Compile Include="Objects\AminoAcidName.cs" />
     <Compile Include="Objects\AminoAcidReference.cs" />
+    <Compile Include="Objects\AminoAcidSequence.cs" />
+    <Compile Include="Objects\AminoAcidSequenceItem.cs" />
     <Compile Include="Objects\ApproximatedAminoAcid.cs" />
     <Compile Include="Objects\ApproximatePeptide.cs" />
     <Compile Include="Builders\ApproximatePeptideCompleter.cs" />
@@ -130,19 +129,18 @@
     <Compile Include="Simulation\SimulationTimestepCompleteEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Commons\Commons.csproj">
-      <Project>{D0E6B038-C939-487D-BB5E-A6270A0D18F5}</Project>
-      <Name>Commons</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Pdb\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MIConvexHull.xml" />
+    <PackageReference Include="MathNet.Numerics">
+      <Version>4.5.1</Version>
+    </PackageReference>
+    <PackageReference Include="MIConvexHull">
+      <Version>1.1.17.1019</Version>
+    </PackageReference>
+    <PackageReference Include="mindleaving.Commons">
+      <Version>1.1.6</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

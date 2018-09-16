@@ -10,10 +10,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Studies</RootNamespace>
     <AssemblyName>Studies</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,11 +46,17 @@
     <Reference Include="Accord.Statistics, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
       <HintPath>..\packages\Accord.Statistics.3.8.0\lib\net45\Accord.Statistics.dll</HintPath>
     </Reference>
+    <Reference Include="Commons, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\mindleaving.Commons.1.1.6\lib\net461\Commons.dll</HintPath>
+    </Reference>
     <Reference Include="Emgu.CV.UI, Version=3.4.1.2976, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.3.4.1.2976\lib\net35\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.World, Version=3.4.1.2976, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.3.4.1.2976\lib\net35\Emgu.CV.World.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
@@ -68,30 +75,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlignedPair.cs" />
     <Compile Include="AlphaHelixStrengthStudy.cs" />
-    <Compile Include="AminoAcidAdjacencyLearning.cs" />
+    <Compile Include="PdbClassificationTools.cs" />
     <Compile Include="AminoAcidAngleStudy.cs" />
     <Compile Include="ApproximatePeptideFoldingValidationStudy.cs" />
     <Compile Include="CftrVariantsStudy.cs" />
     <Compile Include="DistanceMapGenerator.cs" />
     <Compile Include="DistanceMapStudy.cs" />
     <Compile Include="DistanceMapTo3DCalculator.cs" />
+    <Compile Include="LinearTransformation3D.cs" />
     <Compile Include="MoleculeDynamicsStudy.cs" />
     <Compile Include="NucleotideFrequencyStudy.cs" />
     <Compile Include="PeptideFrequencyStudy.cs" />
     <Compile Include="PeptideSequenceSimilarityStudy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProteinAligner.cs" />
-    <Compile Include="TightPackingSpheresStudy.cs" />
+    <Compile Include="ProteinAlignmentStudy.cs" />
+    <Compile Include="SequenceAligner.cs" />
+    <Compile Include="SequenceAlignment.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChemistryLibrary\ChemistryLibrary.csproj">
       <Project>{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}</Project>
       <Name>ChemistryLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Commons\Commons.csproj">
-      <Project>{D0E6B038-C939-487D-BB5E-A6270A0D18F5}</Project>
-      <Name>Commons</Name>
     </ProjectReference>
     <ProjectReference Include="..\Domain\Domain.csproj">
       <Project>{4708C272-3B30-4E50-A16B-479B49B095E1}</Project>

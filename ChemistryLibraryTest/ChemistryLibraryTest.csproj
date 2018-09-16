@@ -10,10 +10,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ChemistryLibraryTest</RootNamespace>
     <AssemblyName>ChemistryLibraryTest</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,6 +35,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Commons, Version=1.1.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\mindleaving.Commons.1.1.6\lib\net461\Commons.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
@@ -64,10 +71,6 @@
     <ProjectReference Include="..\ChemistryLibrary\ChemistryLibrary.csproj">
       <Project>{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}</Project>
       <Name>ChemistryLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Commons\Commons.csproj">
-      <Project>{D0E6B038-C939-487D-BB5E-A6270A0D18F5}</Project>
-      <Name>Commons</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

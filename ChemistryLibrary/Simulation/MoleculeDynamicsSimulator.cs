@@ -70,8 +70,8 @@ namespace ChemistryLibrary.Simulation
         {
             if (!Molecule.IsPositioned)
                 Molecule.PositionAtoms();
-            var currentAtomPositions = Molecule.MoleculeStructure.Vertices.Keys
-                .ToDictionary(vId => vId, vId => Molecule.GetAtom(vId).Position);
+            var currentAtomPositions = Molecule.MoleculeStructure.Vertices
+                .ToDictionary(vertex => vertex.Id, vertex => Molecule.GetAtom(vertex.Id).Position);
             var lastNeighborhoodUpdate = 0.To(Unit.Second);
             var atomNeighborhoodMap = new AtomNeighborhoodMap(Molecule);
             for (var t = 0.To(Unit.Second); t < simulationSettings.SimulationTime; t += simulationSettings.TimeStep)
@@ -88,8 +88,8 @@ namespace ChemistryLibrary.Simulation
                 // TODO: Redistribute electrons (either here or as a step after molecule is fully connected
                 //WriteDebug(molecule);
 
-                var newAtomPositions = Molecule.MoleculeStructure.Vertices.Keys
-                    .ToDictionary(vId => vId, vId => Molecule.GetAtom(vId).Position);
+                var newAtomPositions = Molecule.MoleculeStructure.Vertices
+                    .ToDictionary(vertex => vertex.Id, vertex => Molecule.GetAtom(vertex.Id).Position);
                 if (simulationSettings.StopSimulationWhenAtomAtRest && t > simulationSettings.ForceRampUpPeriod)
                 {
                     var maximumPositionChange = currentAtomPositions.Keys

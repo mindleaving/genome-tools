@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ChemistryLibrary.Objects
 {
@@ -41,7 +42,7 @@ namespace ChemistryLibrary.Objects
             {
                 if(vertexIds != null)
                     return vertexIds;
-                return Molecule.MoleculeStructure.Vertices.Keys;
+                return Molecule.MoleculeStructure.Vertices.Select(v => v.Id);
             }
         }
 

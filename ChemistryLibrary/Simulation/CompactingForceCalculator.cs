@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
 using Commons.Extensions;
@@ -21,17 +22,17 @@ namespace ChemistryLibrary.Simulation
             var forceDictionary = new Dictionary<ApproximatedAminoAcid, ApproximateAminoAcidForces>();
 
             var convexHull = compactnessMeasurerResult.ConvexHull;
-            foreach (var vertex in convexHull.Vertices.Values)
+            foreach (var vertex in convexHull.Vertices)
             {
-                var aminoAcid = (ApproximatedAminoAcid) vertex.Object;
+                var aminoAcid = vertex.Object;
                 var vertexPosition = aminoAcid.CarbonAlphaPosition;
                 if (!forceDictionary.ContainsKey(aminoAcid))
                     forceDictionary.Add(aminoAcid, new ApproximateAminoAcidForces());
 
-                var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(convexHull, vertex);
+                var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(convexHull, vertex).Cast<IVertex<ApproximatedAminoAcid>>();
                 foreach (var adjacentVertex in adjacentVertices)
                 {
-                    var adjacentAminoAcid = (ApproximatedAminoAcid) adjacentVertex.Object;
+                    var adjacentAminoAcid = adjacentVertex.Object;
                     var adjacentPosition = adjacentAminoAcid.CarbonAlphaPosition;
                     var connectingVector = vertexPosition.VectorTo(adjacentPosition);
                     var distance = connectingVector.Magnitude();

@@ -11,17 +11,17 @@ namespace ChemistryLibrary.Builders
 {
     public static class ApproximatePeptideBuilder
     {
-        public static ApproximatePeptide FromSequence(string sequence)
+        public static ApproximatePeptide FromSequence(string sequence, int firstSequenceNumber)
         {
             var cleanedPeptideString = Regex.Replace(sequence.ToUpperInvariant(), "[^A-Z]", "");
             var aminoAcidNames = cleanedPeptideString.Select(c => c.ToAminoAcidName()).ToList();
-            return FromSequence(aminoAcidNames);
+            return FromSequence(aminoAcidNames, firstSequenceNumber);
         }
 
-        public static ApproximatePeptide FromSequence(IList<AminoAcidName> sequence)
+        public static ApproximatePeptide FromSequence(IList<AminoAcidName> sequence, int firstSequenceNumber)
         {
             var aminoAcids = sequence
-                .Select(aaName => new ApproximatedAminoAcid(aaName))
+                .Select((aaName, idx) => new ApproximatedAminoAcid(aaName, firstSequenceNumber+idx))
                 .ToList();
             ApproximateAminoAcidPositioner.Position(aminoAcids, new UnitPoint3D(Unit.Meter, 0, 0, 0));
             return new ApproximatePeptide(aminoAcids);
@@ -40,7 +40,7 @@ namespace ChemistryLibrary.Builders
                 var carbon = aminoAcid.GetAtomFromName("C");
                 var aminoAcidDihedralAngles = dihedralAngles[aminoAcid];
 
-                var approximateAminoAcid = new ApproximatedAminoAcid(aminoAcid.Name)
+                var approximateAminoAcid = new ApproximatedAminoAcid(aminoAcid.Name, aminoAcid.SequenceNumber)
                 {
                     NitrogenPosition = nitrogen.Position,
                     CarbonAlphaPosition = carbonAlpha.Position,

@@ -17,7 +17,7 @@ using Peptide = Domain.Peptide;
 namespace Studies
 {
     [TestFixture]
-    public class AminoAcidAdjacencyLearning
+    public class PdbClassificationTools
     {
         [Test]
         [Ignore("Already done")]

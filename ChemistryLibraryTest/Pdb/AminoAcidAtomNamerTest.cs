@@ -12,20 +12,20 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void GlycineNamedCorrectly()
         {
-            var aminoAcidReference = AminoAcidLibrary.Glycine;
+            var aminoAcidReference = AminoAcidLibrary.Glycine(1);
             PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
-            var nitrogen = moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
+            var nitrogen = moleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId).Object;
             Assume.That(nitrogen.Element, Is.EqualTo(ElementName.Nitrogen));
             Assert.That(nitrogen.AminoAcidAtomName, Is.EqualTo("N"));
 
-            var carbonEnd = moleculeStructure.Vertices[aminoAcidReference.LastAtomId].Object;
+            var carbonEnd = moleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId).Object;
             Assume.That(carbonEnd.Element, Is.EqualTo(ElementName.Carbon));
             Assert.That(carbonEnd.AminoAcidAtomName, Is.EqualTo("C"));
 
             var remainingNonHydrogenAtoms = moleculeStructure.Vertices
-                .Select(v => v.Value.Object)
+                .Select(v => v.Object)
                 .Where(atom => atom.Element != ElementName.Hydrogen)
                 .Except(new[] {nitrogen, carbonEnd})
                 .ToList();
@@ -38,20 +38,20 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void AlanineNamedCorrectly()
         {
-            var aminoAcidReference = AminoAcidLibrary.Alanine;
+            var aminoAcidReference = AminoAcidLibrary.Alanine(1);
             PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
-            var nitrogen = moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
+            var nitrogen = moleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId).Object;
             Assume.That(nitrogen.Element, Is.EqualTo(ElementName.Nitrogen));
             Assert.That(nitrogen.AminoAcidAtomName, Is.EqualTo("N"));
 
-            var carbonEnd = moleculeStructure.Vertices[aminoAcidReference.LastAtomId].Object;
+            var carbonEnd = moleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId).Object;
             Assume.That(carbonEnd.Element, Is.EqualTo(ElementName.Carbon));
             Assert.That(carbonEnd.AminoAcidAtomName, Is.EqualTo("C"));
 
             var remainingNonHydrogenAtoms = moleculeStructure.Vertices
-                .Select(v => v.Value.Object)
+                .Select(v => v.Object)
                 .Where(atom => atom.Element != ElementName.Hydrogen)
                 .Except(new[] { nitrogen, carbonEnd })
                 .ToList();
@@ -67,20 +67,20 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void ProlineNamedCorrectly()
         {
-            var aminoAcidReference = AminoAcidLibrary.Proline;
+            var aminoAcidReference = AminoAcidLibrary.Proline(1);
             PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
-            var nitrogen = moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
+            var nitrogen = moleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId).Object;
             Assume.That(nitrogen.Element, Is.EqualTo(ElementName.Nitrogen));
             Assert.That(nitrogen.AminoAcidAtomName, Is.EqualTo("N"));
 
-            var carbonEnd = moleculeStructure.Vertices[aminoAcidReference.LastAtomId].Object;
+            var carbonEnd = moleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId).Object;
             Assume.That(carbonEnd.Element, Is.EqualTo(ElementName.Carbon));
             Assert.That(carbonEnd.AminoAcidAtomName, Is.EqualTo("C"));
 
             var remainingNonHydrogenAtoms = moleculeStructure.Vertices
-                .Select(v => v.Value.Object)
+                .Select(v => v.Object)
                 .Where(atom => atom.Element != ElementName.Hydrogen)
                 .Except(new[] { nitrogen, carbonEnd })
                 .ToList();
@@ -96,20 +96,20 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void LeucineNamedCorrectly()
         {
-            var aminoAcidReference = AminoAcidLibrary.Leucine;
+            var aminoAcidReference = AminoAcidLibrary.Leucine(1);
             PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
-            var nitrogen = moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
+            var nitrogen = moleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId).Object;
             Assume.That(nitrogen.Element, Is.EqualTo(ElementName.Nitrogen));
             Assert.That(nitrogen.AminoAcidAtomName, Is.EqualTo("N"));
 
-            var carbonEnd = moleculeStructure.Vertices[aminoAcidReference.LastAtomId].Object;
+            var carbonEnd = moleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId).Object;
             Assume.That(carbonEnd.Element, Is.EqualTo(ElementName.Carbon));
             Assert.That(carbonEnd.AminoAcidAtomName, Is.EqualTo("C"));
 
             var remainingNonHydrogenAtoms = moleculeStructure.Vertices
-                .Select(v => v.Value.Object)
+                .Select(v => v.Object)
                 .Where(atom => atom.Element != ElementName.Hydrogen)
                 .Except(new[] { nitrogen, carbonEnd })
                 .ToList();
@@ -125,20 +125,20 @@ namespace ChemistryLibraryTest.Pdb
         [Test]
         public void PhenylalanineNamedCorrectly()
         {
-            var aminoAcidReference = AminoAcidLibrary.Phenylalanine;
+            var aminoAcidReference = AminoAcidLibrary.Phenylalanine(1);
             PdbAminoAcidAtomNamer.AssignNames(aminoAcidReference);
 
             var moleculeStructure = aminoAcidReference.Molecule.MoleculeStructure;
-            var nitrogen = moleculeStructure.Vertices[aminoAcidReference.FirstAtomId].Object;
+            var nitrogen = moleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId).Object;
             Assume.That(nitrogen.Element, Is.EqualTo(ElementName.Nitrogen));
             Assert.That(nitrogen.AminoAcidAtomName, Is.EqualTo("N"));
 
-            var carbonEnd = moleculeStructure.Vertices[aminoAcidReference.LastAtomId].Object;
+            var carbonEnd = moleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId).Object;
             Assume.That(carbonEnd.Element, Is.EqualTo(ElementName.Carbon));
             Assert.That(carbonEnd.AminoAcidAtomName, Is.EqualTo("C"));
 
             var remainingNonHydrogenAtoms = moleculeStructure.Vertices
-                .Select(v => v.Value.Object)
+                .Select(v => v.Object)
                 .Where(atom => atom.Element != ElementName.Hydrogen)
                 .Except(new[] { nitrogen, carbonEnd })
                 .ToList();

@@ -1,137 +1,116 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Accord.Statistics.Testing;
 using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
+using Commons.Physics;
 
 namespace Studies
 {
     public class ProteinAligner
     {
-        public LinearTransformation Align(Peptide peptide1, Peptide peptide2)
-        {
-            var logicalAlignment = Align(peptide1.AminoAcids, peptide2.AminoAcids);
-        }
-
-        public LinearTransformation AlignAtSequence(Peptide peptide1, Peptide peptide2, Range<int> aminoAcidRange)
-        {
-            var aminoAcidSequence1 = peptide1.AminoAcids.SubArray(aminoAcidRange.From, aminoAcidRange.To - aminoAcidRange.From + 1);
-            var aminoAcidSequence2 = peptide2.AminoAcids
-        }
-
-        public SequenceAlignment<T> Align<T>(List<T> sequence1, List<T> sequence2)
-        {
-            var initialAlignment = SlideAlignment(sequence1, sequence2);
-            GetOverlapOfOffsetSequences(sequence1, sequence2, initialAlignment, out var overlapSequence1, out var overlapSequence2);
-            var overlapLength = overlapSequence1.Count;
-            var alignmentPairs = Enumerable.Range(0, overlapLength)
-                .Select(idx => new AlignedPair<T>(
-                    overlapSequence1[idx], initialAlignment + idx, 
-                    overlapSequence2[idx], initialAlignment + idx))
-                .ToList();
-            // TODO: Use dynamic programming or other sequence alignment algorithms for a better alignment. This initial alignment can maybe be used as a fix point.
-            return new SequenceAlignment<T>(alignmentPairs);
-        }
-
-        private int SlideAlignment<T>(List<T> sequence1, List<T> sequence2)
-        {
-            var distinctItems = sequence1.Concat(sequence2).Distinct().Count();
-            var overlapSums = new List<Tuple<int, double>>();
-            for (int sequence2Offset = -(sequence2.Count-1); sequence2Offset <= sequence1.Count-1; sequence2Offset++)
-            {
-                GetOverlapOfOffsetSequences(sequence1, sequence2, sequence2Offset, out var overlapSequence1, out var overlapSequence2);
-                var overlapLength = overlapSequence1.Count;
-
-                var matchCount = 0;
-                var lastWasMatch = false;
-                var longestMatch = 0;
-                var matchLength = 0;
-                for (int overlapIdx = 0; overlapIdx < overlapLength; overlapIdx++)
-                {
-                    var sequence1Item = overlapSequence1[overlapIdx];
-                    var sequence2Item = overlapSequence2[overlapIdx];
-                    var isOverlap = sequence1Item.Equals(sequence2Item);
-                    if (!isOverlap && lastWasMatch)
-                    {
-                        if (matchLength > longestMatch)
-                            longestMatch = matchLength;
-                        matchLength = 0;
-                    }
-                    if (isOverlap)
-                    {
-                        matchCount++;
-                        matchLength++;
-                    }
-                    lastWasMatch = isOverlap;
-                }
-
-                var matchProbability = 1.0 / distinctItems;
-                var matchCountSignificanceTest = new BinomialTest(
-                    successes: matchCount, trials: overlapLength,
-                    hypothesizedProbability: matchProbability,
-                    alternate: OneSampleHypothesis.ValueIsGreaterThanHypothesis);
-                var overlapLengthSignificanceTest = new BinomialTest(
-                    successes: 1, trials: overlapLength - longestMatch+1,
-                    hypothesizedProbability: Math.Pow(matchProbability, longestMatch),
-                    alternate: OneSampleHypothesis.ValueIsGreaterThanHypothesis);
-                var changeOfThisBeingRandom = Math.Min(matchCountSignificanceTest.PValue, overlapLengthSignificanceTest.PValue);
-                overlapSums.Add(new Tuple<int, double>(sequence2Offset, changeOfThisBeingRandom));
-            }
-            var bestOverlapOffset = overlapSums.MinimumItem(x => x.Item2).Item1;
-            return bestOverlapOffset;
-        }
-
         /// <summary>
-        /// Extract overlap of sequences when offsetting sequences. Resulting overlap sequences have the same length (by definition of 'overlap')
+        /// Aligns <paramref name="peptide2"/> with <paramref name="peptide1"/>
         /// </summary>
-        /// <param name="sequence1">Sequence 1</param>
-        /// <param name="sequence2">Sequence 2</param>
-        /// <param name="offsetSequence2">Offset sequence 2 to the right by this much. Negative numbers mean offset to the left relative to sequence 1</param>
-        /// <param name="overlapSequence1">Overlap of sequence 1</param>
-        /// <param name="overlapSequence2">Overlap of sequenc 2</param>
-        private void GetOverlapOfOffsetSequences<T>(
-            List<T> sequence1,
-            List<T> sequence2,
-            int offsetSequence2,
-            out List<T> overlapSequence1,
-            out List<T> overlapSequence2)
+        /// <returns>
+        /// Linear transformation that maps <paramref name="peptide2"/> positions
+        /// to best alignment with <paramref name="peptide1"/>
+        /// </returns>
+        public LinearTransformation3D Align(Peptide peptide1, Peptide peptide2)
         {
-            var sequence1Start = Math.Max(0, offsetSequence2);
-            var sequence1End = Math.Min(sequence1.Count - 1, sequence2.Count - 1 + offsetSequence2);
-            var sequence2Start = Math.Max(0, -offsetSequence2);
-            var sequence2End = Math.Min(sequence2.Count - 1, sequence1.Count - 1 - offsetSequence2);
-            var overlapLength = sequence1End - sequence1Start + 1;
-            overlapSequence1 = sequence1.Skip(sequence1Start).Take(overlapLength).ToList();
-            overlapSequence2 = sequence2.Skip(sequence2Start).Take(overlapLength).ToList();
-        }
-    }
+            // TODO: Select sequences where missing amino acids are filled in (using sequence numbers)
+            var sequence1AminoAcids = peptide1.AminoAcids.Select(aa => aa.Name).ToList();
+            var sequence2AminoAcids = peptide2.AminoAcids.Select(aa => aa.Name).ToList();
+            var logicalAlignment = SequenceAligner.Align(sequence1AminoAcids, sequence2AminoAcids);
+            var sequence1CarbonAlphaPositions = logicalAlignment.AlignedPairs
+                .Select(alignedPair => alignedPair.Item1Index)
+                .Select(aminoAcidIdx => peptide1.AminoAcids[aminoAcidIdx].GetAtomFromName("CA"))
+                .Select(carbonAlpha => carbonAlpha?.Position?.In(SIPrefix.Pico, Unit.Meter))
+                .ToList();
+            var sequence2CarbonAlphaPositions = logicalAlignment.AlignedPairs
+                .Select(alignedPair => alignedPair.Item2Index)
+                .Select(aminoAcidIdx => peptide2.AminoAcids[aminoAcidIdx].GetAtomFromName("CA"))
+                .Select(carbonAlpha => carbonAlpha?.Position?.In(SIPrefix.Pico, Unit.Meter))
+                .ToList();
 
-    public class SequenceAlignment<T>
-    {
-        public SequenceAlignment(List<AlignedPair<T>> alignedPairs)
-        {
-            AlignedPairs = alignedPairs;
+            return AlignUsingPositionPairs(sequence1CarbonAlphaPositions, sequence2CarbonAlphaPositions);
         }
 
-        public List<AlignedPair<T>> AlignedPairs { get; }
-    }
-
-    public class AlignedPair<T>
-    {
-        public AlignedPair(T item1, int item1Index, T item2, int item2Index)
+        public LinearTransformation3D AlignSubsequence(
+            Peptide peptide1,
+            int startIndex1,
+            Peptide peptide2,
+            int startIndex2,
+            int length)
         {
-            Item1 = item1;
-            Item2 = item2;
-            Item1Index = item1Index;
-            Item2Index = item2Index;
+            var subsequence1 = peptide1.AminoAcids
+                .Skip(startIndex1)
+                .Take(length)
+                .Select(aa => aa.GetAtomFromName("CA"))
+                .Select(carbonAlpha => carbonAlpha?.Position?.In(SIPrefix.Pico, Unit.Meter))
+                .ToList();
+            var subsequence2 = peptide2.AminoAcids
+                .Skip(startIndex2)
+                .Take(length)
+                .Select(aa => aa.GetAtomFromName("CA"))
+                .Select(carbonAlpha => carbonAlpha?.Position?.In(SIPrefix.Pico, Unit.Meter))
+                .ToList();
+
+            return AlignUsingPositionPairs(subsequence1, subsequence2);
         }
 
-        public int Item1Index { get; }
-        public T Item1 { get; }
+        private LinearTransformation3D AlignUsingPositionPairs(List<Point3D> sequence1, List<Point3D> sequence2)
+        {
+            var validIndices = sequence1
+                .PairwiseOperation(sequence2, (p1, p2) => p1 != null && p2 != null)
+                .Select((isValid, idx) => new {IsValid = isValid, Index = idx})
+                .Where(x => x.IsValid)
+                .Select(x => x.Index)
+                .ToList();
+            if(validIndices.Count < 2)
+                throw new ArgumentException("Too little position information (too many null-points) for alignment of sequences");
+            var sequence2PositionArray = new double[validIndices.Count, 4];
+            for (int validIdx = 0; validIdx < validIndices.Count; validIdx++)
+            {
+                var idx = validIndices[validIdx];
+                sequence2PositionArray[validIdx, 0] = 1;
+                sequence2PositionArray[validIdx, 1] = sequence2[idx].X;
+                sequence2PositionArray[validIdx, 2] = sequence2[idx].Y;
+                sequence2PositionArray[validIdx, 3] = sequence2[idx].Z;
+            }
 
-        public int Item2Index { get; }
-        public T Item2 { get; }
+            var sequence1X = validIndices.Select(idx => sequence1[idx].X).ToArray();
+            var sequence1Y = validIndices.Select(idx => sequence1[idx].Y).ToArray();
+            var sequence1Z = validIndices.Select(idx => sequence1[idx].Z).ToArray();
+
+            var betaX = LinearRegression(sequence2PositionArray, sequence1X);
+            var betaY = LinearRegression(sequence2PositionArray, sequence1Y);
+            var betaZ = LinearRegression(sequence2PositionArray, sequence1Z);
+
+            var rotationMatrix = new Matrix3X3();
+            rotationMatrix.Set(new[,]
+            {
+                {betaX[1], betaX[2], betaX[3]}, 
+                {betaY[1], betaY[2], betaY[3]}, 
+                {betaZ[1], betaZ[2], betaZ[3]}
+            });
+            return new LinearTransformation3D(
+                new Vector3D(betaX[0], betaY[0], betaZ[0]),
+                rotationMatrix);
+        }
+
+        private double[] LinearRegression(double[,] X, double[] b)
+        {
+            return X.Transpose().Multiply(X).Inverse().Multiply(X.Transpose().Multiply(b.ConvertToMatrix())).Vectorize();
+        }
+
+        //public LinearTransformation3D AlignAtSequence(Peptide peptide1, Range<int> range1, Peptide peptide2, Range<int> range2)
+        //{
+        //    if(range1.From-range1.To != range2.From-range2.To)
+        //        throw new ArgumentException("Ranges do not have the same length");
+        //    var aminoAcidSequence1 = peptide1.AminoAcids.SubArray(range1);
+        //    var aminoAcidSequence2 = peptide2.AminoAcids.SubArray(range2);
+        //}
     }
 }

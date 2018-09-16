@@ -116,8 +116,8 @@ namespace ChemistryLibrary.Extensions
             else
             {
                 var connectionAtomVertexId = moleculeReference.Molecule.MoleculeStructure.Vertices
-                    .Single(v => v.Value.Object.Equals(matchingConnectionAtom)).Key;
-                moleculeReference.Molecule.ConnectAtoms(moleculeReference.LastAtomId, connectionAtomVertexId, bondMultiplicity);
+                    .Single(v => v.Object.Equals(matchingConnectionAtom));
+                moleculeReference.Molecule.ConnectAtoms(moleculeReference.LastAtomId, connectionAtomVertexId.Id, bondMultiplicity);
             }
             return moleculeReference;
         }
@@ -145,11 +145,11 @@ namespace ChemistryLibrary.Extensions
         public static void MarkBackbone(this Molecule molecule, MoleculeReference moleculeReference)
         {
             var pathsFromFirstAtom = GraphAlgorithms.ShortestPaths(molecule.MoleculeStructure, moleculeReference.FirstAtomId);
-            var pathToLastAtom = pathsFromFirstAtom.PathTo(molecule.MoleculeStructure.Vertices[moleculeReference.LastAtomId]);
+            var pathToLastAtom = pathsFromFirstAtom.PathTo(molecule.MoleculeStructure.GetVertexFromId(moleculeReference.LastAtomId));
             var pathVertices = pathToLastAtom.Path
                 .SelectMany(edge => new[] { edge.Vertex1Id, edge.Vertex2Id })
                 .Distinct()
-                .Select(vId => molecule.MoleculeStructure.Vertices[vId])
+                .Select(vId => molecule.MoleculeStructure.GetVertexFromId(vId))
                 .Select(v => v.Object);
             pathVertices.ForEach(atom => atom.IsBackbone = true);
         }

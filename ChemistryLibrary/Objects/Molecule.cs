@@ -10,7 +10,7 @@ namespace ChemistryLibrary.Objects
 {
     public class Molecule : IDisposable
     {
-        public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Values.Select(v => v.Object);
+        public IEnumerable<Atom> Atoms => MoleculeStructure.Vertices.Select(v => v.Object);
         public Graph<Atom,SimpleBond> MoleculeStructure { get; } = new Graph<Atom,SimpleBond>();
         public UnitValue Charge => Atoms.Sum(atom => atom.FormalCharge, Unit.ElementaryCharge);
         public bool IsPositioned { get; private set; }
@@ -28,9 +28,9 @@ namespace ChemistryLibrary.Objects
                 return firstVertex.Id;
             }
 
-            if(!MoleculeStructure.Vertices.ContainsKey(existingAtomId))
+            if(!MoleculeStructure.HasVertex(existingAtomId))
                 throw new KeyNotFoundException("Adding atom to molecule failed, because the reference to an existing atom was not found");
-            var existingAtom = MoleculeStructure.Vertices[existingAtomId].Object;
+            var existingAtom = MoleculeStructure.GetVertexFromId(existingAtomId).Object;
             var vertex = new Vertex<Atom>(MoleculeStructure.GetUnusedVertexId())
             {
                 Object = atom
@@ -66,12 +66,12 @@ namespace ChemistryLibrary.Objects
             var mergeInfo = MoleculeStructure.AddGraph(moleculeToBeAdded.Molecule.MoleculeStructure);
             var vertex1 = connectionAtomId;
             var vertex2 = mergeInfo.VertexIdMap[moleculeToBeAdded.FirstAtomId];
-            var atom1 = MoleculeStructure.Vertices[vertex1].Object;
-            var atom2 = MoleculeStructure.Vertices[vertex2].Object;
+            var atom1 = MoleculeStructure.GetVertexFromId(vertex1).Object;
+            var atom2 = MoleculeStructure.GetVertexFromId(vertex2).Object;
             var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
             foreach (var bond in bonds)
             {
-                var edge = MoleculeStructure.ConnectVertices(vertex1, vertex2);
+                var edge = (Edge<SimpleBond>)MoleculeStructure.ConnectVertices(vertex1, vertex2);
                 edge.Object = bond;
             }
             convertedInputMoleculeReference = new MoleculeReference(this,
@@ -94,7 +94,7 @@ namespace ChemistryLibrary.Objects
 
         public Atom GetAtom(uint atomId)
         {
-            return MoleculeStructure.Vertices[atomId].Object;
+            return MoleculeStructure.GetVertexFromId(atomId).Object;
         }
 
         public void ConnectAtoms(uint atomId1, uint atomId2, BondMultiplicity bondMultiplicity = BondMultiplicity.Single)
@@ -104,7 +104,7 @@ namespace ChemistryLibrary.Objects
             var bonds = AtomConnector.CreateBonds(atom1, atom2, bondMultiplicity);
             foreach (var bond in bonds)
             {
-                var edge = MoleculeStructure.ConnectVertices(atomId1, atomId2);
+                var edge = (Edge<SimpleBond>)MoleculeStructure.ConnectVertices(atomId1, atomId2);
                 edge.Object = bond;
             }
         }

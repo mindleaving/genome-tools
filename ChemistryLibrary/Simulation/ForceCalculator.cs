@@ -33,14 +33,14 @@ namespace ChemistryLibrary.Simulation
         private static Dictionary<uint, Vector3D> CalculateBondForces(Graph<Atom,SimpleBond> graph)
         {
             var forceLookup = graph.Vertices.ToDictionary(
-                kvp => kvp.Key, 
+                kvp => kvp.Id, 
                 kvp => new Vector3D(0, 0, 0));
 
             // Bond force
-            foreach (var edge in graph.Edges.Values)
+            foreach (var edge in graph.Edges)
             {
-                var vertex1 = graph.Vertices[edge.Vertex1Id];
-                var vertex2 = graph.Vertices[edge.Vertex2Id];
+                var vertex1 = graph.GetVertexFromId(edge.Vertex1Id);
+                var vertex2 = graph.GetVertexFromId(edge.Vertex2Id);
                 var atom1 = vertex1.Object;
                 var atom2 = vertex2.Object;
                 var bond = (OrbitalBond)edge.Object;
@@ -61,19 +61,19 @@ namespace ChemistryLibrary.Simulation
             Dictionary<uint, Vector3D> forceLookup,
             AtomNeighborhoodMap neighborhoodMap)
         {
-            var vertices = molecule.MoleculeStructure.Vertices.Keys;
-            foreach (var vertex in vertices)
+            var vertexIds = molecule.MoleculeStructure.Vertices.Select(v => v.Id);
+            foreach (var vertexId in vertexIds)
             {
-                var atom = molecule.GetAtom(vertex);
+                var atom = molecule.GetAtom(vertexId);
                 var charge1 = atom.EffectiveCharge;
                 var atom1Position = atom.Position;
 
-                var neighborhood = neighborhoodMap.GetNeighborhood(vertex);
-                foreach (var neighborVertex in neighborhood)
+                var neighborhood = neighborhoodMap.GetNeighborhood(vertexId);
+                foreach (var neighborVertexId in neighborhood)
                 {
-                    if (neighborVertex <= vertex)
+                    if (neighborVertexId <= vertexId)
                         continue;
-                    var neighborAtom = molecule.GetAtom(neighborVertex);
+                    var neighborAtom = molecule.GetAtom(neighborVertexId);
                     var charge2 = neighborAtom.EffectiveCharge;
                     var r = atom1Position.VectorTo(neighborAtom.Position);
                     var distance = r.Magnitude().In(SIPrefix.Pico, Unit.Meter);
@@ -82,8 +82,8 @@ namespace ChemistryLibrary.Simulation
                                         *charge2.Value;
                     var ionicForce = -5*1e-1*(chargeProduct/(distance*distance))*r.Normalize().ToVector3D();
 
-                    forceLookup[vertex] += ionicForce;
-                    forceLookup[neighborVertex] += -ionicForce;
+                    forceLookup[vertexId] += ionicForce;
+                    forceLookup[neighborVertexId] += -ionicForce;
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace ChemistryLibrary.Simulation
             Dictionary<uint, Vector3D> forceLookup,
             AtomNeighborhoodMap neighborhoodMap)
         {
-            var vertices = molecule.MoleculeStructure.Vertices.Keys;
+            var vertices = molecule.MoleculeStructure.Vertices.Select(v => v.Id);
             foreach (var vertex in vertices)
             {
                 var atom = molecule.GetAtom(vertex);
@@ -128,13 +128,13 @@ namespace ChemistryLibrary.Simulation
         private static Dictionary<Orbital, Vector3D> CalculateLonePairRepulsion(Graph<Atom,SimpleBond> graph, 
             IDictionary<uint, Vector3D> forceLookup)
         {
-            var lonePairForceLookup = graph.Vertices.Values
+            var lonePairForceLookup = graph.Vertices
                 .Select(v => (AtomWithOrbitals)v.Object)
                 .SelectMany(atom => atom.LonePairs)
                 .ToDictionary(o => o, o => new Vector3D(0,0,0));
-            foreach(var vertex in graph.Vertices.Values)
+            foreach(var vertex in graph.Vertices)
             {
-                var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).ToList();
+                var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, vertex).Cast<IVertex<Atom>>().ToList();
                 var currentAtom = (AtomWithOrbitals)vertex.Object;
                 var filledOuterOrbitals = currentAtom.OuterOrbitals.Where(o => o.IsFull).ToList();
                 var orbitalNeighborVertexMap = MapBondOrbitalToNeighborVertex(
@@ -183,8 +183,8 @@ namespace ChemistryLibrary.Simulation
             return lonePairForceLookup;
         }
 
-        private static Dictionary<Orbital, Vertex<Atom>> MapBondOrbitalToNeighborVertex(
-            List<Orbital> filledOuterOrbitals, AtomWithOrbitals currentAtom, List<Vertex<Atom>> adjacentVertices)
+        private static Dictionary<Orbital, IVertex<Atom>> MapBondOrbitalToNeighborVertex(
+            List<Orbital> filledOuterOrbitals, AtomWithOrbitals currentAtom, List<IVertex<Atom>> adjacentVertices)
         {
             var orbitalNeighborVertexMap = filledOuterOrbitals
                 .Where(o => o.IsPartOfBond)

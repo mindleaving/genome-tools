@@ -22,13 +22,13 @@ namespace ChemistryLibraryTest.Simulation
         {
             var approximatePeptide = new ApproximatePeptide(new []
             {
-                new ApproximatedAminoAcid(AminoAcidName.Alanine)
+                new ApproximatedAminoAcid(AminoAcidName.Alanine, 1)
                 {
                     NitrogenPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, -150, -150, 0),
                     CarbonAlphaPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0, -150, 0),
                     CarbonPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 0, 0, 0)
                 },
-                new ApproximatedAminoAcid(AminoAcidName.Alanine)
+                new ApproximatedAminoAcid(AminoAcidName.Alanine, 2)
                 {
                     NitrogenPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 150, 0, 0),
                     CarbonAlphaPosition = new UnitPoint3D(SIPrefix.Pico, Unit.Meter, 150, 0, 150),
@@ -57,7 +57,7 @@ namespace ChemistryLibraryTest.Simulation
             var targetPhi = 40.To(Unit.Degree);
             var targetPsi = -10.To(Unit.Degree);
 
-            var approximatePeptide = ApproximatePeptideBuilder.FromSequence(new [] { AminoAcidName.Alanine, AminoAcidName.Alanine, AminoAcidName.Alanine });
+            var approximatePeptide = ApproximatePeptideBuilder.FromSequence(new [] { AminoAcidName.Alanine, AminoAcidName.Alanine, AminoAcidName.Alanine }, 1);
             approximatePeptide.UpdatePositions();
             var startAngles = AminoAcidAngleMeasurer.MeasureAngles(approximatePeptide);
             var simulationSettings = new ApproximatePeptideSimulationSettings

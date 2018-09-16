@@ -13,9 +13,9 @@ namespace ChemistryLibraryTest.Measurements
         [Test]
         public void VolumeAsExpected()
         {
-            var aa1 = new ApproximatedAminoAcid(AminoAcidName.Alanine);
-            var aa2 = new ApproximatedAminoAcid(AminoAcidName.Alanine);
-            var aa3 = new ApproximatedAminoAcid(AminoAcidName.Alanine);
+            var aa1 = new ApproximatedAminoAcid(AminoAcidName.Alanine, 1);
+            var aa2 = new ApproximatedAminoAcid(AminoAcidName.Alanine, 2);
+            var aa3 = new ApproximatedAminoAcid(AminoAcidName.Alanine, 3);
             var peptide = new ApproximatePeptide(new List<ApproximatedAminoAcid> { aa1, aa2, aa3 });
 
             // Set positions

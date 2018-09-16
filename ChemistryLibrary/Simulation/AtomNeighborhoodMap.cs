@@ -25,7 +25,7 @@ namespace ChemistryLibrary.Simulation
 
         public void Update()
         {
-            var vertices = molecule.MoleculeStructure.Vertices.Keys.ToList();
+            var vertices = molecule.MoleculeStructure.Vertices.Select(v => v.Id).ToList();
             neighborhoodMap.Clear();
             vertices.ForEach(vertex => neighborhoodMap.Add(vertex, new List<uint>()));
 

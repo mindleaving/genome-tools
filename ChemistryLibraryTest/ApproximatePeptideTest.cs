@@ -13,20 +13,20 @@ namespace ChemistryLibraryTest
         [Test]
         public void ApproximatePeptidePositioningTest()
         {
-            var peptide = ApproximatePeptideBuilder.FromSequence(new string('A', 3));
+            var peptide = ApproximatePeptideBuilder.FromSequence(new string('A', 3), 1);
             Assert.That(peptide.AminoAcids.Count, Is.EqualTo(3));
         }
 
         [Test]
         public void AminoAcidPositioningTest()
         {
-            var aminoAcid1 = new ApproximatedAminoAcid(AminoAcidName.Glycine)
+            var aminoAcid1 = new ApproximatedAminoAcid(AminoAcidName.Glycine, 1)
             {
                 OmegaAngle = 0.To(Unit.Degree),
                 PhiAngle = 0.To(Unit.Degree),
                 PsiAngle = -120.To(Unit.Degree)
             };
-            var aminoAcid2 = new ApproximatedAminoAcid(AminoAcidName.Glycine)
+            var aminoAcid2 = new ApproximatedAminoAcid(AminoAcidName.Glycine, 2)
             {
                 OmegaAngle = 10.To(Unit.Degree),
                 PhiAngle = -70.To(Unit.Degree),

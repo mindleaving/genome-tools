@@ -8,15 +8,17 @@ namespace ChemistryLibrary.Objects
     {
         private static long lastId;
 
-        public ApproximatedAminoAcid(AminoAcidName aminoAcidName)
+        public ApproximatedAminoAcid(AminoAcidName aminoAcidName, int sequenceNumber)
         {
             Id = Interlocked.Increment(ref lastId);
             Name = aminoAcidName;
+            SequenceNumber = sequenceNumber;
         }
-        private ApproximatedAminoAcid(long id, AminoAcidName aminoAcidName)
+        private ApproximatedAminoAcid(long id, AminoAcidName aminoAcidName, int sequenceNumber)
         {
             Id = id;
             Name = aminoAcidName;
+            SequenceNumber = sequenceNumber;
         }
 
         public long Id { get; }
@@ -32,6 +34,7 @@ namespace ChemistryLibrary.Objects
         public AminoAcidName Name { get; }
 
         public bool IsFrozen { get; set; }
+        public int SequenceNumber { get; set; }
 
         public bool Equals(ApproximatedAminoAcid other)
         {
@@ -60,7 +63,7 @@ namespace ChemistryLibrary.Objects
 
         public ApproximatedAminoAcid DeepClone()
         {
-            return new ApproximatedAminoAcid(Id, Name)
+            return new ApproximatedAminoAcid(Id, Name, SequenceNumber)
             {
                 NitrogenPosition = NitrogenPosition?.DeepClone(),
                 CarbonAlphaPosition = CarbonAlphaPosition?.DeepClone(),

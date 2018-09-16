@@ -243,12 +243,14 @@ namespace ChemistryLibrary.IO.Pdb
                 var aminoAcid = aminoAcids[residueIdx];
                 PdbAminoAcidAtomNamer.AssignNames(aminoAcid);
                 var aminoAcidVertices = aminoAcid.VertexIds
-                    .Select(vId => aminoAcid.Molecule.MoleculeStructure.Vertices[vId]);
+                    .Select(vId => aminoAcid.Molecule.MoleculeStructure.GetVertexFromId(vId));
                 var residueName = aminoAcid.Name.ToThreeLetterCode();
                 foreach (var vertex in aminoAcidVertices)
                 {
                     var atom = aminoAcid.Molecule.GetAtom(vertex.Id);
                     if (atom.Element == ElementName.Hydrogen)
+                        continue;
+                    if(atom.Position == null)
                         continue;
                     var atomName = atom.AminoAcidAtomName ?? atom.Element.ToElementSymbol().ToString();
                     var x = (1e10*atom.Position.X).ToString("F3");

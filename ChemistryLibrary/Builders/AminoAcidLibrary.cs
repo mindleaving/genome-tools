@@ -7,467 +7,407 @@ namespace ChemistryLibrary.Builders
 {
     public static class AminoAcidLibrary
     {
-        public static AminoAcidReference Get(AminoAcidName aminoAcidCode)
+        public static AminoAcidReference Get(AminoAcidName aminoAcidCode, int sequenceNumber)
         {
             switch (aminoAcidCode)
             {
                 case AminoAcidName.Isoleucine:
-                    return Isoleucine;
+                    return Isoleucine(sequenceNumber);
                 case AminoAcidName.Leucine:
-                    return Leucine;
+                    return Leucine(sequenceNumber);
                 case AminoAcidName.Valine:
-                    return Valine;
+                    return Valine(sequenceNumber);
                 case AminoAcidName.Phenylalanine:
-                    return Phenylalanine;
+                    return Phenylalanine(sequenceNumber);
                 case AminoAcidName.Methionine:
-                    return Methionine;
+                    return Methionine(sequenceNumber);
                 case AminoAcidName.Cysteine:
-                    return Cysteine;
+                    return Cysteine(sequenceNumber);
                 case AminoAcidName.Alanine:
-                    return Alanine;
+                    return Alanine(sequenceNumber);
                 case AminoAcidName.Glycine:
-                    return Glycine;
+                    return Glycine(sequenceNumber);
                 case AminoAcidName.Proline:
-                    return Proline;
+                    return Proline(sequenceNumber);
                 case AminoAcidName.Threonine:
-                    return Threonine;
+                    return Threonine(sequenceNumber);
                 case AminoAcidName.Serine:
-                    return Serine;
+                    return Serine(sequenceNumber);
                 case AminoAcidName.Tyrosine:
-                    return Tyrosine;
+                    return Tyrosine(sequenceNumber);
                 case AminoAcidName.Tryptophan:
-                    return Tryptophan;
+                    return Tryptophan(sequenceNumber);
                 case AminoAcidName.Glutamine:
-                    return Glutamine;
+                    return Glutamine(sequenceNumber);
                 case AminoAcidName.Asparagine:
-                    return Asparagine;
+                    return Asparagine(sequenceNumber);
                 case AminoAcidName.Histidine:
-                    return Histidine;
+                    return Histidine(sequenceNumber);
                 case AminoAcidName.GlutamicAcid:
-                    return GlutamicAcid;
+                    return GlutamicAcid(sequenceNumber);
                 case AminoAcidName.AsparticAcid:
-                    return AsparticAcid;
+                    return AsparticAcid(sequenceNumber);
                 case AminoAcidName.Lysine:
-                    return Lysine;
+                    return Lysine(sequenceNumber);
                 case AminoAcidName.Arginine:
-                    return Arginine;
+                    return Arginine(sequenceNumber);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(aminoAcidCode), $"Unknown amino acid code '{aminoAcidCode}'");
             }
         }
 
-        public static AminoAcidReference Alanine
+        public static AminoAcidReference Alanine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon)
-                    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon)
+                .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Alanine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Alanine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Glycine
+        public static AminoAcidReference Glycine(int sequenceNumber)
         {
-            get
-            {
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Glycine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Glycine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Isoleucine
+        public static AminoAcidReference Isoleucine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon)
-                    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon)
+                .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var sideChain2Builder = new MoleculeBuilder();
-                sideChain2Builder.Start
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain2Builder = new MoleculeBuilder();
+            sideChain2Builder.Start
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain2Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Isoleucine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain2Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Isoleucine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Leucine
+        public static AminoAcidReference Leucine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var sideChain11Builder = new MoleculeBuilder();
-                sideChain11Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
-                    .AddSideChain(sideChain11Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen); ;
+            var sideChain1Builder = new MoleculeBuilder();
+            var sideChain11Builder = new MoleculeBuilder();
+            sideChain11Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                .AddSideChain(sideChain11Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen); ;
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Leucine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Leucine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Proline
+        public static AminoAcidReference Proline(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var sideChain1End = sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            var sideChain1End = sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen)
-                    .AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).ConnectTo(sideChain1End)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Proline, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen)
+                .AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).ConnectTo(sideChain1End)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Proline, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Valine
+        public static AminoAcidReference Valine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var sideChain11Builder = new MoleculeBuilder();
-                sideChain11Builder.Start
-                    .Add(ElementName.Carbon)
-                    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
-                var sideChain12Builder = new MoleculeBuilder();
-                sideChain12Builder.Start
-                    .Add(ElementName.Carbon)
-                    .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
-                    .AddSideChain(sideChain11Builder.Start)
-                    .AddSideChain(sideChain12Builder.Start);
+            var sideChain1Builder = new MoleculeBuilder();
+            var sideChain11Builder = new MoleculeBuilder();
+            sideChain11Builder.Start
+                .Add(ElementName.Carbon)
+                .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain12Builder = new MoleculeBuilder();
+            sideChain12Builder.Start
+                .Add(ElementName.Carbon)
+                .AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                .AddSideChain(sideChain11Builder.Start)
+                .AddSideChain(sideChain12Builder.Start);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Valine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Valine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Phenylalanine
+        public static AminoAcidReference Phenylalanine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .AddBenzolRing();
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .AddBenzolRing();
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Phenylalanine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Phenylalanine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Tryptophan
+        public static AminoAcidReference Tryptophan(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var sideChain11Builder = new MoleculeBuilder();
-                var sideChain11End = sideChain11Builder.Start
-                    .Add(ElementName.Carbon)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
-                var benzolReferences = sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain11Builder.Start)
-                    .AddBenzolRing(1);
-                benzolReferences.Single().ConnectTo(sideChain11End);
+            var sideChain1Builder = new MoleculeBuilder();
+            var sideChain11Builder = new MoleculeBuilder();
+            var sideChain11End = sideChain11Builder.Start
+                .Add(ElementName.Carbon)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
+            var benzolReferences = sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain11Builder.Start)
+                .AddBenzolRing(1);
+            benzolReferences.Single().ConnectTo(sideChain11End);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Tryptophan, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Tryptophan, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Tyrosine
+        public static AminoAcidReference Tyrosine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var benzolReferences = sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .AddBenzolRing(3);
-                benzolReferences.Single().Add(ElementName.Oxygen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            var benzolReferences = sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .AddBenzolRing(3);
+            benzolReferences.Single().Add(ElementName.Oxygen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Tyrosine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Tyrosine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference AsparticAcid
+        public static AminoAcidReference AsparticAcid(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .AddToCurrentAtom(ElementName.Oxygen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
+                .AddToCurrentAtom(ElementName.Oxygen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.AsparticAcid, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.AsparticAcid, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference GlutamicAcid
+        public static AminoAcidReference GlutamicAcid(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .AddToCurrentAtom(ElementName.Oxygen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
+                .AddToCurrentAtom(ElementName.Oxygen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.GlutamicAcid, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.GlutamicAcid, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Arginine
+        public static AminoAcidReference Arginine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var sideChain11Builder = new MoleculeBuilder();
-                sideChain11Builder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
-                var sideChain12Builder = new MoleculeBuilder();
-                sideChain12Builder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon)
-                    .AddSideChain(sideChain11Builder.Start)
-                    .AddSideChain(sideChain12Builder.Start, BondMultiplicity.Double);
+            var sideChain1Builder = new MoleculeBuilder();
+            var sideChain11Builder = new MoleculeBuilder();
+            sideChain11Builder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain12Builder = new MoleculeBuilder();
+            sideChain12Builder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen);
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon)
+                .AddSideChain(sideChain11Builder.Start)
+                .AddSideChain(sideChain12Builder.Start, BondMultiplicity.Double);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Arginine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Arginine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Histidine
+        public static AminoAcidReference Histidine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                var ringBuilder = new MoleculeBuilder();
-                var ringEnd = ringBuilder.Start
-                    .Add(ElementName.Carbon)
-                    .Add(ElementName.Nitrogen)
-                    .Add(ElementName.Carbon, BondMultiplicity.Double)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen);
-                ringBuilder.Start.ConnectTo(ringEnd, BondMultiplicity.Double);
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
-                    .AddSideChain(ringBuilder.Start);
+            var sideChain1Builder = new MoleculeBuilder();
+            var ringBuilder = new MoleculeBuilder();
+            var ringEnd = ringBuilder.Start
+                .Add(ElementName.Carbon)
+                .Add(ElementName.Nitrogen)
+                .Add(ElementName.Carbon, BondMultiplicity.Double)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen);
+            ringBuilder.Start.ConnectTo(ringEnd, BondMultiplicity.Double);
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen)
+                .AddSideChain(ringBuilder.Start);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Histidine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Histidine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Lysine
+        public static AminoAcidReference Lysine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Lysine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Lysine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Serine
+        public static AminoAcidReference Serine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder();
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Oxygen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder();
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Oxygen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Serine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Serine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Threonine
+        public static AminoAcidReference Threonine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder(); ;
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddSideChain(ElementName.Oxygen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder(); ;
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddSideChain(ElementName.Oxygen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Threonine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Threonine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Cysteine
+        public static AminoAcidReference Cysteine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder(); ;
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Sulfur, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder(); ;
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Sulfur, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Cysteine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Cysteine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Methionine
+        public static AminoAcidReference Methionine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder(); ;
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Sulfur)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder(); ;
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Sulfur)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Methionine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Methionine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Asparagine
+        public static AminoAcidReference Asparagine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder(); ;
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder(); ;
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Asparagine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Asparagine, sequenceNumber, moleculeReference);
         }
 
-        public static AminoAcidReference Glutamine
+        public static AminoAcidReference Glutamine(int sequenceNumber)
         {
-            get
-            {
-                var sideChain1Builder = new MoleculeBuilder(); ;
-                sideChain1Builder.Start
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
+            var sideChain1Builder = new MoleculeBuilder(); ;
+            sideChain1Builder.Start
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double)
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen, ElementName.Hydrogen);
 
-                var moduleBuilder = new MoleculeBuilder();
-                var moleculeReference = moduleBuilder.Start
-                    .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
-                    .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
-                    .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
-                return new AminoAcidReference(AminoAcidName.Glutamine, moleculeReference);
-            }
+            var moduleBuilder = new MoleculeBuilder();
+            var moleculeReference = moduleBuilder.Start
+                .Add(ElementName.Nitrogen).AddToCurrentAtom(ElementName.Hydrogen)
+                .Add(ElementName.Carbon).AddSideChain(sideChain1Builder.Start)
+                .Add(ElementName.Carbon).AddToCurrentAtom(ElementName.Oxygen, BondMultiplicity.Double);
+            return new AminoAcidReference(AminoAcidName.Glutamine, sequenceNumber, moleculeReference);
         }
     }
 }

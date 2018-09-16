@@ -38,7 +38,7 @@ namespace ChemistryLibraryTest.Pdb
                 + "LNTEGEIQIDGVSWDSITLQQWRKAFGVIPQKVFIFSGTFRKNLDPYEQWSDQEIWKVAD"
                 + "EVGLRSVIEQFPGKLDFVLVDGGCVLSHGHKQLMCLARSVLSKAKILLLDEPSAHLDPVT"
                 + "YQIIRRTLKQAFADCTVILCEHRIEAMLECQQFLVIEENKVRQYDSIQKLLNERSLFRQA"
-                + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL");
+                + "ISPSDRVKLFPHRNSSKCKSKPQIAALKEETEEEVQDTRL", 1);
             peptide.Molecule.PositionAtoms(peptide.MoleculeReference.FirstAtomId, peptide.MoleculeReference.LastAtomId);
             File.WriteAllText(@"G:\Projects\HumanGenome\cftr.pdb", PdbSerializer.Serialize(peptide, "cftr"));
         }

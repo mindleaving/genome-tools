@@ -20,5 +20,17 @@ namespace ChemistryLibraryTest.Pdb
                 Assert.That(peptide.AminoAcids.Count, Is.EqualTo(expectedPeptideLength));
             }
         }
+
+        [Test]
+        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb1b68.ent", 23, 162)]
+        public void AminoAcidSequenceNumberAsExpected(string pdbFile, int sequenceStart, int sequenceStop)
+        {
+            var pdbResult = PdbReader.ReadFile(pdbFile);
+            Assume.That(pdbResult.Models.Any());
+            var firstModel = pdbResult.Models.First();
+            var firstChain = firstModel.Chains.First();
+            Assert.That(firstChain.AminoAcids.First().SequenceNumber, Is.EqualTo(sequenceStart));
+            Assert.That(firstChain.AminoAcids.Last().SequenceNumber, Is.EqualTo(sequenceStop));
+        }
     }
 }

@@ -6,6 +6,7 @@ using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
 using MIConvexHull;
+using IVertex = MIConvexHull.IVertex;
 
 namespace ChemistryLibrary.Measurements
 {
@@ -37,7 +38,7 @@ namespace ChemistryLibrary.Measurements
 
         private static UnitValue CalculateVolume(ConvexHull<ApproximateAminoAcidVertex3D, DefaultConvexFace<ApproximateAminoAcidVertex3D>> convexHull)
         {
-            const double oneThird = 1.0/3.0;
+            const double OneThird = 1.0/3.0;
             var volume = 0.0;
             var origin = convexHull.Points.First().Point;
             foreach (var face in convexHull.Faces)
@@ -47,7 +48,7 @@ namespace ChemistryLibrary.Measurements
                 var faceVector2 = (face.Vertices[2].Point - face.Vertices[1].Point).ToVector3D();
                 var faceArea = 0.5*faceVector1.CrossProduct(faceVector2).Magnitude();
                 var blockHeight = origin.DistanceFromPlane(faceOrigin, faceVector1, faceVector2);
-                var blockVolume = oneThird*faceArea*blockHeight;
+                var blockVolume = OneThird*faceArea*blockHeight;
                 volume += blockVolume;
             }
             var picoMultiplier = SIPrefix.Pico.GetMultiplier();
@@ -84,7 +85,7 @@ namespace ChemistryLibrary.Measurements
                     {
                         var vertex2 = face.Vertices[v2Idx];
                         var vertex2GraphId = convexHullToGraphVertexIdMap[vertex2.Id];
-                        var graphVertex1 = graph.Vertices[vertex1GraphId];
+                        var graphVertex1 = graph.GetVertexFromId(vertex1GraphId);
                         var adjacentVertices = GraphAlgorithms.GetAdjacentVertices(graph, graphVertex1);
                         if(!adjacentVertices.Select(v => v.Id).Contains(vertex2GraphId))
                             graph.AddEdge(new Edge<OrbitalBond>(graph.GetUnusedEdgeId(), vertex1GraphId, vertex2GraphId));

@@ -14,17 +14,17 @@ namespace ChemistryLibrary.IO.Pdb
         {
             var molecule = aminoAcidReference.Molecule;
             aminoAcidReference.VertexIds
-                .Select(vId => aminoAcidReference.Molecule.MoleculeStructure.Vertices[vId])
+                .Select(vId => aminoAcidReference.Molecule.MoleculeStructure.GetVertexFromId(vId))
                 .ForEach(v => v.AlgorithmData = false);
 
-            var nitrogenVertex = molecule.MoleculeStructure.Vertices[aminoAcidReference.FirstAtomId];
+            var nitrogenVertex = molecule.MoleculeStructure.GetVertexFromId(aminoAcidReference.FirstAtomId);
             nitrogenVertex.AlgorithmData = true;
             var nitrogen = molecule.GetAtom(aminoAcidReference.FirstAtomId);
             nitrogen.AminoAcidAtomName = "N";
             if(nitrogen.Element != ElementName.Nitrogen)
                 throw new Exception("Bug!");
 
-            var carbonEndVertex = molecule.MoleculeStructure.Vertices[aminoAcidReference.LastAtomId];
+            var carbonEndVertex = molecule.MoleculeStructure.GetVertexFromId(aminoAcidReference.LastAtomId);
             carbonEndVertex.AlgorithmData = true;
             var carbonEnd = molecule.GetAtom(aminoAcidReference.LastAtomId);
             carbonEnd.AminoAcidAtomName = "C";
@@ -78,18 +78,18 @@ namespace ChemistryLibrary.IO.Pdb
             }
         }
 
-        private static IEnumerable<Vertex<Atom>> GetNeighbors(Molecule molecule, Vertex<Atom> vertex)
+        private static IEnumerable<IVertex<Atom>> GetNeighbors(Molecule molecule, IVertex vertex)
         {
             return vertex.EdgeIds
-                .Select(edgeId => molecule.MoleculeStructure.Edges[edgeId])
+                .Select(edgeId => molecule.MoleculeStructure.GetEdgeById(edgeId))
                 .Select(edge => edge.Vertex1Id == vertex.Id ? edge.Vertex2Id : edge.Vertex1Id)
                 .Distinct()
-                .Select(vId => molecule.MoleculeStructure.Vertices[vId]);
+                .Select(vId => molecule.MoleculeStructure.GetVertexFromId(vId));
         }
 
         private class AtomChainInfo
         {
-            public Vertex<Atom> Vertex { get; set; }
+            public IVertex<Atom> Vertex { get; set; }
             public int ChainIdx { get; set; }
         }
 

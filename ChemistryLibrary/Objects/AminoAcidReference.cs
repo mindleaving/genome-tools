@@ -5,18 +5,20 @@ namespace ChemistryLibrary.Objects
 {
     public class AminoAcidReference : MoleculeReference
     {
-        public AminoAcidReference(AminoAcidName aminoAcidName, MoleculeReference moleculeReference)
-            : this(aminoAcidName, moleculeReference.Molecule, moleculeReference.VertexIds, moleculeReference.FirstAtomId, moleculeReference.LastAtomId)
+        public AminoAcidReference(AminoAcidName aminoAcidName, int sequenceNumber, MoleculeReference moleculeReference)
+            : this(aminoAcidName, sequenceNumber, moleculeReference.Molecule, moleculeReference.VertexIds, moleculeReference.FirstAtomId, moleculeReference.LastAtomId)
         {
         }
 
-        public AminoAcidReference(AminoAcidName name, Molecule molecule, IEnumerable<uint> vertexIds,  uint firstAtomId, uint lastAtomId) 
+        public AminoAcidReference(AminoAcidName name, int sequenceNumber,  Molecule molecule, IEnumerable<uint> vertexIds, uint firstAtomId, uint lastAtomId) 
             : base(molecule, vertexIds, firstAtomId, lastAtomId)
         {
             Name = name;
+            SequenceNumber = sequenceNumber;
         }
 
         public AminoAcidName Name { get; }
+        public int SequenceNumber { get; }
 
         public Atom GetAtomFromName(string atomName)
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.Extensions;
+using ChemistryLibrary.Objects;
 using ChemistryLibrary.Simulation;
 using Commons;
 using Commons.Extensions;
@@ -19,13 +20,15 @@ namespace Studies
         [Test]
         public void RunSimulation()
         {
-            var molecule = AminoAcidLibrary.Proline
-                .Add(AminoAcidLibrary.Tyrosine)
-                .Add(AminoAcidLibrary.Alanine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Glutamine)
-                .Add(AminoAcidLibrary.Lysine)
-                .Molecule;
+            var molecule = PeptideBuilder.PeptideFromSequence(new[]
+            {
+                AminoAcidName.Proline,
+                AminoAcidName.Tyrosine,
+                AminoAcidName.Alanine,
+                AminoAcidName.Glutamine,
+                AminoAcidName.Glutamine,
+                AminoAcidName.Lysine
+            }, 1).Molecule;
             var customForces = new List<CustomAtomForce>();
             var settings = new MoleculeDynamicsSimulationSettings
             {

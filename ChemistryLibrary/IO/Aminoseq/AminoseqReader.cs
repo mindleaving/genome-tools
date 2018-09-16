@@ -10,7 +10,7 @@ namespace ChemistryLibrary.IO.Aminoseq
         public static Peptide ReadFile(string filename)
         {
             var aminoAcidSequence = File.ReadAllLines(filename).Aggregate((a, b) => a + b);
-            return PeptideBuilder.PeptideFromString(aminoAcidSequence);
+            return PeptideBuilder.PeptideFromString(aminoAcidSequence, 1);
         }
     }
 }

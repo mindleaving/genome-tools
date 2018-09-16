@@ -26,7 +26,7 @@ namespace ChemistryLibrary.Builders
                 var moleculeBuilder = new MoleculeBuilder();
                 var aminoAcidReference = moleculeBuilder.Start
                     .Add(ElementName.Nitrogen, ElementName.Carbon, ElementName.Carbon);
-                var aminoAcid = new AminoAcidReference(approximatedAminoAcid.Name, aminoAcidReference);
+                var aminoAcid = new AminoAcidReference(approximatedAminoAcid.Name, approximatedAminoAcid.SequenceNumber, aminoAcidReference);
 
                 var nitrogen = aminoAcid.VertexIds
                     .Select(aminoAcid.Molecule.GetAtom)
@@ -58,8 +58,7 @@ namespace ChemistryLibrary.Builders
             var aminoAcids = new List<AminoAcidReference>();
             foreach (var approximatedAminoAcid in approximatePeptide.AminoAcids)
             {
-                var aminoAcidReference = AminoAcidLibrary.Get(approximatedAminoAcid.Name);
-                var aminoAcid = new AminoAcidReference(approximatedAminoAcid.Name, aminoAcidReference);
+                var aminoAcid = AminoAcidLibrary.Get(approximatedAminoAcid.Name, approximatedAminoAcid.SequenceNumber);
                 PdbAminoAcidAtomNamer.AssignNames(aminoAcid);
 
                 var nitrogen = aminoAcid.GetAtomFromName("N");

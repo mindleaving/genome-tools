@@ -42,7 +42,7 @@ namespace MoleculeViewer.Views
             }
             else
             {
-                approximatePeptide = ApproximatePeptideBuilder.FromSequence(new string('A', 8));
+                approximatePeptide = ApproximatePeptideBuilder.FromSequence(new string('A', 8), 1);
                 //approximatePeptide = ApproximatePeptideBuilder.FromSequence(File.ReadAllLines(filename).Aggregate((a,b) => a + b));
                 approximatePeptide.UpdatePositions();
                 peptide = new ApproximatePeptideCompleter(approximatePeptide).GetFullPeptide();

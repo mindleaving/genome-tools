@@ -14,7 +14,7 @@ namespace ChemistryLibraryTest.Measurements
         [Test]
         public void Psi90PlusMeasuredCorrectly()
         {
-            var peptide = PeptideBuilder.PeptideFromString("GG");
+            var peptide = PeptideBuilder.PeptideFromString("GG", 1);
             var firstAminoAcid = peptide.AminoAcids.First();
             var lastAminoAcid = peptide.AminoAcids.Last();
             PdbAminoAcidAtomNamer.AssignNames(firstAminoAcid);
