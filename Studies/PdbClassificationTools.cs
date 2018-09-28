@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.IO.Pdb;
+using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
 using Domain;
@@ -366,6 +367,49 @@ namespace Studies
             {
                 PdbReader.ReadFile(pdbFile);
                 File.Delete(pdbFile);
+            }
+        }
+
+        [Test]
+        public void ProteinPdbSequenceAlignment()
+        {
+            
+            var proteinIndexCsvFileDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
+            var outputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\SequenceOutput";
+            var csvFiles = Directory.EnumerateFiles(proteinIndexCsvFileDirectory, "*.csv");
+            var failingSequences = new ConcurrentBag<string>();
+            Parallel.ForEach(csvFiles, csvFile =>
+            {
+                try
+                {
+                    var proteinPdbPaths = File.ReadLines(csvFile);
+                    var sequences = new List<string>();
+                    foreach (var proteinPdbPath in proteinPdbPaths)
+                    {
+                        var pdbFile = PdbReader.ReadFile(proteinPdbPath);
+                        var peptide = pdbFile.Models.First().Chains.Single();
+                        var maxSequenceNumber = peptide.AminoAcids.Max(aa => aa.SequenceNumber);
+                        var sequence = Enumerable.Repeat(' ', maxSequenceNumber).ToList();
+                        foreach (var aminoAcidReference in peptide.AminoAcids)
+                        {
+                            if(aminoAcidReference.SequenceNumber < 1)
+                                continue;
+                            sequence[aminoAcidReference.SequenceNumber-1] = aminoAcidReference.Name.ToOneLetterCode();
+                        }
+                        sequences.Add(new string(sequence.ToArray()));
+                    }
+                    var outputFile = Path.Combine(outputDirectory, Path.GetFileName(csvFile));
+                    File.WriteAllLines(outputFile, sequences);
+                }
+                catch
+                {
+                    failingSequences.Add(csvFile);
+                }
+            });
+            Console.WriteLine("Failing proteins:");
+            foreach (var failingProteins in failingSequences)
+            {
+                Console.WriteLine(failingProteins);
             }
         }
     }

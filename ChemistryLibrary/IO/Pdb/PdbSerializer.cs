@@ -9,12 +9,19 @@ namespace ChemistryLibrary.IO.Pdb
 {
     public static class PdbSerializer
     {
-        public static string Serialize(Peptide peptide, string pdbCode)
+        public static string Serialize(string pdbCode, params Peptide[] peptides)
         {
-            var header = BuildHeader(pdbCode, peptide);
-            var atoms = SerializeAtoms(peptide);
-            var output = header + Environment.NewLine
-                         + atoms + Environment.NewLine;
+            var header = BuildHeader(pdbCode, peptides.First());
+            var output = header + Environment.NewLine;
+            for (var modelIdx = 0; modelIdx < peptides.Length; modelIdx++)
+            {
+                var peptide = peptides[modelIdx];
+                var atoms = SerializeAtoms(peptide);
+                output += $"MODEL     {modelIdx,4}".PadRight(80) + Environment.NewLine
+                          + atoms + Environment.NewLine
+                          + "ENDMDL".PadRight(80) + Environment.NewLine;
+            }
+
             var lines = output.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
             var master = GenerateMaster(lines);
 
@@ -31,7 +38,7 @@ namespace ChemistryLibrary.IO.Pdb
             var date = DateTime.Now;
 
             var aminoAcidSequence = peptide.AminoAcids
-                .Select(aa => AminoAcidExtensions.ToThreeLetterCode(aa.Name))
+                .Select(aa => aa.Name.ToThreeLetterCode())
                 .ToList();
 
             var output =  BuildHeader(description, date, pdbCode) + Environment.NewLine
@@ -245,6 +252,7 @@ namespace ChemistryLibrary.IO.Pdb
                 var aminoAcidVertices = aminoAcid.VertexIds
                     .Select(vId => aminoAcid.Molecule.MoleculeStructure.GetVertexFromId(vId));
                 var residueName = aminoAcid.Name.ToThreeLetterCode();
+                var sequenceNumber = aminoAcid.SequenceNumber;
                 foreach (var vertex in aminoAcidVertices)
                 {
                     var atom = aminoAcid.Molecule.GetAtom(vertex.Id);
@@ -263,7 +271,7 @@ namespace ChemistryLibrary.IO.Pdb
 
                     if (atomIdx > 1)
                         output += Environment.NewLine;
-                    output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{residueIdx+1,4}    " +
+                    output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{sequenceNumber,4}    " +
                             $"{x,8}{y,8}{z,8}{occupancy,6}{temperatureFactor,6}          " +
                             $"{elementSymbol,2}{charge,2}";
                     atomIdx++;

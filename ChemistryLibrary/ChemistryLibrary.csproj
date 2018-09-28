@@ -139,7 +139,7 @@
       <Version>1.1.17.1019</Version>
     </PackageReference>
     <PackageReference Include="mindleaving.Commons">
-      <Version>1.1.6</Version>
+      <Version>1.1.7</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

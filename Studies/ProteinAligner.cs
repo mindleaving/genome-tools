@@ -8,6 +8,22 @@ using Commons.Physics;
 
 namespace Studies
 {
+    public class ProteinAlignerResult
+    {
+        public ProteinAlignerResult(
+            LinearTransformation3D transformation, 
+            UnitValue averagePositionError,
+            bool isTransformationValid)
+        {
+            Transformation = transformation;
+            AveragePositionError = averagePositionError;
+            IsTransformationValid = isTransformationValid;
+        }
+
+        public LinearTransformation3D Transformation { get; }
+        public UnitValue AveragePositionError { get; }
+        public bool IsTransformationValid { get; }
+    }
     public class ProteinAligner
     {
         /// <summary>
@@ -17,7 +33,7 @@ namespace Studies
         /// Linear transformation that maps <paramref name="peptide2"/> positions
         /// to best alignment with <paramref name="peptide1"/>
         /// </returns>
-        public LinearTransformation3D Align(Peptide peptide1, Peptide peptide2)
+        public ProteinAlignerResult Align(Peptide peptide1, Peptide peptide2)
         {
             // TODO: Select sequences where missing amino acids are filled in (using sequence numbers)
             var sequence1AminoAcids = peptide1.AminoAcids.Select(aa => aa.Name).ToList();
@@ -37,7 +53,7 @@ namespace Studies
             return AlignUsingPositionPairs(sequence1CarbonAlphaPositions, sequence2CarbonAlphaPositions);
         }
 
-        public LinearTransformation3D AlignSubsequence(
+        public ProteinAlignerResult AlignSubsequence(
             Peptide peptide1,
             int startIndex1,
             Peptide peptide2,
@@ -60,7 +76,7 @@ namespace Studies
             return AlignUsingPositionPairs(subsequence1, subsequence2);
         }
 
-        private LinearTransformation3D AlignUsingPositionPairs(List<Point3D> sequence1, List<Point3D> sequence2)
+        private ProteinAlignerResult AlignUsingPositionPairs(List<Point3D> sequence1, List<Point3D> sequence2)
         {
             var validIndices = sequence1
                 .PairwiseOperation(sequence2, (p1, p2) => p1 != null && p2 != null)
@@ -95,9 +111,17 @@ namespace Studies
                 {betaY[1], betaY[2], betaY[3]}, 
                 {betaZ[1], betaZ[2], betaZ[3]}
             });
-            return new LinearTransformation3D(
+            var transformation = new LinearTransformation3D(
                 new Vector3D(betaX[0], betaY[0], betaZ[0]),
                 rotationMatrix);
+            var averagePositionError = validIndices
+                .Select(idx => sequence1[idx].DistanceTo(transformation.Apply(sequence2[idx])))
+                .Average()
+                .To(SIPrefix.Pico, Unit.Meter);
+            var isRotationMatrixValid = (rotationMatrix[0, 0].Square() + rotationMatrix[1, 0].Square() + rotationMatrix[2, 0].Square()).IsBetween(0.9,1.1)
+                && (rotationMatrix[0, 1].Square() + rotationMatrix[1, 1].Square() + rotationMatrix[2, 1].Square()).IsBetween(0.9,1.1)
+                && (rotationMatrix[0, 2].Square() + rotationMatrix[1, 2].Square() + rotationMatrix[2, 2].Square()).IsBetween(0.9,1.1);
+            return new ProteinAlignerResult(transformation, averagePositionError, isRotationMatrixValid);
         }
 
         private double[] LinearRegression(double[,] X, double[] b)
