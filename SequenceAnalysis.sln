@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Studies", "Studies\Studies.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj", "{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SequenceAssembler", "SequenceAssembler\SequenceAssembler.csproj", "{320BDBB4-5A18-4B68-B7BE-48D47D75A538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{320BDBB4-5A18-4B68-B7BE-48D47D75A538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{320BDBB4-5A18-4B68-B7BE-48D47D75A538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{320BDBB4-5A18-4B68-B7BE-48D47D75A538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{320BDBB4-5A18-4B68-B7BE-48D47D75A538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

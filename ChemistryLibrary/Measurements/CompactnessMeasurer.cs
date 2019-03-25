@@ -31,8 +31,8 @@ namespace ChemistryLibrary.Measurements
         {
             var vertices = ToVertices(peptide.AminoAcids);
             var convexHull = ConvexHull.Create(vertices);
-            var volume = CalculateVolume(convexHull);
-            var convexHullGraph = ToGraph(convexHull);
+            var volume = CalculateVolume(convexHull.Result);
+            var convexHullGraph = ToGraph(convexHull.Result);
             return new CompactnessMeasurerResult(volume, convexHullGraph);
         }
 
