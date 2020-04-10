@@ -76,6 +76,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AlignedPair.cs" />
+    <Compile Include="AlphaHelixPairStudy.cs" />
+    <Compile Include="AlphaHelixPairStudy.DataGeneration.cs" />
     <Compile Include="AlphaHelixStrengthStudy.cs" />
     <Compile Include="PdbClassificationTools.cs" />
     <Compile Include="AminoAcidAngleStudy.cs" />
@@ -103,6 +105,10 @@
     <ProjectReference Include="..\Domain\Domain.csproj">
       <Project>{4708C272-3B30-4E50-A16B-479B49B095E1}</Project>
       <Name>Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tools\Tools.csproj">
+      <Project>{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}</Project>
+      <Name>Tools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

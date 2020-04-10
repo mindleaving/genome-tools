@@ -8,25 +8,51 @@ namespace ChemistryLibrary.Builders
 {
     public static class PeptideBuilder
     {
-        public static Peptide PeptideFromString(string peptideString, int firstSequenceNumber)
+        public static Peptide PeptideFromString(string peptideString, PeptideBuilderOptions options = null)
         {
             var sequence = Regex.Replace(peptideString.ToUpperInvariant(), "[^A-Z]", "")
                 .Select(aminoAcidCode => aminoAcidCode.ToAminoAcidName());
-            return PeptideFromSequence(sequence, firstSequenceNumber);
+            return PeptideFromSequence(sequence, options);
         }
 
-        public static Peptide PeptideFromSequence(IEnumerable<AminoAcidName> aminoAcidNameSequence, int firstSequenceNumber)
+        public static Peptide PeptideFromSequence(
+            IEnumerable<AminoAcidName> aminoAcidNameSequence,
+            PeptideBuilderOptions options = null)
         {
-            var aminoAcidReferences = aminoAcidNameSequence
-                .Select((aminoAcidName, idx) => AminoAcidLibrary.Get(aminoAcidName, firstSequenceNumber + idx));
-            return PeptideFromAminoAcids(aminoAcidReferences);
+            if(options == null)
+                options = new PeptideBuilderOptions();
+            if (options.BuildMolecule)
+            {
+                var aminoAcidReferences = aminoAcidNameSequence
+                    .Select((aminoAcidName, idx) => AminoAcidLibrary.Get(aminoAcidName, options.FirstSequenceNumber + idx));
+                return PeptideFromAminoAcids(aminoAcidReferences);
+            }
+            else
+            {
+                var aminoAcidReferences = aminoAcidNameSequence
+                    .Select((aa,idx) => new AminoAcidReference(aa, options.FirstSequenceNumber + idx, null, new List<uint>(), 0, 0))
+                    .ToList();
+                return new Peptide(new MoleculeReference(new Molecule()), aminoAcidReferences);
+            }
         }
 
-        public static Peptide PeptideFromSequence(AminoAcidSequence aminoAcidNameSequence)
+        public static Peptide PeptideFromSequence(AminoAcidSequence aminoAcidNameSequence, PeptideBuilderOptions options = null)
         {
-            var aminoAcidReferences = aminoAcidNameSequence
-                .Select(sequenceItem => AminoAcidLibrary.Get(sequenceItem.AminoAcidName, sequenceItem.ResidueNumber));
-            return PeptideFromAminoAcids(aminoAcidReferences);
+            if(options == null)
+                options = new PeptideBuilderOptions();
+            if (options.BuildMolecule)
+            {
+                var aminoAcidReferences = aminoAcidNameSequence
+                    .Select(sequenceItem => AminoAcidLibrary.Get(sequenceItem.AminoAcidName, sequenceItem.ResidueNumber));
+                return PeptideFromAminoAcids(aminoAcidReferences);
+            }
+            else
+            {
+                var aminoAcidReferences = aminoAcidNameSequence
+                    .Select((aa,idx) => new AminoAcidReference(aa.AminoAcidName, aa.ResidueNumber, null, new List<uint>(), 0, 0))
+                    .ToList();
+                return new Peptide(new MoleculeReference(new Molecule()), aminoAcidReferences);
+            }
         }
 
         public static Peptide PeptideFromAminoAcids(IEnumerable<AminoAcidReference> aminoAcidReferences)
@@ -53,5 +79,11 @@ namespace ChemistryLibrary.Builders
             }
             return new Peptide(moleculeReference, aminoAcids);
         }
+    }
+
+    public class PeptideBuilderOptions
+    {
+        public int FirstSequenceNumber { get; set; } = 1;
+        public bool BuildMolecule { get; set; } = true;
     }
 }

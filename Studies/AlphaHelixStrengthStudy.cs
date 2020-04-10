@@ -286,13 +286,17 @@ namespace Studies
             return lookup;
         }
 
-        private List<HelixAnnotatedSequence> ParseHelixSequences(string annotatedSequencesFile)
+        public static List<HelixAnnotatedSequence> ParseHelixSequences(string annotatedSequencesFile)
         {
             var annotatedSequences = new List<HelixAnnotatedSequence>();
+            var currentPdbCode = "";
             foreach (var line in File.ReadAllLines(annotatedSequencesFile))
             {
                 if(line.StartsWith("#"))
+                {
+                    currentPdbCode = line.Substring(1).Trim();
                     continue;
+                }
                 if(string.IsNullOrWhiteSpace(line))
                     continue;
                 var aminoAcids = new List<char>();
@@ -310,20 +314,25 @@ namespace Studies
                         annotation.Add(isHelix);
                     }
                 }
-                annotatedSequences.Add(new HelixAnnotatedSequence(annotation, aminoAcids));
+                annotatedSequences.Add(new HelixAnnotatedSequence(currentPdbCode, annotation, aminoAcids));
             }
             return annotatedSequences;
         }
     }
 
-    internal class HelixAnnotatedSequence
+    public class HelixAnnotatedSequence
     {
-        public HelixAnnotatedSequence(IList<bool> isHelixSignal, IList<char> aminoAcidCodes)
+        public HelixAnnotatedSequence(
+            string pdbCode,
+            IList<bool> isHelixSignal, 
+            IList<char> aminoAcidCodes)
         {
+            PdbCode = pdbCode;
             IsHelixSignal = isHelixSignal;
             AminoAcidCodes = aminoAcidCodes;
         }
 
+        public string PdbCode { get; }
         public IList<bool> IsHelixSignal { get; }
         public IList<char> AminoAcidCodes { get; }
     }

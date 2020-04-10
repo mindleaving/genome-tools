@@ -16,51 +16,82 @@ namespace Tools
         /// Generate annotation data for AlphaHelixStrengthStudy
         /// </summary>
         [Test]
-        public void AlphaHelixOuput()
+        [TestCase(
+            @"G:\Projects\HumanGenome\Protein-PDBs", 
+            "*.pdb", 
+            @"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt"
+        )]
+        [TestCase(
+            @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain", 
+            "*.ent",
+            @"G:\Projects\HumanGenome\humanSingleChainHelixMarked.txt"
+        )]
+        public void AlphaHelixOuput(string directory, string filter, string outputFilePath)
         {
-            var pdbFiles = Directory.GetFiles(@"G:\Projects\HumanGenome\Protein-PDBs", "*.pdb");
+            var pdbFiles = Directory.GetFiles(directory, filter, SearchOption.AllDirectories);
             var output = new List<string>();
             foreach (var pdbFile in pdbFiles)
             {
-                try
-                {
-                    var pdbResult = PdbReader.ReadFile(pdbFile);
-                    if (!pdbResult.Models.Any() || !pdbResult.Models.First().Chains.Any())
-                        continue;
-                    output.Add("#" + Path.GetFileNameWithoutExtension(pdbFile));
-                    foreach (var chain in pdbResult.Models.First().Chains)
-                    {
-                        var helixAnnotations = chain.Annotations
-                            .Where(annot => annot.Type == PeptideSecondaryStructure.AlphaHelix)
-                            .ToList();
-                        var fullSequence = GetFullSequence(chain, helixAnnotations);
-                        //var helixSequence = GetHelixSequences(helixAnnotations);
-                        output.Add(fullSequence);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception: " + e.Message);
-                }
+                ExtractFullSequenceFromFile(pdbFile, output);
             }
-            File.WriteAllLines(@"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt", output);
+            File.WriteAllLines(outputFilePath, output);
         }
 
-        private static string GetFullSequence(Peptide chain, List<PeptideAnnotation> helixAnnotations)
+        public static void ExtractFullSequenceFromFile(
+            string pdbFile,
+            List<string> output)
+        {
+            try
+            {
+                var pdbResult = PdbReader.ReadFile(pdbFile);
+                if (!pdbResult.Models.Any() || !pdbResult.Models.First().Chains.Any())
+                    return;
+                output.Add("#" + Path.GetFileNameWithoutExtension(pdbFile));
+                foreach (var chain in pdbResult.Models.First().Chains)
+                {
+                    var helixAnnotations = chain.Annotations.Where(annot => annot.Type == PeptideSecondaryStructure.AlphaHelix).ToList();
+                    var fullSequence = GetFullSequence(chain, helixAnnotations);
+                    //var helixSequence = GetHelixSequences(helixAnnotations);
+                    output.Add(fullSequence);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
+            }
+        }
+
+        public static string GetFullSequence(Peptide chain, List<PeptideAnnotation> helixAnnotations)
         {
             var fullSequence = "";
-            foreach (var aminoAcid in chain.AminoAcids)
+            var aminoAcidCount = chain.AminoAcids.Last().SequenceNumber;
+            var aminoAcidQueue = new Queue<AminoAcidReference>(chain.AminoAcids);
+            var nonEmptyHelixAnnotations = helixAnnotations.Where(annotation => annotation.AminoAcidReferences.Any()).ToList();
+            for (int aminoAcidIndex = 1; aminoAcidIndex <= aminoAcidCount; aminoAcidIndex++)
             {
-                if (helixAnnotations.Any(annotation => annotation.AminoAcidReferences.First() == aminoAcid))
-                    fullSequence += "[";
-                fullSequence += aminoAcid.Name.ToOneLetterCode();
-                if (helixAnnotations.Any(annotation => annotation.AminoAcidReferences.Last() == aminoAcid))
-                    fullSequence += "]";
+                while (aminoAcidQueue.Peek().SequenceNumber < aminoAcidIndex)
+                {
+                    aminoAcidQueue.Dequeue();
+                }
+                var nextAminoAcid = aminoAcidQueue.Peek();
+                if (nextAminoAcid.SequenceNumber == aminoAcidIndex)
+                {
+                    var currentAminoAcid = aminoAcidQueue.Dequeue();
+                    if (nonEmptyHelixAnnotations.Any(annotation => annotation.AminoAcidReferences.First() == currentAminoAcid))
+                        fullSequence += "[";
+                    fullSequence += currentAminoAcid.Name.ToOneLetterCode();
+                    if (nonEmptyHelixAnnotations.Any(annotation => annotation.AminoAcidReferences.Last() == currentAminoAcid))
+                        fullSequence += "]";
+                }
+                else
+                {
+                    fullSequence += "?";
+                }
             }
             return fullSequence;
         }
 
-        private IEnumerable<string> GetHelixSequences(List<PeptideAnnotation> helixAnnotations)
+        public IEnumerable<string> GetHelixSequences(List<PeptideAnnotation> helixAnnotations)
         {
             foreach (var annotation in helixAnnotations)
             {

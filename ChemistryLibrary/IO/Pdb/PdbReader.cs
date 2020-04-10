@@ -11,17 +11,27 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.IO.Pdb
 {
+    public class PdbReaderOptions
+    {
+        public int? MaximumModelCount { get; set; } = null;
+        public bool BuildMolecule { get; set; } = true;
+    }
     public static class PdbReader
     {
-        public static PdbReaderResult ReadFile(string filename)
+        public static PdbReaderResult ReadFile(string filename, PdbReaderOptions options = null)
         {
+            if(options == null)
+                options = new PdbReaderOptions();
             var lines = File.ReadAllLines(filename);
-            var models = ExtractModels(lines);
+            var models = ExtractModels(lines, options);
             return new PdbReaderResult(models);
         }
 
-        private static PdbModel[] ExtractModels(string[] lines)
+        private static PdbModel[] ExtractModels(
+            string[] lines,
+            PdbReaderOptions options)
         {
+            var annotationLines = GetAnnotationLines(lines);
             var models = new List<PdbModel>();
             var modelLines = new List<string>();
             var modelStarted = false;
@@ -36,13 +46,15 @@ namespace ChemistryLibrary.IO.Pdb
                     modelLines.Add(line);
                     if (ReadLineCode(line) == "ENDMDL")
                     {
-                        models.Add(ConstructModel(modelLines));
+                        models.Add(ConstructModel(modelLines, annotationLines, options));
                         modelStarted = false;
                         modelLines.Clear();
+                        if(options.MaximumModelCount.HasValue && models.Count >= options.MaximumModelCount.Value)
+                            break;
                     }
                 }
                 if(modelStarted)
-                    models.Add(ConstructModel(modelLines));
+                    models.Add(ConstructModel(modelLines, annotationLines, options));
             }
             catch
             {
@@ -53,7 +65,17 @@ namespace ChemistryLibrary.IO.Pdb
             return models.ToArray();
         }
 
-        private static PdbModel ConstructModel(IList<string> modelLines)
+        private static IList<string> GetAnnotationLines(IList<string> lines)
+        {
+            return lines.Where(
+                line => ReadLineCode(line).InSet("HELIX", "SHEET"))
+                .ToList();
+        }
+
+        private static PdbModel ConstructModel(
+            IList<string> modelLines,
+            IList<string> annotationLines,
+            PdbReaderOptions options)
         {
             var chainIds = ExtractChainIds(modelLines);
             var chains = new List<Peptide>();
@@ -61,7 +83,7 @@ namespace ChemistryLibrary.IO.Pdb
             {
                 try
                 {
-                    var chain = ExtractChain(modelLines, chainId);
+                    var chain = ExtractChain(modelLines, annotationLines, chainId, options);
                     if(!chain.AminoAcids.Any())
                         continue;
                     chains.Add(chain);
@@ -79,16 +101,21 @@ namespace ChemistryLibrary.IO.Pdb
             return new PdbModel(chains.ToArray());
         }
 
-        private static Peptide ExtractChain(IList<string> lines, char chainId)
+        private static Peptide ExtractChain(
+            IList<string> modelLines,
+            IList<string> annotationLines,
+            char chainId,
+            PdbReaderOptions options)
         {
-            var aminoAcidSequence = ExtractSequence(lines, chainId);
+            var aminoAcidSequence = ExtractSequence(modelLines, chainId);
             if(!aminoAcidSequence.Any())
                 return new Peptide(new MoleculeReference(new Molecule()), new List<AminoAcidReference>());
-            var peptide = PeptideBuilder.PeptideFromSequence(aminoAcidSequence);
+            var peptide = PeptideBuilder.PeptideFromSequence(aminoAcidSequence, new PeptideBuilderOptions { BuildMolecule = options.BuildMolecule });
             peptide.ChainId = chainId;
-            var annotations = ExtractAnnotations(lines, chainId, peptide);
+            var annotations = ExtractAnnotations(annotationLines, chainId, peptide);
             peptide.Annotations.AddRange(annotations);
-            ReadAtomPositions(lines, chainId, peptide);
+            if(options.BuildMolecule)
+                ReadAtomPositions(modelLines, chainId, peptide);
             return peptide;
         }
 
@@ -139,7 +166,7 @@ namespace ChemistryLibrary.IO.Pdb
                 var annotation = new PeptideAnnotation(
                     PeptideSecondaryStructure.AlphaHelix,
                     peptide.AminoAcids
-                        .Where(aa => aa.SequenceNumber >= helix.FirstResidueNumber && aa.SequenceNumber <= helix.FirstResidueNumber)
+                        .Where(aa => aa.SequenceNumber >= helix.FirstResidueNumber && aa.SequenceNumber <= helix.LastResidueNumber)
                         .ToList(),
                     helix.FirstResidueNumber);
                 annotations.Add(annotation);
@@ -219,7 +246,7 @@ namespace ChemistryLibrary.IO.Pdb
                 .Select(ParseAtomLine)
                 .Where(atom => atom.ChainId == chainId)
                 .GroupBy(atom => atom.ResidueNumber)
-                .Where(atomGroup => atomGroup.First().ResidueName != "UNK")
+                .Where(IsAminoAcidAtomGroup)
                 .Select(atomGroup => new AminoAcidSequenceItem
                     {
                         AminoAcidName = ParseAminoAcidName(atomGroup.First().ResidueName),
@@ -228,6 +255,12 @@ namespace ChemistryLibrary.IO.Pdb
                 .OrderBy(x => x.ResidueNumber)
                 .ToList();
             return new AminoAcidSequence(aminoAcidMap);
+        }
+
+        private static bool IsAminoAcidAtomGroup(IGrouping<int, PdbAtomLine> atomGroup)
+        {
+            var residueName = atomGroup.First().ResidueName;
+            return residueName.Length == 3 && residueName != "UNK";
         }
 
         private static AminoAcidName ParseAminoAcidName(string redidueName)

@@ -28,7 +28,7 @@ namespace Studies
                 AminoAcidName.Glutamine,
                 AminoAcidName.Glutamine,
                 AminoAcidName.Lysine
-            }, 1).Molecule;
+            }).Molecule;
             var customForces = new List<CustomAtomForce>();
             var settings = new MoleculeDynamicsSimulationSettings
             {
