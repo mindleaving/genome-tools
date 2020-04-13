@@ -89,35 +89,26 @@ namespace ChemistryLibrary.Builders
             UnitValue bondAngle,
             UnitValue bondTorsion)
         {
-            var basisVector1 = vector1.Normalize().ToVector3D();
-            var normalizedVector2 = vector2.Normalize();
-            var basisVector2 = (normalizedVector2 - basisVector1.DotProduct(normalizedVector2) * basisVector1).Normalize().ToVector3D();
-            var basisVector3 = basisVector1.CrossProduct(basisVector2);
+            // Spherical coordinates
+            var polarAngle = 180.To(Unit.Degree) - bondAngle;
+            var azimuthAngle = bondTorsion;
 
-            var bondAngleRadians = bondAngle.In(Unit.Radians);
-            var bondTorsionRadians = bondTorsion.In(Unit.Radians);
-            var cosBondAngle = Math.Cos(bondAngleRadians);
-            var cosBondTorsion = Math.Cos(bondTorsionRadians);
-            var bondVector = bondLength.In(SIPrefix.Pico, Unit.Meter) * new Vector3D(
-                             -cosBondAngle,
-                             cosBondTorsion*Math.Sqrt(1-cosBondAngle*cosBondAngle),
-                             Math.Sqrt(1 - cosBondTorsion*cosBondTorsion-cosBondAngle*cosBondAngle*(1-cosBondTorsion*cosBondTorsion)));
+            var atomCentricX = Math.Sin(polarAngle.In(Unit.Radians)) * Math.Cos(azimuthAngle.In(Unit.Radians));
+            var atomCentricY = Math.Sin(polarAngle.In(Unit.Radians)) * Math.Sin(azimuthAngle.In(Unit.Radians));
+            var atomCentricZ = Math.Cos(polarAngle.In(Unit.Radians));
+            var atomicBondVector = new Vector3D(atomCentricX, atomCentricY, atomCentricZ);
+
+            var zAxis = vector1.Normalize().ToVector3D();
+            var xAxis = -(vector2 - vector2.ProjectOnto(zAxis)).Normalize().ToVector3D();
+            var yAxis = zAxis.CrossProduct(xAxis);
 
             var transformMatrix = new Matrix3X3();
-            transformMatrix.SetColumn(0, basisVector1.Data);
-            transformMatrix.SetColumn(1, basisVector2.Data);
-            transformMatrix.SetColumn(2, basisVector3.Data);
-            var bondDirection = transformMatrix.Data.Multiply(bondVector.Data.ConvertToMatrix()).Vectorize();
+            transformMatrix.SetColumn(0, xAxis.Data);
+            transformMatrix.SetColumn(1, yAxis.Data);
+            transformMatrix.SetColumn(2, zAxis.Data);
+            var bondVector = new Vector3D(transformMatrix.Data.Multiply(atomicBondVector.Data.ConvertToMatrix()).Vectorize());
 
-            // Debug
-            //var actualBondAngle = (-basisVector1).AngleWith(new Vector3D(bondDirection));
-            //var actualTorsionAngle = new Vector3D(bondDirection).CrossProduct(basisVector1).AngleWith(-basisVector3);
-            //if ((actualBondAngle - bondAngle).Abs().In(Unit.Degree) > 1)
-            //    throw new Exception("Bug!");
-            //if ((actualTorsionAngle.Abs() - bondTorsion.Abs()).Abs().In(Unit.Degree) > 1)
-            //    throw new Exception("Bug!");
-
-            var atomPosition = currentPosition + new UnitVector3D(SIPrefix.Pico, Unit.Meter, bondDirection[0], bondDirection[1], bondDirection[2]);
+            var atomPosition = currentPosition + bondLength * bondVector;
             return atomPosition;
         }
     }
