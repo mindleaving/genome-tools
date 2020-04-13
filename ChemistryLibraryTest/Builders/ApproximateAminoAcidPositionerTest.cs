@@ -125,25 +125,19 @@ namespace ChemistryLibraryTest.Builders
             var n1 = v2.CrossProduct(v1).Normalize().ToVector3D();
 
             var matrix = new Matrix(3, 4);
-            matrix[0, 0] = n1.Y * v2.Z + n1.Z * v2.Y;
-            matrix[0, 1] = n1.X * v2.Z - n1.Z * v2.X;
-            matrix[0, 2] = -n1.X * v2.Y - n1.Y * v2.X;
-            matrix[0, 3] = Math.Cos(bondTorsion.In(Unit.Radians))
-                           - (n1.X * (nitrogenPosition.Y * carbonPosition.Z - nitrogenPosition.Z * carbonPosition.Y)
-                              + n1.Y * (nitrogenPosition.X * carbonPosition.Z - nitrogenPosition.Z * carbonPosition.X)
-                              + n1.Z * (nitrogenPosition.X * carbonPosition.Y - nitrogenPosition.Y * carbonPosition.X));
+            matrix[0, 0] = n1.Y * v1.Z + n1.Z * v1.Y;
+            matrix[0, 1] = n1.X * v1.Z - n1.Z * v1.X;
+            matrix[0, 2] = -n1.X * v1.Y - n1.Y * v1.X;
+            matrix[0, 3] = Math.Cos(bondTorsion.In(Unit.Radians)) / Math.Sin(Math.PI - bondAngle.In(Unit.Radians)); // because |N2| = |v1 x v3| = |v1||v3|sin(angle between v1 and v3 = bond angle) and |v1|=1 and |v3|=1
             matrix[1, 0] = v1.X;
             matrix[1, 1] = v1.Y;
             matrix[1, 2] = v1.Z;
-            matrix[1, 3] = Math.Cos(Math.PI - bondAngle.In(Unit.Radians))
-                           + nitrogenPosition.X * v1.X
-                           + nitrogenPosition.Y * v1.Y
-                           + nitrogenPosition.Z * v1.Z;
+            matrix[1, 3] = Math.Cos(Math.PI - bondAngle.In(Unit.Radians));
 
             var rref = matrix.Data.ReducedRowEchelonForm();
             var v3X = rref[0, 3];
             var v3Y = rref[1, 3];
-            var v3Z = Math.Sqrt(1 - v3X.Square() - v3Y.Square());
+            var v3Z = double.NaN;
             var v3 = new Vector3D(v3X, v3Y, v3Z);
 
             var actualBondAngle = Math.Acos(v1.Normalize().DotProduct(v3.Normalize())).To(Unit.Radians);
