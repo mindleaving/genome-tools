@@ -20,13 +20,15 @@ namespace ChemistryLibrary.Builders
             }
         }
 
-        private static void PositionAminoAcid(ApproximatedAminoAcid aminoAcid, 
-            ApproximatedAminoAcid lastAminoAcid,
-            UnitPoint3D startPosition)
+        public static void PositionAminoAcid(ApproximatedAminoAcid aminoAcid, 
+            ApproximatedAminoAcid lastAminoAcid = null,
+            UnitPoint3D startPosition = null)
         {
-            var nitrogenCarbonDistance = PeriodicTable.GetRadius(ElementName.Nitrogen) +
-                                         PeriodicTable.GetRadius(ElementName.Carbon);
-            var CaCDistance = 2 * PeriodicTable.GetRadius(ElementName.Carbon);
+            if(lastAminoAcid == null && startPosition == null)
+                throw new ArgumentNullException("Either last amino acid or start position must be non-null");
+            var nitrogenCarbonDistance = PeriodicTable.GetCovalentRadius(ElementName.Nitrogen) +
+                                         PeriodicTable.GetCovalentRadius(ElementName.Carbon);
+            var CaCDistance = 2 * PeriodicTable.GetCovalentRadius(ElementName.Carbon);
 
             UnitPoint3D carbonPosition;
             UnitPoint3D carbonAlphaPosition;

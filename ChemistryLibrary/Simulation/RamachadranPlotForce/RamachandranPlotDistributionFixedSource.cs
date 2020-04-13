@@ -2,16 +2,16 @@
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    public class RamachandranPlotDistributionFixedSource : IRamachandranPlotDistributionSource
+    public class RamachandranPlotDistributionFixedSource : IRamachandranPlotGradientDistributionSource
     {
-        private readonly IRamachandranPlotDistribution distribution;
+        private readonly IRamachandranPlotGradientDistribution distribution;
 
-        public RamachandranPlotDistributionFixedSource(IRamachandranPlotDistribution distribution)
+        public RamachandranPlotDistributionFixedSource(IRamachandranPlotGradientDistribution distribution)
         {
             this.distribution = distribution;
         }
 
-        public IRamachandranPlotDistribution GetDistribution(AminoAcidName aminoAcidName)
+        public IRamachandranPlotGradientDistribution GetDistribution(AminoAcidName aminoAcidName)
         {
             return distribution;
         }

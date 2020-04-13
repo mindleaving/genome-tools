@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Extensions;
 using ChemistryLibrary.Measurements;
 using ChemistryLibrary.Objects;
@@ -13,14 +14,14 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    public class RamachandranPlotGridDistribution : IRamachandranPlotDistribution
+    public class RamachandranPlotGridGradientDistribution : IRamachandranPlotGradientDistribution
     {
         private readonly int gridSteps;
 
         public AminoAcidName AminoAcidName { get; }
         public Vector2D[,] GradientPlot { get; }
 
-        public RamachandranPlotGridDistribution(AminoAcidName aminoAcidName, string distributionFilePath, int gridSteps = 360)
+        public RamachandranPlotGridGradientDistribution(AminoAcidName aminoAcidName, string distributionFilePath, int gridSteps = 360)
         {
             AminoAcidName = aminoAcidName;
             this.gridSteps = gridSteps;
@@ -31,7 +32,7 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
             }
             catch (Exception)
             {
-                var angles = ParseDistributionFile(distributionFilePath);
+                var angles = RamachandranPlotFileSource.ParseRamachadranPlotFile(distributionFilePath);
                 GradientPlot = GenerateGradientPlot(angles);
                 StoreDistibutionPlot(distributionCacheFilename);
             }
@@ -144,35 +145,6 @@ namespace ChemistryLibrary.Simulation.RamachadranPlotForce
                 }
             });
             return gradientPlot;
-        }
-
-        private static List<AminoAcidAngles> ParseDistributionFile(string distributionFilePath)
-        {
-            const char Delimiter = ';';
-
-            var angles = new List<AminoAcidAngles>();
-            using (var streamReader = new StreamReader(distributionFilePath))
-            {
-                string line;
-                while ((line = streamReader.ReadLine()) != null)
-                {
-                    if(line.StartsWith("#") || line.StartsWith("//"))
-                        continue;
-                    var splittedLine = line.Split(Delimiter);
-                    if(splittedLine.Length != 3)
-                        continue;
-                    var omega = double.Parse(splittedLine[0], NumberStyles.Any, CultureInfo.InvariantCulture);
-                    var phi = double.Parse(splittedLine[1], NumberStyles.Any, CultureInfo.InvariantCulture);
-                    var psi = double.Parse(splittedLine[2], NumberStyles.Any, CultureInfo.InvariantCulture);
-                    angles.Add(new AminoAcidAngles
-                    {
-                        Omega = omega.To(Unit.Degree),
-                        Phi = phi.To(Unit.Degree),
-                        Psi = psi.To(Unit.Degree)
-                    });
-                }
-            }
-            return angles;
         }
 
         public UnitVector2D GetPhiPsiVector(UnitValue phi, UnitValue psi)

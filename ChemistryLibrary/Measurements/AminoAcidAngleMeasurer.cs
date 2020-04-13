@@ -23,6 +23,11 @@ namespace ChemistryLibrary.Measurements
         /// with carbon of current amino acid and nitrogen of next amino acid
         /// </summary>
         public UnitValue Psi { get; set; }
+
+        public override string ToString()
+        {
+            return $"Omega/Phi/Psi: {Omega.In(Unit.Degree):F1}/{Phi.In(Unit.Degree):F1}/{Psi.In(Unit.Degree):F1}";
+        }
     }
     public static class AminoAcidAngleMeasurer
     {

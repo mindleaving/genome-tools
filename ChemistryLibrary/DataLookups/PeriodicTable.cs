@@ -410,7 +410,7 @@ namespace ChemistryLibrary.DataLookups
             return GetMass(element) / PhysicalConstants.AvogradrosNumber;
         }
 
-        private static readonly Dictionary<ElementName, UnitValue> AtomRadius = new Dictionary<ElementName, UnitValue>
+        private static readonly Dictionary<ElementName, UnitValue> CovalentAtomRadius = new Dictionary<ElementName, UnitValue>
         {
             {ElementName.Hydrogen, 37.To(SIPrefix.Pico, Unit.Meter)},
             {ElementName.Helium, 32.To(SIPrefix.Pico, Unit.Meter)},
@@ -532,9 +532,137 @@ namespace ChemistryLibrary.DataLookups
             {ElementName.Ununoctium, double.NaN.To(SIPrefix.Pico, Unit.Meter)}
         };
 
-        public static UnitValue GetRadius(ElementName element)
+        public static UnitValue GetCovalentRadius(ElementName element)
         {
-            return AtomRadius[element];
+            return CovalentAtomRadius[element];
+        }
+
+        // Source: https://en.wikipedia.org/wiki/Van_der_Waals_radius
+        private static readonly Dictionary<ElementName, UnitValue> VanDerWaalsAtomRadius = new Dictionary<ElementName, UnitValue>
+        {
+            {ElementName.Hydrogen, 110.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Helium, 140.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Lithium, 182.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Beryllium, 153.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Boron, 192.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Carbon, 170.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Nitrogen, 155.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Oxygen, 152.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Fluorine, 147.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Neon, 154.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Sodium, 227.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Magnesium, 173.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Aluminium, 184.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Silicon, 210.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Phosphorus, 180.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Sulfur, 180.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Chlorine, 175.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Argon, 188.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Potassium, 275.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Calcium, 231.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Scandium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Titanium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Vanadium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Chromium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Manganese, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Iron, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Cobalt, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Nickel, 163.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Copper, 140.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Zinc, 139.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Gallium, 187.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Germanium, 211.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Arsenic, 185.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Selenium, 190.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Bromine, 185.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Krypton, 202.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Rubidium, 303.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Strontium, 268.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Yttrium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Zirconium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Niobium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Molybdenum, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Technetium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ruthenium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Rhodium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Palladium, 163.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Silver, 172.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Cadmium, 158.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Indium, 193.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Tin, 217.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Antimony, 206.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Tellurium, 206.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Iodine, 198.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Xenon, 216.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Cesium, 343.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Barium, 268.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Lanthanum, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Cerium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Praseodymium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Neodymium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Promethium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Samarium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Europium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Gadolinium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Terbium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Dysprosium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Holmium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Erbium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Thulium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ytterbium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Lutetium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Hafnium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Tantalum, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Tungsten, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Rhenium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Osmium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Iridium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Platinum, 175.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Gold, 166.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Mercury, 155.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Thallium, 196.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Lead, 202.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Bismuth, 207.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Polonium, 197.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Astatine, 202.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Radon, 220.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Francium, 348.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Radium, 283.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Actinium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Thorium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Protactinium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Uranium, 186.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Neptunium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Plutonium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Americium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Curium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Berkelium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Californium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Einsteinium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Fermium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Mendelevium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Nobelium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Lawrencium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Rutherfordium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Dubnium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Seaborgium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Bohrium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Hassium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Meitnerium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Darmstadtium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Roentgenium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Copernicium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununtrium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununquadium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununpentium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununhexium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununseptium, double.NaN.To(SIPrefix.Pico, Unit.Meter)},
+            {ElementName.Ununoctium, double.NaN.To(SIPrefix.Pico, Unit.Meter)}
+        };
+
+        public static UnitValue GetVanDerWaalsRadius(ElementName element)
+        {
+            return CovalentAtomRadius[element];
         }
     }
 }

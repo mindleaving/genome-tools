@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ChemistryLibrary.Extensions;
 
 namespace ChemistryLibrary.Objects
 {
@@ -7,12 +8,12 @@ namespace ChemistryLibrary.Objects
     {
         public Peptide(MoleculeReference moleculeReference,
             List<AminoAcidReference> aminoAcids)
-            : this(moleculeReference, aminoAcids, new List<PeptideAnnotation>())
+            : this(moleculeReference, aminoAcids, new List<PeptideAnnotation<AminoAcidReference>>())
         {
         }
         public Peptide(MoleculeReference moleculeReference, 
             List<AminoAcidReference> aminoAcids,
-            List<PeptideAnnotation> annotations)
+            List<PeptideAnnotation<AminoAcidReference>> annotations)
         {
             MoleculeReference = moleculeReference ?? throw new ArgumentNullException(nameof(moleculeReference));
             AminoAcids = aminoAcids;
@@ -23,7 +24,7 @@ namespace ChemistryLibrary.Objects
         public Molecule Molecule => MoleculeReference.Molecule;
         public MoleculeReference MoleculeReference { get; }
         public List<AminoAcidReference> AminoAcids { get; }
-        public List<PeptideAnnotation> Annotations { get; }
+        public List<PeptideAnnotation<AminoAcidReference>> Annotations { get; }
 
         public void Dispose()
         {
@@ -32,6 +33,12 @@ namespace ChemistryLibrary.Objects
             Annotations.ForEach(annotation => annotation.Dispose());
             AminoAcids.Clear();
             Annotations.Clear();
+        }
+
+        public void Add(AminoAcidReference aminoAcid)
+        {
+            MoleculeReference.Add(aminoAcid, out var aminoAcidReference);
+            AminoAcids.Add(new AminoAcidReference(aminoAcid.Name, aminoAcid.SequenceNumber, aminoAcidReference));
         }
     }
 }

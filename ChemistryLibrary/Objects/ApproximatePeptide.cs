@@ -9,6 +9,10 @@ namespace ChemistryLibrary.Objects
     {
         public List<ApproximatedAminoAcid> AminoAcids { get; } = new List<ApproximatedAminoAcid>();
 
+        public ApproximatePeptide()
+        {
+        }
+
         public ApproximatePeptide(IList<ApproximatedAminoAcid> aminoAcids)
         {
             AminoAcids.AddRange(aminoAcids);
@@ -22,6 +26,11 @@ namespace ChemistryLibrary.Objects
         public ApproximatePeptide DeepClone()
         {
             return new ApproximatePeptide(AminoAcids.Select(aa => aa.DeepClone()).ToList());
+        }
+
+        public void Add(ApproximatedAminoAcid aminoAcid)
+        {
+            AminoAcids.Add(aminoAcid);
         }
     }
 }

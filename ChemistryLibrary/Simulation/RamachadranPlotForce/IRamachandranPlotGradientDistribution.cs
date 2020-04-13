@@ -3,7 +3,7 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    public interface IRamachandranPlotDistribution
+    public interface IRamachandranPlotGradientDistribution
     {
         AminoAcidName AminoAcidName { get; }
         UnitVector2D GetPhiPsiVector(UnitValue phi, UnitValue psi);

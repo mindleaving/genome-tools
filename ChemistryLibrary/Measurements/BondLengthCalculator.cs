@@ -13,7 +13,7 @@ namespace ChemistryLibrary.Measurements
 
         public static UnitValue CalculateApproximate(ElementName element1, ElementName element2)
         {
-            return PeriodicTable.GetRadius(element1) + PeriodicTable.GetRadius(element2);
+            return PeriodicTable.GetCovalentRadius(element1) + PeriodicTable.GetCovalentRadius(element2);
         }
     }
 }

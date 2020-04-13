@@ -11,7 +11,7 @@ namespace ChemistryLibrary.Simulation
         {
             var compactnessForceCalculator = new CompactingForceCalculator();
 
-            var ramachandranPlotDistributionSource = new RamachandranPlotDistributionFileSource(ramachadranDataDirectory);
+            var ramachandranPlotDistributionSource = new RamachandranPlotGradientDistributionFileSource(ramachadranDataDirectory);
             var ramachadranForceCalculator = new RamachandranForceCalculator(ramachandranPlotDistributionSource);
             var bondForceCalculator = new BondForceCalculator();
 

@@ -15,6 +15,6 @@ namespace ChemistryLibrary.DataLookups
             new[] { SIBaseUnit.Second, SIBaseUnit.Second, SIBaseUnit.Ampere, SIBaseUnit.Second, SIBaseUnit.Ampere, SIBaseUnit.Second }));
         public static UnitValue SpeedOfLight => 299792458.To(Unit.MetersPerSecond);
         public static UnitValue AvogradrosNumber => 6.02214086 * 1e23.To(new CompoundUnit(new List<SIBaseUnit>(), new []{SIBaseUnit.Mole}));
-        public static UnitValue BoltzmannsConstant => 1.38066 * 1e-23.To(Unit.Joule.ToCompoundUnit() / Unit.Kelvin.ToCompoundUnit());
+        public static UnitValue BoltzmannsConstant => 1.38066 * 1e-23.To(CompoundUnits.Joule / CompoundUnits.Kelvin);
     }
 }

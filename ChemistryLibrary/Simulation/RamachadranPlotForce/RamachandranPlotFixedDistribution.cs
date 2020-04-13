@@ -4,7 +4,7 @@ using Commons.Physics;
 
 namespace ChemistryLibrary.Simulation.RamachadranPlotForce
 {
-    public class RamachandranPlotFixedDistribution : IRamachandranPlotDistribution
+    public class RamachandranPlotFixedDistribution : IRamachandranPlotGradientDistribution
     {
         private readonly UnitValue targetPhi;
         private readonly UnitValue targetPsi;

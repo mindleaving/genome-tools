@@ -61,7 +61,7 @@ namespace Tools
             }
         }
 
-        public static string GetFullSequence(Peptide chain, List<PeptideAnnotation> helixAnnotations)
+        public static string GetFullSequence(Peptide chain, List<PeptideAnnotation<AminoAcidReference>> helixAnnotations)
         {
             var fullSequence = "";
             var aminoAcidCount = chain.AminoAcids.Last().SequenceNumber;
@@ -91,7 +91,7 @@ namespace Tools
             return fullSequence;
         }
 
-        public IEnumerable<string> GetHelixSequences(List<PeptideAnnotation> helixAnnotations)
+        public IEnumerable<string> GetHelixSequences(List<PeptideAnnotation<AminoAcidReference>> helixAnnotations)
         {
             foreach (var annotation in helixAnnotations)
             {

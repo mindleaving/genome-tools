@@ -154,21 +154,20 @@ namespace ChemistryLibrary.IO.Pdb
             }
         }
 
-        private static List<PeptideAnnotation> ExtractAnnotations(IList<string> lines, char chainId, Peptide peptide)
+        private static List<PeptideAnnotation<AminoAcidReference>> ExtractAnnotations(IList<string> lines, char chainId, Peptide peptide)
         {
             var helices = lines
                 .Where(line => ReadLineCode(line) == "HELIX")
                 .Select(ParseHelix)
                 .Where(helix => helix.FirstResidueChainId == chainId);
-            var annotations = new List<PeptideAnnotation>();
+            var annotations = new List<PeptideAnnotation<AminoAcidReference>>();
             foreach (var helix in helices)
             {
-                var annotation = new PeptideAnnotation(
+                var annotation = new PeptideAnnotation<AminoAcidReference>(
                     PeptideSecondaryStructure.AlphaHelix,
                     peptide.AminoAcids
                         .Where(aa => aa.SequenceNumber >= helix.FirstResidueNumber && aa.SequenceNumber <= helix.LastResidueNumber)
-                        .ToList(),
-                    helix.FirstResidueNumber);
+                        .ToList());
                 annotations.Add(annotation);
             }
             var sheetStrandGroups = lines
@@ -186,10 +185,9 @@ namespace ChemistryLibrary.IO.Pdb
                         && aa.SequenceNumber <= strand.LastResidueNumber);
                     sheetAminoAcids.AddRange(aminoAcids);
                 }
-                var annotation = new PeptideAnnotation(
+                var annotation = new PeptideAnnotation<AminoAcidReference>(
                     PeptideSecondaryStructure.BetaSheet, 
-                    sheetAminoAcids,
-                    sheetStrands.First().FirstResidueNumber);
+                    sheetAminoAcids);
                 annotations.Add(annotation);
             }
             return annotations;

@@ -19,7 +19,7 @@ namespace ChemistryLibrary.Objects
             Element = ElementMap.FromProtonCount(Protons);
             Period = PeriodicTable.GetPeriod(Element);
             Mass = AtomPropertyCalculator.CalculateMass(Protons, Neutrons);
-            Radius = PeriodicTable.GetRadius(Element);
+            Radius = PeriodicTable.GetCovalentRadius(Element);
             ElectroNegativity = PeriodicTable.ElectroNegativity(Element);
             FormalCharge =  0*PhysicalConstants.ElementaryCharge;
             EffectiveCharge = FormalCharge;

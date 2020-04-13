@@ -57,7 +57,7 @@ namespace MoleculeViewer.Views
                 UseRamachandranForce = true
             };
             var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
-            var ramachandranPlotDistributionSource = new RamachandranPlotDistributionFileSource(ramachadranDataDirectory);
+            var ramachandranPlotDistributionSource = new RamachandranPlotGradientDistributionFileSource(ramachadranDataDirectory);
             //var ramachandranPlotDistributionSource = new RamachandranPlotDistributionFixedSource(
             //    new RamachandranPlotFixedDistribution(AminoAcidName.Alanine, new UnitPoint2D(-57.To(Unit.Degree), -47.To(Unit.Degree))));
             //var simulationRunner = ApproximatePeptideFoldingSimulatorFactory.Create(
