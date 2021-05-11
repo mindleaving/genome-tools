@@ -1,171 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ChemistryLibrary</RootNamespace>
-    <AssemblyName>ChemistryLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>GenomeTools.ChemistryLibrary</RootNamespace>
+    <AssemblyName>GenomeTools.ChemistryLibrary</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>Jan Scholtyssek</Authors>
+    <Company></Company>
+    <PackageIconUrl></PackageIconUrl>
+    <PackageTags>Chemistry Biology Genomics PDB</PackageTags>
+    <Copyright>Copyright 2021</Copyright>
+    <Description>Library for representing biochemical concepts, down to atom subatomar level for molecular dynamics simulations</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/mindleaving/genome-tools</RepositoryUrl>
+    <PackageId>mindleaving.GenomeTools.ChemistryLibrary</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="MIConvexHull" Version="1.1.19.1019" />
+    <PackageReference Include="mindleaving.Commons" Version="2.1.8" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Builders\ApproximateAminoAcidPositioner.cs" />
-    <Compile Include="Builders\ApproximatePeptideBuilder.cs" />
-    <Compile Include="Builders\AtomExtractor.cs" />
-    <Compile Include="Builders\OrbitalGenerator.cs" />
-    <Compile Include="DataLookups\AminoAcidBondAngles.cs" />
-    <Compile Include="DataLookups\AminoAcidSideChainMassLookup.cs" />
-    <Compile Include="DataLookups\CodonMap.cs" />
-    <Compile Include="DataLookups\RamachandranPlot.cs" />
-    <Compile Include="DataLookups\RamachandranPlotFileSource.cs" />
-    <Compile Include="Extensions\AminoAcidExtensions.cs" />
-    <Compile Include="Builders\AminoAcidLibrary.cs" />
-    <Compile Include="IO\Aminoseq\AminoseqReader.cs" />
-    <Compile Include="IO\Fastq\Contig.cs" />
-    <Compile Include="IO\Fastq\FastqData.cs" />
-    <Compile Include="IO\Fastq\FastqReader.cs" />
-    <Compile Include="IO\GeneLocationInfoReader.cs" />
-    <Compile Include="IO\Pdb\PdbModel.cs" />
-    <Compile Include="IO\Pdb\PdbReaderResult.cs" />
-    <Compile Include="IO\PeptideLoader.cs" />
-    <Compile Include="Measurements\AlphaHelixDetector.cs" />
-    <Compile Include="Measurements\BondEnergyCalculator.cs" />
-    <Compile Include="Measurements\DihedralAngleCalculator.cs" />
-    <Compile Include="Measurements\FixedLengthSequenceFrequencyCounter.cs" />
-    <Compile Include="Measurements\IntronExonExtractor.cs" />
-    <Compile Include="Measurements\IntronExtronResult.cs" />
-    <Compile Include="Objects\AminoAcidName.cs" />
-    <Compile Include="Objects\AminoAcidReference.cs" />
-    <Compile Include="Objects\AminoAcidSequence.cs" />
-    <Compile Include="Objects\AminoAcidSequenceItem.cs" />
-    <Compile Include="Objects\ApproximatedAminoAcid.cs" />
-    <Compile Include="Objects\ApproximatePeptide.cs" />
-    <Compile Include="Builders\ApproximatePeptideCompleter.cs" />
-    <Compile Include="Objects\AtomWithOrbitals.cs" />
-    <Compile Include="Builders\AtomConnector.cs" />
-    <Compile Include="Objects\Atom.cs" />
-    <Compile Include="Objects\BondMultiplicity.cs" />
-    <Compile Include="Objects\Codon.cs" />
-    <Compile Include="Objects\Exon.cs" />
-    <Compile Include="Objects\GeneLocationInfo.cs" />
-    <Compile Include="Objects\Intron.cs" />
-    <Compile Include="Objects\Nucleotide.cs" />
-    <Compile Include="Objects\PeptideAnnotation.cs" />
-    <Compile Include="Objects\PeptideSecondaryStructure.cs" />
-    <Compile Include="Objects\SimpleBond.cs" />
-    <Compile Include="Objects\SinglePointAminoAcid.cs" />
-    <Compile Include="Objects\SinglePointPeptide.cs" />
-    <Compile Include="Simulation\AminoAcidCannotBePositionedException.cs" />
-    <Compile Include="Simulation\ApproximateAminoAcidForces.cs" />
-    <Compile Include="Simulation\ApproximatePeptideFoldingSimulator.cs" />
-    <Compile Include="Simulation\ApproximatePeptideFoldingSimulatorFactory.cs" />
-    <Compile Include="Simulation\ApproximatePeptideSimulationSettings.cs" />
-    <Compile Include="Simulation\AtomNeighborhoodMap.cs" />
-    <Compile Include="Objects\OrbitalBond.cs" />
-    <Compile Include="Objects\ChemistryException.cs" />
-    <Compile Include="Simulation\BondForceCalculator.cs" />
-    <Compile Include="Simulation\ChargeRedistributor.cs" />
-    <Compile Include="Simulation\CompactingForceCalculator.cs" />
-    <Compile Include="Simulation\CustomAtomForce.cs" />
-    <Compile Include="Objects\Electron.cs" />
-    <Compile Include="DataLookups\ElementMap.cs" />
-    <Compile Include="Objects\ElementName.cs" />
-    <Compile Include="Objects\ElementSymbol.cs" />
-    <Compile Include="Simulation\ForceCalculator.cs" />
-    <Compile Include="DataLookups\IsotopeTable.cs" />
-    <Compile Include="Measurements\AminoAcidAngleMeasurer.cs" />
-    <Compile Include="Measurements\AtomPropertyCalculator.cs" />
-    <Compile Include="Measurements\BondLengthCalculator.cs" />
-    <Compile Include="Measurements\CompactnessMeasurer.cs" />
-    <Compile Include="Objects\Molecule.cs" />
-    <Compile Include="Builders\MoleculeBuilder.cs" />
-    <Compile Include="Extensions\MoleculeExtensions.cs" />
-    <Compile Include="Builders\MoleculeLibrary.cs" />
-    <Compile Include="Builders\MoleculePositioner.cs" />
-    <Compile Include="Objects\MoleculeReference.cs" />
-    <Compile Include="Simulation\MultiLevelGrowingFoldingSimulator.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\IRamachandranPlotGradientDistribution.cs" />
-    <Compile Include="Simulation\ISimulationRunner.cs" />
-    <Compile Include="Simulation\NBodyForceCalculator.cs" />
-    <Compile Include="Objects\Orbital.cs" />
-    <Compile Include="Objects\OrbitalComparer.cs" />
-    <Compile Include="IO\Pdb\OffsetSequenceMatcher.cs" />
-    <Compile Include="IO\Pdb\PdbAminoAcidAtomNamer.cs" />
-    <Compile Include="IO\Pdb\PdbSheetLine.cs" />
-    <Compile Include="IO\Pdb\PdbAtomLine.cs" />
-    <Compile Include="IO\Pdb\PdbHelixLine.cs" />
-    <Compile Include="IO\Pdb\PdbReader.cs" />
-    <Compile Include="IO\Pdb\PdbSerializer.cs" />
-    <Compile Include="Objects\Peptide.cs" />
-    <Compile Include="Builders\PeptideBuilder.cs" />
-    <Compile Include="DataLookups\PeriodicTable.cs" />
-    <Compile Include="DataLookups\PhysicalConstants.cs" />
-    <Compile Include="Objects\PhysicsException.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Simulation\MoleculeDynamicsSimulationSettings.cs" />
-    <Compile Include="Simulation\MoleculeDynamicsSimulator.cs" />
-    <Compile Include="Builders\SpherePointDistributor.cs" />
-    <Compile Include="Objects\SpinType.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\IRamachandranPlotGradientDistributionSource.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\RamachandranForceCalculator.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotFixedDistribution.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotGridGradientDistribution.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotGradientDistributionFileSource.cs" />
-    <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotDistributionFixedSource.cs" />
-    <Compile Include="Simulation\SimulationTimestepCompleteEventArgs.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <PackageReference Include="MathNet.Numerics">
-      <Version>4.9.0</Version>
-    </PackageReference>
-    <PackageReference Include="MIConvexHull">
-      <Version>1.1.19.1019</Version>
-    </PackageReference>
-    <PackageReference Include="mindleaving.Commons">
-      <Version>2.1.5</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
