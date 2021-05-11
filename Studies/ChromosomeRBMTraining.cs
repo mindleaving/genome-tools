@@ -1,21 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Commons;
+using Commons.DataProcessing;
 using Commons.Mathematics;
+using NUnit.Framework;
 
-namespace ChromosomeRBMTraining
+namespace Studies
 {
     /// <summary>
     /// Train Restricted Boltzmann machine from chromosome data
     /// </summary>
-    public static class Program
+    public class ChromosomeRBMTraining
     {
-        public static void Main()
+        [Test]
+        public void Run()
         {
             var sequenceLength = 250;
             var chromosomeNr = 7;
-            var chromosomeDataSource = new ChromosomeDataSource($@"G:\Projects\HumanGenome\chromosomes\Homo_sapiens.GRCh38.dna.primary_assembly.chromosome_{chromosomeNr}.fa", sequenceLength);
+            var chromosomeDataSource = new ChromosomeDataSource($@"F:\HumanGenome\chromosomes\Homo_sapiens.GRCh38.dna.primary_assembly.chromosome_{chromosomeNr}.fa", sequenceLength);
             var rbmSettings = new RestrictedBoltzmannMachineSettings
             {
                 HiddenNodes = (int)(0.2 * sequenceLength),
@@ -24,10 +26,10 @@ namespace ChromosomeRBMTraining
                 TrainingIterations = 10 * 1000 * 1000
             };
             var rbm = new RestrictedBoltzmannMachine(rbmSettings);
-            rbm.Train(chromosomeDataSource);
+            rbm.Train((IDataSource<bool>) chromosomeDataSource);
 
-            //rbm.OutputModel($@"G:\Projects\HumanGenome\chromosomes\chromosome{chromosomeNr}_rbm_model.txt");
-            OutputNucleotideSequences(rbm, rbmSettings, $@"G:\Projects\HumanGenome\chromosomes\chromosome{chromosomeNr}_nucelotides.txt");
+            //rbm.OutputModel($@"F:\HumanGenome\chromosomes\chromosome{chromosomeNr}_rbm_model.txt");
+            OutputNucleotideSequences(rbm, rbmSettings, $@"F:\HumanGenome\chromosomes\chromosome{chromosomeNr}_nucelotides.txt");
         }
 
         private static void OutputNucleotideSequences(RestrictedBoltzmannMachine rbm, RestrictedBoltzmannMachineSettings rbmSettings, string outputFile)

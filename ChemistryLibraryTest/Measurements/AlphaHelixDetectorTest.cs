@@ -9,7 +9,7 @@ namespace ChemistryLibraryTest.Measurements
     public class AlphaHelixDetectorTest
     {
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\2dc3.pdb")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\2dc3.pdb")]
         public void DetectedAlphaHelixMatchesOriginalAnnotation(string pdbFilePath)
         {
             var pdb = PdbReader.ReadFile(pdbFilePath);

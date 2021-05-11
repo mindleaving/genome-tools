@@ -29,8 +29,8 @@ namespace MoleculeViewer.Views
         {
             InitializeComponent();
 
-            var filename = @"G:\Projects\HumanGenome\Protein-PDBs\2mgo.pdb";
-            //var filename = @"G:\Projects\HumanGenome\AminoseqFiles\CFTR.aminoseq";
+            var filename = @"F:\HumanGenome\Protein-PDBs\2mgo.pdb";
+            //var filename = @"F:\HumanGenome\AminoseqFiles\CFTR.aminoseq";
             ApproximatePeptide approximatePeptide;
             Peptide peptide;
             if (filename.ToLowerInvariant().EndsWith(".pdb"))
@@ -56,7 +56,7 @@ namespace MoleculeViewer.Views
                 UseCompactingForce = true,
                 UseRamachandranForce = true
             };
-            var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var ramachadranDataDirectory = @"F:\HumanGenome\ramachadranDistributions";
             var ramachandranPlotDistributionSource = new RamachandranPlotGradientDistributionFileSource(ramachadranDataDirectory);
             //var ramachandranPlotDistributionSource = new RamachandranPlotDistributionFixedSource(
             //    new RamachandranPlotFixedDistribution(AminoAcidName.Alanine, new UnitPoint2D(-57.To(Unit.Degree), -47.To(Unit.Degree))));

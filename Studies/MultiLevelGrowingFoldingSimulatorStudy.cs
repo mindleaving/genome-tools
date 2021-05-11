@@ -19,14 +19,19 @@ namespace Studies
         [TestCase(
             "2da0", 
             "GSSGSSGYGSEKKGYLLKKSDGIRKVWQRRKCSVKNGILTISHATSNRQPAKLNLLTCQVKPNAEDKKSFDLISHNRTYHFQAEDEQDYVAWISVLTNSKEEALTMAFSGPSSG",
-            @"G:\Projects\HumanGenome\generatedProteins\MultiLevelGrowingSimulation\pdb2da0.ent"
+            @"F:\HumanGenome\generatedProteins\MultiLevelGrowingSimulation"
         )]
-        public void RunSimulationForSequence(string pdbCode, string sequenceString, string outputFilePath)
+        public void RunSimulationForSequence(string pdbCode, string sequenceString, string outputDirectory)
         {
-            var distributionDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var distributionDirectory = @"F:\HumanGenome\ramachadranDistributions";
             var sut = new MultiLevelGrowingFoldingSimulator(distributionDirectory);
             var settings = new MultiLevelGrowingFoldingSimulatorSettings
             {
+                InfluenceHorizont = 5.To(SIPrefix.Nano, Unit.Meter),
+                HydrogenBondBreakProbability = 0,
+                TipPositioningAttempts = 10,
+                RecursivePositioningAttempts = 100,
+                SecondaryStructureFoldingFrequency = 5
             };
             var aminoAcidSequence = sequenceString
                 .Select(c => c.ToAminoAcidName())
@@ -35,12 +40,14 @@ namespace Studies
             var peptide = sut.Simulate(aminoAcidSequence, settings);
             var approximatePeptideCompleter = new ApproximatePeptideCompleter(peptide);
             var completedPeptide = approximatePeptideCompleter.GetBackbone();
-            File.WriteAllText(outputFilePath, PdbSerializer.Serialize(pdbCode, completedPeptide));
+            File.WriteAllText(
+                Path.Combine(outputDirectory, $"pdb{pdbCode}_{DateTime.Now:yyyy-MM-dd_HHmmss}.ent"), 
+                PdbSerializer.Serialize(pdbCode, completedPeptide));
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\2dc3.pdb")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb1yzg.ent")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\2dc3.pdb")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb1yzg.ent")]
         public void MeasureAverageAminoAcidDistance(string pdbFilePath)
         {
             var pdb = PdbReader.ReadFile(pdbFilePath);

@@ -18,17 +18,22 @@ namespace Tools
     public class RamachandranDistributionGenerator
     {
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs",
-            @"G:\Projects\HumanGenome\ramachandranPlots",
-            @"G:\Projects\HumanGenome\ramachadranDistributions")]
-        public void GenerateAminoAcidDihedralAngleDistributions(string pdbDirectory, 
+        [TestCase(@"F:\HumanGenome\Protein-PDBs", "*.pdb",
+            @"F:\HumanGenome\ramachandranPlots",
+            @"F:\HumanGenome\ramachadranDistributions")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned", "*.ent",
+            @"D:\HumanGenome\ramachandranPlots",
+            @"D:\HumanGenome\ramachadranDistributions")]
+        public void GenerateAminoAcidDihedralAngleDistributions(
+            string pdbDirectory, 
+            string searchPattern,
             string ramachandranPlotDirectory, 
             string ramachandranDistributionDirectory)
         {
             // Clear Ramachandran distribution directory, because we will be appending.
             Directory.GetFiles(ramachandranDistributionDirectory).ForEach(File.Delete);
 
-            var pdbFiles = Directory.GetFiles(pdbDirectory, "*.pdb", SearchOption.TopDirectoryOnly);
+            var pdbFiles = Directory.GetFiles(pdbDirectory, searchPattern, SearchOption.TopDirectoryOnly);
             foreach (var pdbFile in pdbFiles)
             {
                 var pdbId = Path.GetFileNameWithoutExtension(pdbFile);

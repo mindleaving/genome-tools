@@ -47,8 +47,8 @@ namespace Studies
             var pdbCode2 = "2bbo";
             var outputDirectory = @"C:\Temp";
 
-            var pdbFile1 = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode1}.ent";
-            var pdbFile2 = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode2}.ent";
+            var pdbFile1 = $@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode1}.ent";
+            var pdbFile2 = $@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode2}.ent";
             var peptide1 = PdbReader.ReadFile(pdbFile1).Models.First().Chains.First();
             var peptide2 = PdbReader.ReadFile(pdbFile2).Models.First().Chains.First();
             var proteinAligner = new ProteinAligner();
@@ -78,8 +78,8 @@ namespace Studies
             var length = 40;
             var outputDirectory = @"C:\Temp";
 
-            var pdbFile1 = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode1}.ent";
-            var pdbFile2 = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode2}.ent";
+            var pdbFile1 = $@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode1}.ent";
+            var pdbFile2 = $@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb{pdbCode2}.ent";
             var peptide1 = PdbReader.ReadFile(pdbFile1).Models.First().Chains.First();
             var peptide2 = PdbReader.ReadFile(pdbFile2).Models.First().Chains.First();
             var proteinAligner = new ProteinAligner();
@@ -102,10 +102,10 @@ namespace Studies
         [Test]
         public void AlignAllModelsOfProtein(string proteinName, bool storeIndividualAlignedPdb)
         {
-            var outputDirectory = Path.Combine(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\AlignedProteins", proteinName);
+            var outputDirectory = Path.Combine(@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\AlignedProteins", proteinName);
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
-            var proteinListDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
+            var proteinListDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
             var pdbListFile = Path.Combine(proteinListDirectory, proteinName + ".csv");
             var pdbFiles = File.ReadLines(pdbListFile).ToList();
             var firstPeptide = PdbReader.ReadFile(pdbFiles.First()).Models.First().Chains.First();
@@ -167,7 +167,7 @@ namespace Studies
         [Test]
         public void AlignAllProteins()
         {
-            var proteinFileDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
+            var proteinFileDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
             var storeIndividualAlignedPdb = false;
 
             var proteinFiles = Directory.EnumerateFiles(proteinFileDirectory);

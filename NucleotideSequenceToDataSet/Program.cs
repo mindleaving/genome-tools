@@ -6,7 +6,7 @@ namespace NucleotideSequenceToDataSet
 {
     public static class Program
     {
-        private const string ChromosomeDataDirectory = @"G:\Projects\HumanGenome\chromosomes";
+        private const string ChromosomeDataDirectory = @"F:\HumanGenome\chromosomes";
         private const int ExonBoundaryLength = 25;
 
         public static void Main()

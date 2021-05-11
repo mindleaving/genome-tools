@@ -11,9 +11,7 @@ using ChemistryLibrary.IO.Pdb;
 using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
-using Domain;
 using NUnit.Framework;
-using Peptide = Domain.Peptide;
 
 namespace Studies
 {
@@ -24,8 +22,8 @@ namespace Studies
         [Ignore("Already done")]
         public void FilterPdbFiles()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\wwPDB\pdb";
-            var outputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\wwPDB\pdb";
+            var outputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins";
 
             foreach (var directory in Directory.GetDirectories(inputDirectory))
             {
@@ -45,8 +43,8 @@ namespace Studies
         [Test]
         public void NarrowDownToExplicitlyHumanProteins()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins";
-            var outputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins2";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins";
+            var outputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins2";
 
             foreach (var pdbFile in Directory.EnumerateFiles(inputDirectory))
             {
@@ -67,7 +65,7 @@ namespace Studies
         [Test]
         public void PdbReadTest()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins";
             Directory.CreateDirectory(Path.Combine(inputDirectory, "NoChain"));
             Directory.CreateDirectory(Path.Combine(inputDirectory, "SingleChain"));
             Directory.CreateDirectory(Path.Combine(inputDirectory, "MultiChain"));
@@ -110,7 +108,7 @@ namespace Studies
         [Test]
         public void FilterByPositionedMolecules()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain";
             Directory.CreateDirectory(Path.Combine(inputDirectory, "FullyPositioned"));
             Directory.CreateDirectory(Path.Combine(inputDirectory, "PartiallyPositioned"));
             Directory.CreateDirectory(Path.Combine(inputDirectory, "NotPositioned"));
@@ -147,7 +145,7 @@ namespace Studies
         [Test]
         public void FilterByMethod()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
             Directory.CreateDirectory(Path.Combine(inputDirectory, "ByMethod"));
             var methodMap = new Dictionary<string, List<string>>
             {
@@ -187,7 +185,7 @@ namespace Studies
         [Test]
         public void FilterByProtein()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
             var outputDirectory = Path.Combine(inputDirectory, "ByProtein");
             Directory.CreateDirectory(outputDirectory);
             Directory.EnumerateFiles(outputDirectory).ForEach(File.Delete);
@@ -229,10 +227,12 @@ namespace Studies
         [Test]
         public void ExtractAminoAcidPositions()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
-            var failedDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\Failed";
-            var outputDirection = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
-            var files = Directory.EnumerateFiles(inputDirectory, "pdb5uak.ent");
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned";
+            var failedDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\Failed";
+            var outputDirection = @"D:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            if(!Directory.Exists(outputDirection))
+                Directory.CreateDirectory(outputDirection);
+            var files = Directory.EnumerateFiles(inputDirectory, "*.ent");
             Parallel.ForEach(files, pdbFile =>
             {
                 try
@@ -278,7 +278,7 @@ namespace Studies
         [Test]
         public void SequenceLengthHistogramFromPositionFiles()
         {
-            var directory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var directory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
             var files = Directory.EnumerateFiles(directory, "*model000.csv");
             var histogram = new Dictionary<int, int>();
             foreach (var file in files)
@@ -300,7 +300,7 @@ namespace Studies
         public void PdbIdsWithSequenceLength()
         {
             var sequenceLength = 115;
-            var directory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var directory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
             var files = Directory.EnumerateFiles(directory, "*.csv");
             var outputDirectory = Path.Combine(directory, $"SequenceLength {sequenceLength:0000}");
             if (!Directory.Exists(outputDirectory))
@@ -320,29 +320,29 @@ namespace Studies
         {
             // Similar to PeptideFrequencyStudy.FindCommonPeptideSequences,
             // but restricted to peptides where we know the positions of the amino acids in the protein
-            var positionFilesDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
-            var outputDirectory = @"G:\Projects\HumanGenome\sequenceFrequencies\FullyPositionedSingleChainPeptides";
+            var positionFilesDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var outputDirectory = @"F:\HumanGenome\sequenceFrequencies\FullyPositionedSingleChainPeptides";
             var positionFiles = Directory.EnumerateFiles(positionFilesDirectory, "*_model000.csv");
-            var peptides = new List<Peptide>();
+            var peptides = new List<GeneLocationInfo>();
             foreach (var positionFile in positionFiles)
             {
                 var peptideSequence = File.ReadAllLines(positionFile)
                     .Where(line => !string.IsNullOrEmpty(line))
-                    .Select(line => line[0])
+                    .Select(line => line[0].ToAminoAcidName())
                     .ToList();
-                var peptide = new Peptide();
-                peptide.Sequence.AddRange(peptideSequence);                
+                var peptide = new GeneLocationInfo();
+                peptide.AminoAcidSequence.AddRange(peptideSequence);                
                 peptides.Add(peptide);
             }
-            PeptideFrequencyAnalysis.Analyze(peptides, outputDirectory);
+            PeptideFrequencyStudy.Analyze(peptides, outputDirectory);
         }
 
         [Test]
         public void FilterPositionFilesBySubsequence()
         {
             var subsequence = "CAQYWPQKEEKEMIFEDTNLKLTLISEDIK";
-            var positionFilesDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
-            var outputDirectory = $@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\sequence_{subsequence}";
+            var positionFilesDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var outputDirectory = $@"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\sequence_{subsequence}";
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
             var positionFiles = Directory.EnumerateFiles(positionFilesDirectory, "*_model000.csv");
@@ -361,7 +361,7 @@ namespace Studies
         [Test]
         public void PdbReaderDebug()
         {
-            var inputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\Failed";
+            var inputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\Failed";
 
             foreach (var pdbFile in Directory.EnumerateFiles(inputDirectory, "*.ent"))
             {
@@ -374,8 +374,8 @@ namespace Studies
         public void ProteinPdbSequenceAlignment()
         {
             
-            var proteinIndexCsvFileDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
-            var outputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\SequenceOutput";
+            var proteinIndexCsvFileDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
+            var outputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\SequenceOutput";
             var csvFiles = Directory.EnumerateFiles(proteinIndexCsvFileDirectory, "*.csv");
             var failingSequences = new ConcurrentBag<string>();
             Parallel.ForEach(csvFiles, csvFile =>

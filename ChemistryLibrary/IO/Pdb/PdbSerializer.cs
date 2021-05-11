@@ -260,7 +260,9 @@ namespace ChemistryLibrary.IO.Pdb
                         continue;
                     if(atom.Position == null)
                         continue;
-                    var atomName = atom.AminoAcidAtomName ?? atom.Element.ToElementSymbol().ToString();
+                    var atomName = atom.AminoAcidAtomName != null
+                        ? atom.Element.ToElementSymbol().ToString().Length == 1 ? " " + atom.AminoAcidAtomName : atom.AminoAcidAtomName
+                        : atom.Element.ToElementSymbol().ToString().PadLeft(2, ' ').ToUpperInvariant();
                     var x = (1e10*atom.Position.X).ToString("F3");
                     var y = (1e10*atom.Position.Y).ToString("F3");
                     var z = (1e10*atom.Position.Z).ToString("F3");
@@ -271,7 +273,7 @@ namespace ChemistryLibrary.IO.Pdb
 
                     if (atomIdx > 1)
                         output += Environment.NewLine;
-                    output += $"ATOM  {atomIdx,5} {atomName,4} {residueName,3} {chainId}{sequenceNumber,4}    " +
+                    output += $"ATOM  {atomIdx,5} {atomName,-4} {residueName,3} {chainId}{sequenceNumber,4}    " +
                             $"{x,8}{y,8}{z,8}{occupancy,6}{temperatureFactor,6}          " +
                             $"{elementSymbol,2}{charge,2}";
                     atomIdx++;

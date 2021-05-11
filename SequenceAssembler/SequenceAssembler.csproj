@@ -49,19 +49,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FastqReader.cs" />
-    <Compile Include="Objects\AssembledSequence.cs" />
-    <Compile Include="Objects\Contig.cs" />
-    <Compile Include="Objects\FastqData.cs" />
-    <Compile Include="Objects\Nucelotide.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Workflow\NucleotideSequenceWriter.cs" />
-    <Compile Include="Workflow\RestricedBoltzmannMachineSequenceAssembler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Objects\" />
+    <Folder Include="Workflow\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

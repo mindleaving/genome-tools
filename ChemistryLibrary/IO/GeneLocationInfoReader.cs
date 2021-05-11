@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ChemistryLibrary.Extensions;
+using ChemistryLibrary.Objects;
 
-namespace Domain
+namespace ChemistryLibrary.IO
 {
-    public static class PeptideFileReader
+    public static class GeneLocationInfoReader
     {
-        public static List<Peptide> ReadPeptides(string peptideDataFile)
+        public static List<GeneLocationInfo> ReadPeptides(string peptideDataFile)
         {
-            var peptides = new List<Peptide>();
+            var peptides = new List<GeneLocationInfo>();
             using (var streamReader = new StreamReader(peptideDataFile))
             {
-                Peptide peptide = null;
+                GeneLocationInfo geneLocationInfo = null;
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
                 {
@@ -23,26 +25,26 @@ namespace Domain
                         var chromosome = splittedHeader[GRCh38Index + 1];
                         if (chromosome == "X" || chromosome == "Y" || chromosome.All(char.IsNumber))
                         {
-                            peptide = new Peptide();
-                            peptides.Add(peptide);
+                            geneLocationInfo = new GeneLocationInfo();
+                            peptides.Add(geneLocationInfo);
                             var startIndex = int.Parse(splittedHeader[GRCh38Index + 2]);
                             var endIndex = int.Parse(splittedHeader[GRCh38Index + 3]);
-                            peptide.Chromosome = chromosome;
-                            peptide.StartBase = startIndex;
-                            peptide.EndBase = endIndex;
+                            geneLocationInfo.Chromosome = chromosome;
+                            geneLocationInfo.StartBase = startIndex;
+                            geneLocationInfo.EndBase = endIndex;
 
                             var geneSymbolIndex = splittedHeader.IndexOf("gene_symbol");
                             if (geneSymbolIndex >= 0)
-                                peptide.GeneSymbol = splittedHeader[geneSymbolIndex + 1];
+                                geneLocationInfo.GeneSymbol = splittedHeader[geneSymbolIndex + 1];
                         }
                         else
                         {
-                            peptide = null;
+                            geneLocationInfo = null;
                         }
                     }
                     else
                     {
-                        peptide?.Sequence.AddRange(line);
+                        geneLocationInfo?.AminoAcidSequence.AddRange(line.Select(aminoAcidCode => aminoAcidCode.ToAminoAcidName()));
                     }
                 }
             }

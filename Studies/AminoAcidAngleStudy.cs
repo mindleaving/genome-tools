@@ -21,10 +21,10 @@ namespace Studies
         public void InterAminoAcidAngles()
         {
             // Angles between alpha-carbon of adjacent amino acids
-            var aminoAcidPositionDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
+            var aminoAcidPositionDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions";
             var positionFiles = Directory.EnumerateFiles(aminoAcidPositionDirectory, "pdb*model000.csv");
-            var angleOutputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidAngles";
-            var distanceOutputDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidDistances";
+            var angleOutputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidAngles";
+            var distanceOutputDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidDistances";
             var perAminoAcidAngles = new Dictionary<char, List<double>>();
             var aminoAcidDistances = new Dictionary<string, List<double>>();
             foreach (var positionFile in positionFiles)
@@ -95,9 +95,9 @@ namespace Studies
         {
             var angleInverseDistributions = LoadInverseAngleDistributions();
             var pdbId = "1a2b";
-            var aminoAcidSequence = ReadAminoAcidSequenceFromPositionFile($@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\pdb{pdbId}_model000.csv");
-            var distanceMapsDirectory = @"G:\Projects\HumanGenome\generatedProteins\DistanceMaps";
-            var positionFilesDirectory = @"G:\Projects\HumanGenome\generatedProteins\PositionFiles";
+            var aminoAcidSequence = ReadAminoAcidSequenceFromPositionFile($@"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\pdb{pdbId}_model000.csv");
+            var distanceMapsDirectory = @"F:\HumanGenome\generatedProteins\DistanceMaps";
+            var positionFilesDirectory = @"F:\HumanGenome\generatedProteins\PositionFiles";
             var distanceMean = 380;
             var distanceSigma = 4;
 
@@ -194,7 +194,7 @@ namespace Studies
 
         private static Dictionary<char, ContinuousLine2D> LoadInverseAngleDistributions()
         {
-            var angleDirectory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidAngles";
+            var angleDirectory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\InterAminoAcidAngles";
             var angleDistributionFilePattern = "*_probabilityDistribution.csv";
             var probabilityDistributionFiles = Directory.EnumerateFiles(angleDirectory, angleDistributionFilePattern);
             var aminoAcidLetterPattern = "aminoAcid_([A-Z])_probabilityDistribution\\.csv";

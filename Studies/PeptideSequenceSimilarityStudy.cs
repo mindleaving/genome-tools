@@ -11,7 +11,7 @@ namespace Studies
         [Test]
         public void SortPeptideSequence()
         {
-            var peptideFile = @"G:\Projects\HumanGenome\Homo_sapiens.GRCh38.pep.all.fa";
+            var peptideFile = @"F:\HumanGenome\Homo_sapiens.GRCh38.pep.all.fa";
             var peptides = new Dictionary<string, string>();
             using (var streamReader = new StreamReader(peptideFile))
             {
@@ -51,8 +51,8 @@ namespace Studies
                     distinctPeptides.Add(peptide);
                 lastSequence = peptide.Value;
             }
-            File.WriteAllLines(@"G:\Projects\HumanGenome\orderedPeptides.csv", distinctPeptides.Select(kvp => $"{kvp.Key};{kvp.Value}"));
-            File.WriteAllLines(@"G:\Projects\HumanGenome\orderedPeptides_sequenceOnly.txt", distinctPeptides.Select(kvp => kvp.Value));
+            File.WriteAllLines(@"F:\HumanGenome\orderedPeptides.csv", distinctPeptides.Select(kvp => $"{kvp.Key};{kvp.Value}"));
+            File.WriteAllLines(@"F:\HumanGenome\orderedPeptides_sequenceOnly.txt", distinctPeptides.Select(kvp => kvp.Value));
         }
     }
 }

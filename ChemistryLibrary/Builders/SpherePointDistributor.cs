@@ -12,7 +12,7 @@ namespace ChemistryLibrary.Builders
     {
         public static List<Point3D> EvenlyDistributePointsOnSphere(double radius, int pointCount, IEnumerable<Vector3D> existingPoints)
         {
-            //File.Delete(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv");
+            //File.Delete(@"F:\HumanGenome\SpherePointDistribution_debug.csv");
 
             var scaledExistingPoints = existingPoints
                 .Select(v => (v.Magnitude()/radius)*v)
@@ -96,7 +96,7 @@ namespace ChemistryLibrary.Builders
                         frozenPoints.Add(pointsToMove.First());
                 }
                 iteration++;
-                //File.AppendAllText(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv",
+                //File.AppendAllText(@"F:\HumanGenome\SpherePointDistribution_debug.csv",
                 //    points.Select(p => p.ToString()).Aggregate((a, b) => a + ";" + b) + Environment.NewLine);
             } while (iteration < maxIterations);
             return points;

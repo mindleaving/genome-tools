@@ -87,7 +87,7 @@ namespace ChemistryLibraryTest.Builders
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb2da0.ent", 90, 91)]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb2da0.ent", 90, 91)]
         public void MeasureAminoAcidDistances(string pdbFilePath, int sequenceNumber1, int sequenceNumber2)
         {
             var pdb = PdbReader.ReadFile(pdbFilePath);

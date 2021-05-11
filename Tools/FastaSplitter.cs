@@ -8,7 +8,7 @@ namespace Tools
     public class FastaSplitter
     {
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Homo_sapiens.GRCh38.dna.primary_assembly.fa")]
+        [TestCase(@"F:\HumanGenome\Homo_sapiens.GRCh38.dna.primary_assembly.fa")]
         public void Split(string fastaFilename)
         {
             using (var streamReader = new StreamReader(fastaFilename))

@@ -87,7 +87,7 @@ namespace ChemistryLibraryTest.Simulation
             };
             simulator.StartSimulation();
             simulationEndedWaitHandle.WaitOne();
-            File.WriteAllLines(@"G:\Projects\HumanGenome\angles.csv",
+            File.WriteAllLines(@"F:\HumanGenome\angles.csv",
                 angleHistory.Select(angle => $"{angle.Omega.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)};" +
                                              $"{angle.Phi.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)};" +
                                              $"{angle.Psi.In(Unit.Degree).ToString(CultureInfo.InvariantCulture)}"));

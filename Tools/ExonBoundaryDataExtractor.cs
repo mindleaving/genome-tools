@@ -2,26 +2,30 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ChemistryLibrary.Objects;
 
-namespace ExonBoundaryDataExtractor
+namespace Tools
 {
-    public static class Program
+    /// <summary>
+    /// Extracts data for training machine learning models to detect exon/intron boundaries
+    /// </summary>
+    public static class ExonBoundaryDataExtractor
     {
-        private const string WellMatchedPeptideFile = @"G:\Projects\HumanGenome\exonData\well_matched_peptides.csv";
-        private const string ChromosomeDataDirectory = @"G:\Projects\HumanGenome\chromosomes";
-        private const string OutputDirectory = @"G:\Projects\HumanGenome\exonBoundaryData\";
+        private const string WellMatchedPeptideFile = @"F:\HumanGenome\exonData\well_matched_peptides.csv";
+        private const string ChromosomeDataDirectory = @"F:\HumanGenome\chromosomes";
+        private const string OutputDirectory = @"F:\HumanGenome\exonBoundaryData\";
         private const int LongSequenceThreshold = 10;
         private const int PromoterLength = 250;
         private const int DownstreamLength = 100;
         private const int ExonBoundaryLength = 25;
 
-        public static void Main()
+        public static void Extract()
         {
             if (!Directory.Exists(OutputDirectory))
                 Directory.CreateDirectory(OutputDirectory);
 
             var rng = new Random();
-            var peptides = ReadPeptides();
+            var peptides = ReadGenes();
             string lastChromosome = null;
             string chromosomeData = null;
             foreach (var peptide in peptides.OrderBy(pep => pep.Chromosome))
@@ -64,7 +68,7 @@ namespace ExonBoundaryDataExtractor
                 {
                     var currentExon = peptide.Exons[exonIdx];
                     var nextExon = peptide.Exons[exonIdx + 1];
-                    if(!currentExon.LongSequence || !nextExon.LongSequence)
+                    if(!(currentExon.Length > LongSequenceThreshold) || !(nextExon.Length > LongSequenceThreshold))
                         continue;
                     var leftBoundary = chromosomeData.Substring(currentExon.EndBase-ExonBoundaryLength, 2*ExonBoundaryLength);
                     var rightBoundary = chromosomeData.Substring(nextExon.StartBase - 1 - ExonBoundaryLength, 2*ExonBoundaryLength);
@@ -96,14 +100,14 @@ namespace ExonBoundaryDataExtractor
             return promoter.Select(c => c + "").Aggregate((a, b) => a + "," + b);
         }
 
-        private static List<Peptide> ReadPeptides()
+        private static List<GeneLocationInfo> ReadGenes()
         {
             var lines = File.ReadAllLines(WellMatchedPeptideFile);
-            var peptides = new List<Peptide>();
+            var peptides = new List<GeneLocationInfo>();
             foreach (var line in lines)
             {
                 var splittedLine = line.Split(':');
-                var peptide = new Peptide
+                var peptide = new GeneLocationInfo
                 {
                     GeneSymbol = splittedLine[0],
                     Chromosome = splittedLine[1],
@@ -115,11 +119,10 @@ namespace ExonBoundaryDataExtractor
                 {
                     var startBase = peptide.StartBase + int.Parse(exonBoundaries[boundaryIdx]);
                     var endBase = peptide.StartBase + int.Parse(exonBoundaries[boundaryIdx + 1]);
-                    var exon = new Exon
+                    var exon = new ExonInfo
                     {
                         StartBase = startBase,
-                        EndBase = endBase,
-                        LongSequence = endBase-startBase+1 > LongSequenceThreshold
+                        EndBase = endBase
                     };
                     peptide.Exons.Add(exon);
                 }
@@ -127,21 +130,5 @@ namespace ExonBoundaryDataExtractor
             }
             return peptides;
         }
-    }
-
-    public class Peptide
-    {
-        public string Chromosome { get; set; }
-        public int StartBase { get; set; }
-        public int EndBase { get; set; }
-        public string GeneSymbol { get; set; }
-        public List<Exon> Exons { get; } = new List<Exon>();
-    }
-
-    public class Exon
-    {
-        public int StartBase { get; set; }
-        public int EndBase { get; set; }
-        public bool LongSequence { get; set; }
     }
 }

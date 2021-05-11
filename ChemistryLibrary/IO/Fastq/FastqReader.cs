@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using SequenceAssembler.Objects;
+using ChemistryLibrary.Objects;
 
-namespace SequenceAssembler
+namespace ChemistryLibrary.IO.Fastq
 {
     public class FastqReader
     {
@@ -39,54 +39,54 @@ namespace SequenceAssembler
         {
             if(nucleotideLine.Length != qualityLine.Length)
                 throw new FormatException("Nucleotide and ");
-            var nucleotideBytes = new byte[nucleotideLine.Length];
+            var nucleotideBytes = new Nucleotide[nucleotideLine.Length];
             var qualityBytes = new byte[nucleotideBytes.Length];
             for (int idx = 0; idx < nucleotideLine.Length; idx++)
             {
-                nucleotideBytes[idx] = (byte)ParseNucleotide(nucleotideLine[idx]);
+                nucleotideBytes[idx] = ParseNucleotide(nucleotideLine[idx]);
                 qualityBytes[idx] = ParseQuality(qualityLine[idx]);
                 
             }
             return new Contig(nucleotideBytes, qualityBytes);
         }
 
-        private Nucelotide ParseNucleotide(char nucleotideChar)
+        private Nucleotide ParseNucleotide(char nucleotideChar)
         {
             switch (nucleotideChar)
             {
                 case 'Z':
                     return byte.MinValue;
                 case 'A':
-                    return Nucelotide.A;
+                    return Nucleotide.A;
                 case 'C':
-                    return Nucelotide.C;
+                    return Nucleotide.C;
                 case 'G':
-                    return Nucelotide.G;
+                    return Nucleotide.G;
                 case 'T':
                 case 'U':
-                    return Nucelotide.T;
+                    return Nucleotide.T;
                 case 'W':
-                    return Nucelotide.W;
+                    return Nucleotide.W;
                 case 'S':
-                    return Nucelotide.S;
+                    return Nucleotide.S;
                 case 'M':
-                    return Nucelotide.M;
+                    return Nucleotide.M;
                 case 'K':
-                    return Nucelotide.K;
+                    return Nucleotide.K;
                 case 'R':
-                    return Nucelotide.R;
+                    return Nucleotide.R;
                 case 'Y':
-                    return Nucelotide.Y;
+                    return Nucleotide.Y;
                 case 'B':
-                    return Nucelotide.B;
+                    return Nucleotide.B;
                 case 'D':
-                    return Nucelotide.D;
+                    return Nucleotide.D;
                 case 'F':
-                    return Nucelotide.H;
+                    return Nucleotide.H;
                 case 'V':
-                    return Nucelotide.V;
+                    return Nucleotide.V;
                 case 'N':
-                    return Nucelotide.N;
+                    return Nucleotide.N;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(nucleotideChar));
             }

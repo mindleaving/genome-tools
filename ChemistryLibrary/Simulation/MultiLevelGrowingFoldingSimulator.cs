@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ChemistryLibrary.Builders;
 using ChemistryLibrary.DataLookups;
 using ChemistryLibrary.Objects;
+using Commons;
 using Commons.Extensions;
 using Commons.Physics;
 
@@ -15,7 +17,9 @@ namespace ChemistryLibrary.Simulation
         /// </summary>
         public int SecondaryStructureFoldingFrequency { get; set; } = 5;
         public UnitValue InfluenceHorizont { get; set; } = 10.To(SIPrefix.Nano, Unit.Meter);
-        public int PositioningAttempts { get; set; } = 30;
+        public int TipPositioningAttempts { get; set; } = 10;
+        public int RecursivePositioningAttempts { get; set; } = 30;
+        public double HydrogenBondBreakProbability { get; set; } = 0.4;
     }
     public class MultiLevelGrowingFoldingSimulator
     {
@@ -40,12 +44,13 @@ namespace ChemistryLibrary.Simulation
 
         private void RecursiveAddAndPositionNewAminoAcid(
             ApproximatePeptide peptide,
-            Stack<AminoAcidName> aminoAcidQueue,
+            Stack<AminoAcidName> aminoAcidStack,
             MultiLevelGrowingFoldingSimulatorSettings settings)
         {
-            var aminoAcidName = aminoAcidQueue.Pop();
+            var aminoAcidName = aminoAcidStack.Pop();
 
             var lastAminoAcid = peptide.AminoAcids.LastOrDefault();
+            var nextAminoAcid = aminoAcidStack.Count > 0 ? (AminoAcidName?)aminoAcidStack.Peek() : null;
             var lastPosition = lastAminoAcid?.CarbonAlphaPosition ?? new UnitPoint3D(Unit.Meter, 0, 0, 0);
             var influencingAminoAcids = peptide.AminoAcids
                 .Where(x => x.CarbonAlphaPosition.DistanceTo(lastPosition) < settings.InfluenceHorizont)
@@ -60,31 +65,35 @@ namespace ChemistryLibrary.Simulation
                 FoldSecondaryStructure(peptide);
             }
 
-            var remainingPositionAttempts = settings.PositioningAttempts;
+            var remainingPositionAttempts = settings.RecursivePositioningAttempts;
             do
             {
+                var aminoAcid = new ApproximatedAminoAcid(aminoAcidName, sequenceNumber);
+                Console.WriteLine($"Positioning amino acid {peptide.AminoAcids.Count+1}");
+                PositionAminoAcid(aminoAcid, lastAminoAcid, nextAminoAcid, ramachandranPlot, influencingAminoAcids, settings);
+                peptide.Add(aminoAcid);
+
                 try
                 {
-                    var aminoAcid = new ApproximatedAminoAcid(aminoAcidName, sequenceNumber);
-                    PositionAminoAcid(aminoAcid, lastAminoAcid, ramachandranPlot, influencingAminoAcids, settings);
-                    peptide.Add(aminoAcid);
-
-                    RecursiveAddAndPositionNewAminoAcid(peptide, aminoAcidQueue, settings);
+                    if(aminoAcidStack.Count > 0)
+                        RecursiveAddAndPositionNewAminoAcid(peptide, aminoAcidStack, settings);
                     return;
                 }
                 catch (AminoAcidCannotBePositionedException)
                 {
+                    peptide.RemoveLast();
                     remainingPositionAttempts--;
                 }
             } while (remainingPositionAttempts > 0);
 
-            aminoAcidQueue.Push(aminoAcidName);
+            aminoAcidStack.Push(aminoAcidName);
             throw new AminoAcidCannotBePositionedException(aminoAcidName, sequenceNumber);
         }
 
         private void PositionAminoAcid(
             ApproximatedAminoAcid aminoAcid,
             ApproximatedAminoAcid lastAminoAcid,
+            AminoAcidName? nextAminoAcidName,
             RamachandranPlot ramachandranPlot,
             List<ApproximatedAminoAcid> influencingAminoAcids,
             MultiLevelGrowingFoldingSimulatorSettings settings)
@@ -100,12 +109,25 @@ namespace ChemistryLibrary.Simulation
                 aminoAcid.PsiAngle = aminoAcidAngles.Psi;
                 ApproximateAminoAcidPositioner.PositionAminoAcid(aminoAcid, lastAminoAcid, new UnitPoint3D(Unit.Meter, 0, 0, 0));
 
+                var canFormHydrogenBond = CanFormHydrogenBond(aminoAcid, nextAminoAcidName, influencingAminoAcids);
+                if (canFormHydrogenBond)
+                {
+                    if(StaticRandom.Rng.NextDouble() < 1 - settings.HydrogenBondBreakProbability)
+                    {
+                        Console.WriteLine("Position attempt succeeded: Hydrogen bond formed");
+                        return;
+                    }
+                }
+
                 // Note: Clashing distance was determined using MultiLevelGrowingFoldingSimulatorStudy.MeasureAverageAminoAcidDistance
                 var isClashingWithAnyInfluencingAminoAcid = influencingAminoAcids
-                    .Any(otherAminoAcid => otherAminoAcid.CarbonAlphaPosition.DistanceTo(aminoAcid.CarbonAlphaPosition).In(SIPrefix.Nano, Unit.Meter) < 1.0);
+                    .Any(otherAminoAcid => otherAminoAcid.Equals(lastAminoAcid)
+                        ? otherAminoAcid.CarbonAlphaPosition.DistanceTo(aminoAcid.CarbonAlphaPosition).In(SIPrefix.Pico, Unit.Meter) < 320.0
+                        : otherAminoAcid.CarbonAlphaPosition.DistanceTo(aminoAcid.CarbonAlphaPosition).In(SIPrefix.Pico, Unit.Meter) < 450.0);
                 if(isClashingWithAnyInfluencingAminoAcid)
                 {
                     positionAttempt++;
+                    Console.WriteLine("Position attempt failed: Clash detected");
                     continue;
                 }
 
@@ -116,13 +138,24 @@ namespace ChemistryLibrary.Simulation
                     if (isTooFarAway)
                     {
                         positionAttempt++;
+                        Console.WriteLine("Position attempt failed: Too far away");
                         continue;
                     }
                 }
                 return;
-            } while (positionAttempt < settings.PositioningAttempts);
+            } while (positionAttempt < settings.TipPositioningAttempts);
 
             throw new AminoAcidCannotBePositionedException(aminoAcid.Name, aminoAcid.SequenceNumber);
+        }
+
+        private static bool CanFormHydrogenBond(ApproximatedAminoAcid aminoAcid,
+            AminoAcidName? nextAminoAcidName,
+            List<ApproximatedAminoAcid> influencingAminoAcids)
+        {
+            return (nextAminoAcidName == null || nextAminoAcidName != AminoAcidName.Proline) && influencingAminoAcids.FirstOrDefault(
+                otherAminoAcid => aminoAcid.NextNitrogenPosition.DistanceTo(otherAminoAcid.OxygenPosition)
+                                      .In(SIPrefix.Pico, Unit.Meter)
+                                  < 320.0) != null;
         }
 
         private UnitPoint3D CalculateCenter(List<ApproximatedAminoAcid> aminoAcids)

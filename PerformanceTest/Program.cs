@@ -4,6 +4,14 @@ using System.Diagnostics;
 
 namespace PerformanceTest
 {
+    /// <summary>
+    /// This performance test is the C# implementation of
+    /// a performance comparison between C# and C++. The C++ code is not part of this repository.
+    /// Result: C++ code was 3x as fast as C#-implementation.
+    /// Relevance: Determine if a molecular dynamics simulation implemented in C# was a good or bad idea.
+    /// From the result it's not the obvious choice but wasn't a factor 10 bad and I hence went ahead implementing in C#
+    /// because I'm much more productive in C# and ability to test ideas was/is of higher value than good performance.
+    /// </summary>
     public static class Program
     {
         public static void Main()

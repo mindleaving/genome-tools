@@ -17,14 +17,14 @@ namespace Tools
         /// </summary>
         [Test]
         [TestCase(
-            @"G:\Projects\HumanGenome\Protein-PDBs", 
+            @"F:\HumanGenome\Protein-PDBs", 
             "*.pdb", 
-            @"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt"
+            @"F:\HumanGenome\fullPdbSequencesHelixMarked.txt"
         )]
         [TestCase(
-            @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain", 
+            @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain", 
             "*.ent",
-            @"G:\Projects\HumanGenome\humanSingleChainHelixMarked.txt"
+            @"F:\HumanGenome\humanSingleChainHelixMarked.txt"
         )]
         public void AlphaHelixOuput(string directory, string filter, string outputFilePath)
         {

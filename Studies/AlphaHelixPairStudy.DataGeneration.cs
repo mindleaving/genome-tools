@@ -15,8 +15,8 @@ namespace Studies
         [Test]
         public void ExtractAndAnnotateHelixSequences()
         {
-            var directory = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
-            var outputFilePath = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\humanFullyPositionedSingleChainUniqueProteinHelixMarked.txt";
+            var directory = @"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\ByProtein";
+            var outputFilePath = @"F:\HumanGenome\Protein-PDBs\HumanProteins\humanFullyPositionedSingleChainUniqueProteinHelixMarked.txt";
             var pdbLookupFiles = Directory.EnumerateFiles(directory, "*.csv");
             var pdbReaderOptions = new PdbReaderOptions {MaximumModelCount = 1, BuildMolecule = false};
             var outputLock = new object();

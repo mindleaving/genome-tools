@@ -15,7 +15,7 @@ namespace Studies
         private readonly ManualResetEvent simulationWaitHandle = new ManualResetEvent(true);
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\5m9j.pdb")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\5m9j.pdb")]
         public void ApproximatePeptideIsFoldedToKnownStableState(string pdbFilePath)
         {
             var pdbReadResult = PdbReader.ReadFile(pdbFilePath);
@@ -27,7 +27,7 @@ namespace Studies
                 SimulationTime = 10.To(SIPrefix.Pico, Unit.Second),
                 TimeStep = 2.To(SIPrefix.Femto, Unit.Second)
             };
-            var ramachadranDataDirectory = @"G:\Projects\HumanGenome\ramachadranDistributions";
+            var ramachadranDataDirectory = @"F:\HumanGenome\ramachadranDistributions";
             var simulator = ApproximatePeptideFoldingSimulatorFactory.Create(
                 approximatePeptide, simulationSettings, ramachadranDataDirectory);
             simulator.TimestepCompleted += Simulator_TimestepCompleted;

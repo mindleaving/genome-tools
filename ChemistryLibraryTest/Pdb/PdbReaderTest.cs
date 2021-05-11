@@ -8,7 +8,7 @@ namespace ChemistryLibraryTest.Pdb
     public class PdbReaderTest
     {
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\2mgo.pdb", 20, 9)]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\2mgo.pdb", 20, 9)]
         public void AllModelsRead(string file, int expectedModelCount, int expectedPeptideLength)
         {
             var pdbResult = PdbReader.ReadFile(file);
@@ -22,7 +22,7 @@ namespace ChemistryLibraryTest.Pdb
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb1b68.ent", 23, 162)]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\SingleChain\FullyPositioned\pdb1b68.ent", 23, 162)]
         public void AminoAcidSequenceNumberAsExpected(string pdbFile, int sequenceStart, int sequenceStop)
         {
             var pdbResult = PdbReader.ReadFile(pdbFile);

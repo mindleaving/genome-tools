@@ -12,11 +12,11 @@ namespace Studies
     public partial class AlphaHelixPairStudy
     {
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\helixSequences.txt", "helixPairs_n+4.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\nonHelixSequences.txt", "nonHelixPairs_n+4.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\orderedPeptides_sequenceOnly.txt", "unfilteredPairs_n+4.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\helixSequences.txt", "helixPairs_n+3.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\nonHelixSequences.txt", "nonHelixPairs_n+3.txt")]
+        [TestCase(@"F:\HumanGenome\helixSequences.txt", "helixPairs_n+4.txt")]
+        [TestCase(@"F:\HumanGenome\nonHelixSequences.txt", "nonHelixPairs_n+4.txt")]
+        [TestCase(@"F:\HumanGenome\orderedPeptides_sequenceOnly.txt", "unfilteredPairs_n+4.txt")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\helixSequences.txt", "helixPairs_n+3.txt")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\nonHelixSequences.txt", "nonHelixPairs_n+3.txt")]
         public void BuildPairStatistics(string inputFilePath, string outputFilename)
         {
             var helixSequences = File.ReadAllLines(inputFilePath)
@@ -45,10 +45,10 @@ namespace Studies
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\helixSequences.txt", "helixHydrogenBondNeighborhood_n+3to5.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\nonHelixSequences.txt", "nonHelixHydrogenBondNeighborhood_n+3to5.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\helixSequences.txt", "helixHydrogenBondNeighborhood_n+3to5.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\nonHelixSequences.txt", "nonHelixHydrogenBondNeighborhood_n+3to5_woUnknowns.txt")]
+        [TestCase(@"F:\HumanGenome\helixSequences.txt", "helixHydrogenBondNeighborhood_n+3to5.txt")]
+        [TestCase(@"F:\HumanGenome\nonHelixSequences.txt", "nonHelixHydrogenBondNeighborhood_n+3to5.txt")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\helixSequences.txt", "helixHydrogenBondNeighborhood_n+3to5.txt")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\nonHelixSequences.txt", "nonHelixHydrogenBondNeighborhood_n+3to5_woUnknowns.txt")]
         public void BuildHydrogenBondNeighborhoodStatistics(string inputFilePath, string outputFilename)
         {
             var helixSequences = File.ReadAllLines(inputFilePath)
@@ -79,8 +79,8 @@ namespace Studies
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\fullPdbSequencesHelixMarked.txt", "nonHelixSequences.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\humanFullyPositionedSingleChainUniqueProteinHelixMarked.txt", "nonHelixSequences.txt")]
+        [TestCase(@"F:\HumanGenome\fullPdbSequencesHelixMarked.txt", "nonHelixSequences.txt")]
+        [TestCase(@"F:\HumanGenome\Protein-PDBs\HumanProteins\humanFullyPositionedSingleChainUniqueProteinHelixMarked.txt", "nonHelixSequences.txt")]
         public void ExtractNonHelixSequences(string annotatedSequencesFile, string outputFilename)
         {
             var annotatedSequences = AlphaHelixStrengthStudy.ParseHelixSequences(annotatedSequencesFile);
@@ -117,8 +117,8 @@ namespace Studies
         }
 
         [Test]
-        [TestCase(@"G:\Projects\HumanGenome\helixSequences.txt", "helixNeighborPairs_n+4_offset3.txt")]
-        [TestCase(@"G:\Projects\HumanGenome\nonHelixSequences.txt", "nonHelixNeigborPairs_n+4_offset3.txt")]
+        [TestCase(@"F:\HumanGenome\helixSequences.txt", "helixNeighborPairs_n+4_offset3.txt")]
+        [TestCase(@"F:\HumanGenome\nonHelixSequences.txt", "nonHelixNeigborPairs_n+4_offset3.txt")]
         public void HelixNeighborPairs(string inputFilePath, string outputFilename)
         {
             var helixSequences = File.ReadAllLines(inputFilePath)

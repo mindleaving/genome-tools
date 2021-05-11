@@ -128,7 +128,7 @@ namespace ChemistryLibrary.Simulation
                              .Select(v => v.X + ";" + v.Y + ";" + v.Z)
                              .Aggregate((a,b) => a + ";" + b)
                          + Environment.NewLine;
-            File.AppendAllText(@"G:\Projects\HumanGenome\SpherePointDistribution_debug.csv", output);
+            File.AppendAllText(@"F:\HumanGenome\SpherePointDistribution_debug.csv", output);
         }
 
         private static void ApplyAtomForces(Molecule molecule, 

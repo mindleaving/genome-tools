@@ -13,8 +13,8 @@ namespace Studies
         [Test]
         public void ReconstructProteinFromDistanceMap()
         {
-            var distanceMapPath = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\DistanceMaps\pdb1a2b_model000.png";
-            var outputPath = @"G:\Projects\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\DistanceMapManipulationStudy";
+            var distanceMapPath = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\DistanceMaps\pdb1a2b_model000.png";
+            var outputPath = @"F:\HumanGenome\Protein-PDBs\HumanProteins\AminoAcidPositions\DistanceMapManipulationStudy";
             var description = "blurred";
             var outputFilenameBase = Path.GetFileNameWithoutExtension(distanceMapPath) + "_" + description;
             var distanceMap = new Image<Gray, byte>(distanceMapPath);

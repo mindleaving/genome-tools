@@ -76,7 +76,10 @@
     <Compile Include="AlphaHelixPairStudy.cs" />
     <Compile Include="AlphaHelixPairStudy.DataGeneration.cs" />
     <Compile Include="AlphaHelixStrengthStudy.cs" />
+    <Compile Include="ChromosomeDataSource.cs" />
+    <Compile Include="ChromosomeRBMTraining.cs" />
     <Compile Include="MultiLevelGrowingFoldingSimulatorStudy.cs" />
+    <Compile Include="NucleotideAminoAcidAligner.cs" />
     <Compile Include="PdbClassificationTools.cs" />
     <Compile Include="AminoAcidAngleStudy.cs" />
     <Compile Include="ApproximatePeptideFoldingValidationStudy.cs" />
@@ -94,15 +97,12 @@
     <Compile Include="ProteinAlignmentStudy.cs" />
     <Compile Include="SequenceAligner.cs" />
     <Compile Include="SequenceAlignment.cs" />
+    <Compile Include="WholeGenomeFrequencyAnalysis.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChemistryLibrary\ChemistryLibrary.csproj">
       <Project>{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}</Project>
       <Name>ChemistryLibrary</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Domain\Domain.csproj">
-      <Project>{4708C272-3B30-4E50-A16B-479B49B095E1}</Project>
-      <Name>Domain</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tools\Tools.csproj">
       <Project>{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}</Project>

@@ -2,7 +2,7 @@
 using Commons.Collections;
 using Commons.DataProcessing;
 
-namespace Domain
+namespace ChemistryLibrary.Measurements
 {
     public class FixedLengthSequenceFrequencyCounter
     {

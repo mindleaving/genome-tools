@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace SequenceAssembler.Objects
+namespace ChemistryLibrary.Objects
 {
     [Flags]
-    public enum Nucelotide : byte
+    public enum Nucleotide : byte
     {
         Z = byte.MinValue,
         A = 1,

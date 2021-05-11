@@ -33,10 +33,13 @@ namespace ChemistryLibrary.IO.Pdb
 
             var carbonEndNeighborVertices = GetNeighbors(molecule, carbonEndVertex).ToList();
 
-            var oxygenVertex = carbonEndNeighborVertices.Single(v => v.Object.Element == ElementName.Oxygen);
-            oxygenVertex.AlgorithmData = true;
-            var oxygen = oxygenVertex.Object;
-            oxygen.AminoAcidAtomName = "O";
+            var oxygenVertex = carbonEndNeighborVertices.SingleOrDefault(v => v.Object.Element == ElementName.Oxygen);
+            if (oxygenVertex != null) // Oxygen is not part of backbone and may hence be unavailable
+            {
+                oxygenVertex.AlgorithmData = true;
+                var oxygen = oxygenVertex.Object;
+                oxygen.AminoAcidAtomName = "O";
+            }
 
             var sideChainCarbonVertex = carbonEndNeighborVertices.Single(v => v.Object.Element == ElementName.Carbon);
 

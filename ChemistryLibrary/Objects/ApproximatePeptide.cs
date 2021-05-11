@@ -32,5 +32,12 @@ namespace ChemistryLibrary.Objects
         {
             AminoAcids.Add(aminoAcid);
         }
+
+        public void RemoveLast()
+        {
+            if(AminoAcids.Count == 0)
+                return;
+            AminoAcids.RemoveAt(AminoAcids.Count-1);
+        }
     }
 }

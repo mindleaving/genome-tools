@@ -22,15 +22,21 @@ namespace ChemistryLibrary.Objects
         }
 
         public long Id { get; }
+
         public UnitPoint3D NitrogenPosition { get; set; }
         public UnitPoint3D CarbonAlphaPosition { get; set; }
         public UnitPoint3D CarbonPosition { get; set; }
+        public UnitPoint3D OxygenPosition { get; set; }
+        public UnitPoint3D NextNitrogenPosition { get; set; }
+
         public UnitVector3D NitrogenVelocity { get; set; } = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
         public UnitVector3D CarbonAlphaVelocity { get; set; } = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
         public UnitVector3D CarbonVelocity { get; set; } = new UnitVector3D(Unit.MetersPerSecond, 0, 0, 0);
+
         public UnitValue OmegaAngle { get; set; }
         public UnitValue PhiAngle { get; set; }
         public UnitValue PsiAngle { get; set; }
+
         public AminoAcidName Name { get; }
 
         public bool IsFrozen { get; set; }

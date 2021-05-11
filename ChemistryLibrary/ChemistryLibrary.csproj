@@ -49,17 +49,25 @@
     <Compile Include="Builders\OrbitalGenerator.cs" />
     <Compile Include="DataLookups\AminoAcidBondAngles.cs" />
     <Compile Include="DataLookups\AminoAcidSideChainMassLookup.cs" />
+    <Compile Include="DataLookups\CodonMap.cs" />
     <Compile Include="DataLookups\RamachandranPlot.cs" />
     <Compile Include="DataLookups\RamachandranPlotFileSource.cs" />
     <Compile Include="Extensions\AminoAcidExtensions.cs" />
     <Compile Include="Builders\AminoAcidLibrary.cs" />
     <Compile Include="IO\Aminoseq\AminoseqReader.cs" />
+    <Compile Include="IO\Fastq\Contig.cs" />
+    <Compile Include="IO\Fastq\FastqData.cs" />
+    <Compile Include="IO\Fastq\FastqReader.cs" />
+    <Compile Include="IO\GeneLocationInfoReader.cs" />
     <Compile Include="IO\Pdb\PdbModel.cs" />
     <Compile Include="IO\Pdb\PdbReaderResult.cs" />
     <Compile Include="IO\PeptideLoader.cs" />
     <Compile Include="Measurements\AlphaHelixDetector.cs" />
     <Compile Include="Measurements\BondEnergyCalculator.cs" />
     <Compile Include="Measurements\DihedralAngleCalculator.cs" />
+    <Compile Include="Measurements\FixedLengthSequenceFrequencyCounter.cs" />
+    <Compile Include="Measurements\IntronExonExtractor.cs" />
+    <Compile Include="Measurements\IntronExtronResult.cs" />
     <Compile Include="Objects\AminoAcidName.cs" />
     <Compile Include="Objects\AminoAcidReference.cs" />
     <Compile Include="Objects\AminoAcidSequence.cs" />
@@ -71,6 +79,11 @@
     <Compile Include="Builders\AtomConnector.cs" />
     <Compile Include="Objects\Atom.cs" />
     <Compile Include="Objects\BondMultiplicity.cs" />
+    <Compile Include="Objects\Codon.cs" />
+    <Compile Include="Objects\Exon.cs" />
+    <Compile Include="Objects\GeneLocationInfo.cs" />
+    <Compile Include="Objects\Intron.cs" />
+    <Compile Include="Objects\Nucleotide.cs" />
     <Compile Include="Objects\PeptideAnnotation.cs" />
     <Compile Include="Objects\PeptideSecondaryStructure.cs" />
     <Compile Include="Objects\SimpleBond.cs" />
@@ -135,9 +148,7 @@
     <Compile Include="Simulation\RamachadranPlotForce\RamachandranPlotDistributionFixedSource.cs" />
     <Compile Include="Simulation\SimulationTimestepCompleteEventArgs.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Pdb\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics">
       <Version>4.9.0</Version>

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using ChemistryLibrary.Objects;
 
-namespace SequenceAssembler.Objects
+namespace ChemistryLibrary.IO.Fastq
 {
     public class FastqData
     {

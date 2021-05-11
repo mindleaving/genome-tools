@@ -29,6 +29,7 @@ namespace ChemistryLibrary.Builders
             var nitrogenCarbonDistance = PeriodicTable.GetCovalentRadius(ElementName.Nitrogen) +
                                          PeriodicTable.GetCovalentRadius(ElementName.Carbon);
             var CaCDistance = 2 * PeriodicTable.GetCovalentRadius(ElementName.Carbon);
+            var CODistance = PeriodicTable.GetCovalentRadius(ElementName.Carbon) + PeriodicTable.GetCovalentRadius(ElementName.Oxygen);
 
             UnitPoint3D carbonPosition;
             UnitPoint3D carbonAlphaPosition;
@@ -53,33 +54,65 @@ namespace ChemistryLibrary.Builders
             var omega = aminoAcid.OmegaAngle ?? Math.PI.To(Unit.Radians);
             var phi = aminoAcid.PhiAngle ?? 0.To(Unit.Radians);
             var psi = lastAminoAcid?.PsiAngle ?? 0.To(Unit.Radians);
-            var nitrogenPosition = CalculateAtomPosition(carbonPosition,
+            var nitrogenPosition = lastAminoAcid?.NextNitrogenPosition
+                ?? CalculateAtomPosition(carbonPosition,
                 carbonAlphaCarbonBondDirection,
                 nitrogenCarbonAlphaBondDirection,
                 nitrogenCarbonDistance,
                 AminoAcidBondAngles.CaCNAngle,
                 psi);
-            carbonAlphaPosition = CalculateAtomPosition(nitrogenPosition,
+            carbonAlphaPosition = CalculateAtomPosition(
+                nitrogenPosition,
                 carbonPosition.VectorTo(nitrogenPosition),
                 carbonAlphaCarbonBondDirection,
                 nitrogenCarbonDistance,
                 AminoAcidBondAngles.CNCaAngle,
                 omega);
-            carbonPosition = CalculateAtomPosition(carbonAlphaPosition,
+            carbonPosition = CalculateAtomPosition(
+                carbonAlphaPosition,
                 nitrogenPosition.VectorTo(carbonAlphaPosition),
                 carbonPosition.VectorTo(nitrogenPosition),
                 CaCDistance,
                 AminoAcidBondAngles.NCaCAngle,
                 phi);
+            var nextNitrogenPosition = CalculateAtomPosition(
+                carbonPosition,
+                carbonAlphaPosition.VectorTo(carbonPosition),
+                nitrogenPosition.VectorTo(carbonAlphaPosition),
+                nitrogenCarbonDistance,
+                AminoAcidBondAngles.CaCNAngle,
+                aminoAcid.PsiAngle);
+            var oxygenPosition = CalculateOxygenPosition(carbonPosition, carbonAlphaPosition, nextNitrogenPosition, CODistance);
+
             aminoAcid.NitrogenPosition = nitrogenPosition;
             aminoAcid.CarbonAlphaPosition = carbonAlphaPosition;
             aminoAcid.CarbonPosition = carbonPosition;
+            aminoAcid.NextNitrogenPosition = nextNitrogenPosition;
+            aminoAcid.OxygenPosition = oxygenPosition;
+
             if (aminoAcid.OmegaAngle == null)
                 aminoAcid.OmegaAngle = omega;
             if (aminoAcid.PhiAngle == null)
                 aminoAcid.PhiAngle = phi;
             if (lastAminoAcid != null && lastAminoAcid.PsiAngle == null)
                 lastAminoAcid.PsiAngle = psi;
+        }
+
+        private static UnitPoint3D CalculateOxygenPosition(UnitPoint3D carbonPosition,
+            UnitPoint3D carbonAlphaPosition,
+            UnitPoint3D nextNitrogenPosition,
+            UnitValue CODistance)
+        {
+            // Add normalized vectors to next atoms, which will
+            // point to the middle of the parallelogram spanned by these two vectors.
+            // Then normalize and point in the opposite direction.
+            // Then multiply by the distance and add to carbon position
+
+            return carbonPosition + CODistance
+                * -(carbonPosition.VectorTo(carbonAlphaPosition)
+                        .Normalize()
+                    + carbonPosition.VectorTo(nextNitrogenPosition)
+                        .Normalize()).Normalize().ToVector3D();
         }
 
         public static UnitPoint3D CalculateAtomPosition(UnitPoint3D currentPosition,

@@ -21,6 +21,9 @@
         Cysteine,
         Methionine,
         Asparagine,
-        Glutamine
+        Glutamine,
+
+        StopCodon,
+        Unknown
     }
 }

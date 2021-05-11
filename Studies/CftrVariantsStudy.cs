@@ -13,7 +13,7 @@ namespace Studies
         [Test]
         public void ReadMutationPosition()
         {
-            var mutationNameFile = @"G:\Projects\HumanGenome\cftr_mutations.csv";
+            var mutationNameFile = @"F:\HumanGenome\cftr_mutations.csv";
             var lines = File.ReadAllLines(mutationNameFile);
             //var mutationPositions = new List<string>();
             var heatMap = new Dictionary<int, int>();

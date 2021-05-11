@@ -1,5 +1,4 @@
-﻿using Domain;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Studies
 {
@@ -9,7 +8,7 @@ namespace Studies
         [Test]
         public void FindCommonNucelotideSequences()
         {
-            var fileName = @"G:\Projects\HumanGenome\Homo_sapiens.GRCh38.dna.primary_assembly.fa";
+            var fileName = @"F:\HumanGenome\Homo_sapiens.GRCh38.dna.primary_assembly.fa";
             WholeGenomeFrequencyAnalysis.Analyze(fileName);
         }
     }
