@@ -38,6 +38,7 @@ namespace GenomeTools.ChemistryLibrary.Measurements
         private int aminoAcidIndex;
         private Exon currentExon;
         private bool IsExonInProgress => currentExon != null;
+        private IntronExtronResult previousResult;
 
         public IntronExonExtractor(
             string nucleotides,
@@ -67,6 +68,12 @@ namespace GenomeTools.ChemistryLibrary.Measurements
 
         public IntronExtronResult Extract()
         {
+            if (nucleotideIndex > 0) // = Extraction has been executed before
+            {
+                if (previousResult != null)
+                    return previousResult;
+                throw new InvalidOperationException("Extraction cannot be run more than once. Previous execution failed.");
+            }
             while (nucleotideIndex + 2 < Nucleotides.Length)
             {
                 if (Exons.Any() && Exons.Last().AminoAcids.Count < minimumExonLength)
@@ -121,7 +128,8 @@ namespace GenomeTools.ChemistryLibrary.Measurements
             if (Exons.Sum(x => x.AminoAcids.Count) != AminoAcidSequence.Count)
                 throw new Exception("Sequence not fully matched");
             GenerateIntrons();
-            return new IntronExtronResult(Introns, Exons);
+            previousResult = new IntronExtronResult(Introns, Exons);
+            return previousResult;
         }
 
         private bool CanConstructExonOfMinimumLengthAtPosition()

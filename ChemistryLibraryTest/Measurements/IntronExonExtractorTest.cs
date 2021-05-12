@@ -111,5 +111,29 @@ namespace GenomeTools.ChemistryLibraryTest.Measurements
             var intron = actual.Introns[0];
             Assert.That(intron.StartNucelotideIndex, Is.EqualTo(0));
         }
+
+        [Test]
+        public void RunningExtractionTwiceResultsSameResult()
+        {
+            var nucleotides = "ATGTAG";
+            var aminoAcids = "M";
+            var sut = new IntronExonExtractor(nucleotides, aminoAcids, MinimumExonLength);
+
+            var actual = sut.Extract();
+            var actual2 = sut.Extract();
+
+            Assert.That(actual2, Is.EqualTo(actual));
+        }
+
+        [Test]
+        public void RunningFailedExtractionASecondTimeThrowsInvalidOperationException()
+        {
+            var nucleotides = "CTGGGAATGAATGGGGGTCATTGTTCCAAGTAGGGTAAAAA";
+            var aminoAcids = "KLYNGGI";
+            var sut = new IntronExonExtractor(nucleotides, aminoAcids, MinimumExonLength);
+
+            Assert.That(() => sut.Extract(), Throws.Exception);
+            Assert.That(() => sut.Extract(), Throws.InvalidOperationException);
+        }
     }
 }
