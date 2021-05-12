@@ -16,6 +16,7 @@ namespace GenomeTools.Studies
 {
     public class NucleotideAminoAcidAligner
     {
+        private const int MinimumExonLength = 5;
         private const string ChromosomeDataDirectory = @"D:\HumanGenome\chromosomes";
         private const string OutputDirectory = @"C:\Temp\";// @"F:\HumanGenome\peptideAlignments\";
 
@@ -24,7 +25,8 @@ namespace GenomeTools.Studies
         {
             var testPeptideSequence = "MAGVRTTGKLTT";
             var testNucleotides = NucleotideFromPeptideSequence("IIMAGVLI#ARTTIIVLRTTGKLRTT#ITT");
-            var intronExtronResult = IntronExonExtractor.ExtractExons(testNucleotides, testPeptideSequence);
+            var intronExtronExtractor = new IntronExonExtractor(testNucleotides, testPeptideSequence, MinimumExonLength);
+            var intronExtronResult = intronExtronExtractor.Extract();
             var testAlignedSequence = BuildAlignedSequence(testNucleotides, intronExtronResult.Exons);
             File.WriteAllLines(@"C:\Temp\peptide_alignment.txt", new[]
             {
@@ -77,6 +79,7 @@ namespace GenomeTools.Studies
                 EndBase = endBase,
                 AminoAcidSequence = aminoAcidSequenceLetters.Select(x => x.ToAminoAcidName()).ToList()
             };
+            File.Delete(Path.Combine(OutputDirectory, peptide.GeneSymbol + ".txt"));
             var chromosomeData = LoadChromosomeData(peptide.Chromosome);
             AlignSequence(peptide, chromosomeData);
         }
@@ -91,7 +94,8 @@ namespace GenomeTools.Studies
             var peptideDescription = $"{peptide.GeneSymbol}:{peptide.Chromosome}:{peptide.StartBase}:{peptide.EndBase}";
             try
             {
-                var intronExtronResult = IntronExonExtractor.ExtractExons(nucleotides, peptide.AminoAcidSequence);
+                var intronExtronExtractor = new IntronExonExtractor(nucleotides, peptide.AminoAcidSequence, MinimumExonLength);
+                var intronExtronResult = intronExtronExtractor.Extract();
 
                 var alignedSequence = BuildAlignedSequence(nucleotides, intronExtronResult.Exons);
                 var statistics = new StringBuilder();
@@ -154,7 +158,8 @@ namespace GenomeTools.Studies
                         continue;
                     if (peptide.AminoAcidSequence.First() != AminoAcidName.Methionine)
                         continue;
-                    var intronExtronResult = IntronExonExtractor.ExtractExons(nucleotides, peptide.AminoAcidSequence);
+                    var intronExtronExtractor = new IntronExonExtractor(nucleotides, peptide.AminoAcidSequence, MinimumExonLength);
+                    var intronExtronResult = intronExtronExtractor.Extract();
                     var sequenceLengths = intronExtronResult.Exons.Select(e => e.AminoAcids.Count).ToList();
                     var longSequenceMarkers = sequenceLengths.Select(x => x >= LongSequenceThreshold).ToList();
                     var hasContiguousLongSequences = Enumerable.Range(0, longSequenceMarkers.Count - 1)
