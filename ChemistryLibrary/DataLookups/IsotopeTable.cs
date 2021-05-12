@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public static class IsotopeTable
     {

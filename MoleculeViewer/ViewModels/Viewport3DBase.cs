@@ -4,7 +4,7 @@ using Commons.Extensions;
 using Point3D = System.Windows.Media.Media3D.Point3D;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
-namespace MoleculeViewer.ViewModels
+namespace GenomeTools.MoleculeViewer.ViewModels
 {
     public abstract class Viewport3DBase : ViewModelBase
     {

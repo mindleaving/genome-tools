@@ -1,8 +1,8 @@
-﻿using ChemistryLibrary.Objects;
-using Commons.Extensions;
+﻿using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public static class BondEnergyCalculator
     {

@@ -1,7 +1,7 @@
 ﻿using Commons.Extensions;
 using Commons.Mathematics;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class LinearTransformation3D
     {

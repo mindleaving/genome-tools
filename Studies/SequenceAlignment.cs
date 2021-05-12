@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class SequenceAlignment<T>
     {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.IO.Aminoseq;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.IO.Aminoseq;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.IO
 {
     public static class PeptideLoader
     {

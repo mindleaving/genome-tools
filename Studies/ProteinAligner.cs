@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class ProteinAlignerResult
     {

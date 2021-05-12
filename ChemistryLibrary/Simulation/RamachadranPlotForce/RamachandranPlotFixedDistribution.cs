@@ -1,8 +1,8 @@
-﻿using ChemistryLibrary.Objects;
-using Commons.Extensions;
+﻿using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation.RamachadranPlotForce
+namespace GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranPlotFixedDistribution : IRamachandranPlotGradientDistribution
     {

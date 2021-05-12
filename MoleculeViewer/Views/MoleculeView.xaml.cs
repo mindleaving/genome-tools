@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using MoleculeViewer.ViewModels;
+using GenomeTools.MoleculeViewer.ViewModels;
 
-namespace MoleculeViewer.Views
+namespace GenomeTools.MoleculeViewer.Views
 {
     /// <summary>
     /// Interaction logic for MoleculeView.xaml

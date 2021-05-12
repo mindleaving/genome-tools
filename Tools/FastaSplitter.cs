@@ -2,7 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 
-namespace Tools
+namespace GenomeTools.Tools
 {
     [TestFixture]
     public class FastaSplitter

@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Pdb
+namespace GenomeTools.ChemistryLibraryTest.Pdb
 {
     [TestFixture]
     public class AminoAcidAtomNamerTest

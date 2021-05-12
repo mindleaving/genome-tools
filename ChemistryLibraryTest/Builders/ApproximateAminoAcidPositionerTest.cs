@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Builders
+namespace GenomeTools.ChemistryLibraryTest.Builders
 {
     [TestFixture]
     public class ApproximateAminoAcidPositionerTest

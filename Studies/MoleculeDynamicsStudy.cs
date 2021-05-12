@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Objects;
-using ChemistryLibrary.Simulation;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Simulation;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class MoleculeDynamicsStudy

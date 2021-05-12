@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Measurements;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Measurements;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class Atom : IEquatable<Atom>
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Builders
+namespace GenomeTools.ChemistryLibrary.Builders
 {
     public static class AtomExtractor
     {

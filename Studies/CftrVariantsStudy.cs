@@ -5,7 +5,7 @@ using System.Linq;
 using Commons.Extensions;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class CftrVariantsStudy

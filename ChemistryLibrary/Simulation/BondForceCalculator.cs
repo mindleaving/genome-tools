@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class BondForceCalculator
     {

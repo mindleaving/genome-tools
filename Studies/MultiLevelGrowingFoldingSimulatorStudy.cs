@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Simulation;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Simulation;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class MultiLevelGrowingFoldingSimulatorStudy

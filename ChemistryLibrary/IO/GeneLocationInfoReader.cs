@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.IO
 {
     public static class GeneLocationInfoReader
     {

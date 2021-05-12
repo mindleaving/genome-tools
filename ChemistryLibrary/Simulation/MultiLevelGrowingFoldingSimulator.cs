@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Objects;
 using Commons;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class MultiLevelGrowingFoldingSimulatorSettings
     {

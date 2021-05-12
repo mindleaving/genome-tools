@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class ChargeRedistributor
     {

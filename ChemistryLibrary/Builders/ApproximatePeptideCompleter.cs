@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Builders
+namespace GenomeTools.ChemistryLibrary.Builders
 {
     /// <summary>
     /// Provides methods for building full molecules from an approximate peptide

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using MoleculeViewer.Annotations;
+using GenomeTools.MoleculeViewer.Properties;
 
-namespace MoleculeViewer.ViewModels
+namespace GenomeTools.MoleculeViewer.ViewModels
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

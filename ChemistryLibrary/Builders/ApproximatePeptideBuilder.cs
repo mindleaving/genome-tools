@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Builders
+namespace GenomeTools.ChemistryLibrary.Builders
 {
     public static class ApproximatePeptideBuilder
     {

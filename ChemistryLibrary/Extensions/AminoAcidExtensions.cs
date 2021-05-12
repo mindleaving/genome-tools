@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Extensions
+namespace GenomeTools.ChemistryLibrary.Extensions
 {
     public static class AminoAcidExtensions
     {

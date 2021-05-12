@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class NucleotideFrequencyStudy

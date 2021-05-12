@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Fastq
+namespace GenomeTools.ChemistryLibrary.IO.Fastq
 {
     public class FastqData
     {

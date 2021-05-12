@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.IO;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation.RamachadranPlotForce
+namespace GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranPlotGridGradientDistribution : IRamachandranPlotGradientDistribution
     {

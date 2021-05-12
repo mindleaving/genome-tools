@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Measurements;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Measurements
+namespace GenomeTools.ChemistryLibraryTest.Measurements
 {
     [TestFixture]
     public class AlphaHelixDetectorTest

@@ -1,4 +1,4 @@
-﻿namespace ChemistryLibrary.Objects
+﻿namespace GenomeTools.ChemistryLibrary.Objects
 {
     public enum AminoAcidName
     {

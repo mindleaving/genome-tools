@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Fastq
+namespace GenomeTools.ChemistryLibrary.IO.Fastq
 {
     public class FastqReader
     {

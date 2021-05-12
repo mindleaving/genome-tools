@@ -1,7 +1,7 @@
-﻿using ChemistryLibrary.Objects;
-using ChemistryLibrary.Simulation.RamachadranPlotForce;
+﻿using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public static class ApproximatePeptideFoldingSimulatorFactory
     {

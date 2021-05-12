@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.DataProcessing;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class PeptideFrequencyStudy

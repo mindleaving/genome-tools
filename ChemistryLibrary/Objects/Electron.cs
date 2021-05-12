@@ -1,8 +1,8 @@
-﻿using ChemistryLibrary.DataLookups;
-using Commons.Extensions;
+﻿using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class Electron
     {

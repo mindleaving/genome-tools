@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Measurements
+namespace GenomeTools.ChemistryLibraryTest.Measurements
 {
     [TestFixture]
     public class CompactnessMeasurerTest

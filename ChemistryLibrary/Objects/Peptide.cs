@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Extensions;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class Peptide : IDisposable
     {

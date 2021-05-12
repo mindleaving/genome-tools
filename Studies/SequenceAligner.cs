@@ -4,7 +4,7 @@ using System.Linq;
 using Accord.Statistics.Testing;
 using Commons.Extensions;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public static class SequenceAligner
     {

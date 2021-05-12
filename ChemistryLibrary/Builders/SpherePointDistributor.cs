@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Simulation;
 using Commons;
 using Commons.Extensions;
 using Commons.Mathematics;
+using GenomeTools.ChemistryLibrary.Simulation;
 
-namespace ChemistryLibrary.Builders
+namespace GenomeTools.ChemistryLibrary.Builders
 {
     public static class SpherePointDistributor
     {

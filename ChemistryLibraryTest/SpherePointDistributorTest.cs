@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Builders;
 using Commons.Mathematics;
+using GenomeTools.ChemistryLibrary.Builders;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace GenomeTools.ChemistryLibraryTest
 {
     [TestFixture]
     public class SpherePointDistributorTest

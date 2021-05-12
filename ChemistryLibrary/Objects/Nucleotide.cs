@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     [Flags]
     public enum Nucleotide : byte

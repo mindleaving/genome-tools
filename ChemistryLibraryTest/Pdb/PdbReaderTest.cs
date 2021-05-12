@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Pdb
+namespace GenomeTools.ChemistryLibraryTest.Pdb
 {
     [TestFixture]
     public class PdbReaderTest

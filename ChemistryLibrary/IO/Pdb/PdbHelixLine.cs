@@ -1,4 +1,4 @@
-﻿namespace ChemistryLibrary.IO.Pdb
+﻿namespace GenomeTools.ChemistryLibrary.IO.Pdb
 {
     public class PdbHelixLine
     {

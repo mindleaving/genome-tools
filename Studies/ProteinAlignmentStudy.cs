@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     /// <summary>
     /// Overlay proteins with each other at different sequences and study the relationship between 3D similarity and amino acid sequence

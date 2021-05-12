@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ChemistryLibrary.IO.Pdb
+namespace GenomeTools.ChemistryLibrary.IO.Pdb
 {
     public class PdbReaderResult : IDisposable
     {

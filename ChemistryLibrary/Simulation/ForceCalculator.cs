@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public static class ForceCalculator
     {

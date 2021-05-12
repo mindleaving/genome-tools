@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation.RamachadranPlotForce
+namespace GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranPlotGradientDistributionFileSource : IRamachandranPlotGradientDistributionSource
     {

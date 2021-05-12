@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public class IntronExtronResult
     {

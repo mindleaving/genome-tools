@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MoleculeViewer.ViewModels
+namespace GenomeTools.MoleculeViewer.ViewModels
 {
     public class RelayCommand : ICommand
     {

@@ -5,7 +5,7 @@ using Commons.DataProcessing;
 using Commons.Mathematics;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     /// <summary>
     /// Train Restricted Boltzmann machine from chromosome data

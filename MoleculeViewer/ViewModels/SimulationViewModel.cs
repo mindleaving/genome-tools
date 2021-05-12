@@ -1,9 +1,9 @@
 ﻿using System.Windows.Input;
-using ChemistryLibrary.Simulation;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Simulation;
 
-namespace MoleculeViewer.ViewModels
+namespace GenomeTools.MoleculeViewer.ViewModels
 {
     public class SimulationViewModel : ViewModelBase
     {

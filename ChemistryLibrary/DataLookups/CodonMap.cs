@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Objects;
 using Commons;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public static class CodonMap
     {

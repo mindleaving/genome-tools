@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public class RamachandranPlotFileSource
     {

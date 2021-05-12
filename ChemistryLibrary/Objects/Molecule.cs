@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Builders;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class Molecule : IDisposable
     {

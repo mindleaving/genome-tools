@@ -1,12 +1,12 @@
 ﻿using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Measurements;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Measurements;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Measurements
+namespace GenomeTools.ChemistryLibraryTest.Measurements
 {
     [TestFixture]
     public class AminoAcidAngleMeasurerTest

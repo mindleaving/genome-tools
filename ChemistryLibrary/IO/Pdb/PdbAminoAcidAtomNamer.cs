@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Pdb
+namespace GenomeTools.ChemistryLibrary.IO.Pdb
 {
     public static class PdbAminoAcidAtomNamer
     {

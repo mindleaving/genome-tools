@@ -4,7 +4,7 @@ using System.Linq;
 using Commons.Collections;
 using Commons.DataProcessing;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public static class WholeGenomeFrequencyAnalysis
     {

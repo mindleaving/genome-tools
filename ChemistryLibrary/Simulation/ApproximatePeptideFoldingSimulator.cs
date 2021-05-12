@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
-using ChemistryLibrary.Simulation.RamachadranPlotForce;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class ApproximatePeptideFoldingSimulator : ISimulationRunner
     {

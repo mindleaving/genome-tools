@@ -1,14 +1,13 @@
 ﻿using System.Linq;
 using System.Threading;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Simulation;
-using Commons;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Simulation;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class ApproximatePeptideFoldingValidationStudy
     {

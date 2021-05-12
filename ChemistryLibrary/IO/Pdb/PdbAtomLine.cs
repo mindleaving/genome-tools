@@ -1,6 +1,6 @@
-﻿using ChemistryLibrary.Objects;
+﻿using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Pdb
+namespace GenomeTools.ChemistryLibrary.IO.Pdb
 {
     public class PdbAtomLine
     {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public class AminoAcidAngles
     {

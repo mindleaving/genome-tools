@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Commons.Mathematics;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public static class NBodyForceCalculator
     {

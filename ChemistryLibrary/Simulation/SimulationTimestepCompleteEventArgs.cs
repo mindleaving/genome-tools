@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Objects;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class SimulationTimestepCompleteEventArgs : EventArgs
     {

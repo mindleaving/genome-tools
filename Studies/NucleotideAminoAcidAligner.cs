@@ -4,15 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class NucleotideAminoAcidAligner
     {

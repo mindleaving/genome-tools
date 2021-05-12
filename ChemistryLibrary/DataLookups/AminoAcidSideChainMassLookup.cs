@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public class AminoAcidSideChainMassLookup
     {

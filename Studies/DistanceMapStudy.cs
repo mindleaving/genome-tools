@@ -5,7 +5,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using NUnit.Framework;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     [TestFixture]
     public class DistanceMapStudy

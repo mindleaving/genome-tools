@@ -1,6 +1,6 @@
-﻿using ChemistryLibrary.Objects;
+﻿using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Fastq
+namespace GenomeTools.ChemistryLibrary.IO.Fastq
 {
     public class Contig
     {

@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Aminoseq
+namespace GenomeTools.ChemistryLibrary.IO.Aminoseq
 {
     public static class AminoseqReader
     {

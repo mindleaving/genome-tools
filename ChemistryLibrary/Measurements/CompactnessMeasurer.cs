@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Objects;
 using MIConvexHull;
 using IVertex = MIConvexHull.IVertex;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public class CompactnessMeasurerResult
     {

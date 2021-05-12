@@ -1,19 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO;
-using ChemistryLibrary.Objects;
-using ChemistryLibrary.Simulation;
-using ChemistryLibrary.Simulation.RamachadranPlotForce;
-using Commons;
 using Commons.Extensions;
 using Commons.Physics;
-using MoleculeViewer.ViewModels;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO;
+using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Simulation;
+using GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce;
+using GenomeTools.MoleculeViewer.ViewModels;
 
-namespace MoleculeViewer.Views
+namespace GenomeTools.MoleculeViewer.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

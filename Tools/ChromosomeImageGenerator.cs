@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using NUnit.Framework;
 
-namespace Tools
+namespace GenomeTools.Tools
 {
     public class ChromosomeImageGenerator
     {

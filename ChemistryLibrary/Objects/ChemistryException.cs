@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class ChemistryException : Exception
     {

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation.RamachadranPlotForce
+namespace GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public class RamachandranForceCalculator
     {

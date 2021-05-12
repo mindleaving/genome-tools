@@ -1,7 +1,7 @@
 ﻿using System;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class AminoAcidCannotBePositionedException : Exception
     {

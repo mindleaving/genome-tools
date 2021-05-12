@@ -1,11 +1,11 @@
-﻿using ChemistryLibrary.Builders;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
-using Commons.Extensions;
+﻿using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace GenomeTools.ChemistryLibraryTest
 {
     [TestFixture]
     public class ApproximatePeptideTest

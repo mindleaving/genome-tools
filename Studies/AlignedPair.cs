@@ -1,4 +1,4 @@
-﻿namespace Studies
+﻿namespace GenomeTools.Studies
 {
     public class AlignedPair<T>
     {

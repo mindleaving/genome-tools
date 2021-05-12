@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class Intron
     {

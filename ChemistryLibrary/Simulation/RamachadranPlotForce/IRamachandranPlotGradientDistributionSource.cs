@@ -1,6 +1,6 @@
-﻿using ChemistryLibrary.Objects;
+﻿using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Simulation.RamachadranPlotForce
+namespace GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce
 {
     public interface IRamachandranPlotGradientDistributionSource
     {

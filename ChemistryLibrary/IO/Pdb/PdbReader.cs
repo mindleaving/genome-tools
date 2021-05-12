@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.IO.Pdb
+namespace GenomeTools.ChemistryLibrary.IO.Pdb
 {
     public class PdbReaderOptions
     {

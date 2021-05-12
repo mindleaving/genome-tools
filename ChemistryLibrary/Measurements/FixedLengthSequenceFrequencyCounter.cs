@@ -2,7 +2,7 @@
 using Commons.Collections;
 using Commons.DataProcessing;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public class FixedLengthSequenceFrequencyCounter
     {

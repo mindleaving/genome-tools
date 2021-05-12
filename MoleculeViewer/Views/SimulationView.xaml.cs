@@ -1,8 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using MoleculeViewer.ViewModels;
+using GenomeTools.MoleculeViewer.ViewModels;
 
-namespace MoleculeViewer.Views
+namespace GenomeTools.MoleculeViewer.Views
 {
     /// <summary>
     /// Interaction logic for SimulationView.xaml

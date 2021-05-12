@@ -8,7 +8,7 @@ using Commons.Physics;
 using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public static class DistanceMapGenerator
     {

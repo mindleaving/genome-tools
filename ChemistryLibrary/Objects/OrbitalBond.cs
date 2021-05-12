@@ -2,7 +2,7 @@
 using Commons.Extensions;
 using Commons.Physics;
 
-namespace ChemistryLibrary.Objects
+namespace GenomeTools.ChemistryLibrary.Objects
 {
     public class OrbitalBond : SimpleBond
     {

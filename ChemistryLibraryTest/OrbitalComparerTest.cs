@@ -1,7 +1,7 @@
-﻿using ChemistryLibrary.Objects;
+﻿using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest
+namespace GenomeTools.ChemistryLibraryTest
 {
     [TestFixture]
     public class OrbitalComparerTest

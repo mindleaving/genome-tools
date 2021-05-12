@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Commons.Physics;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public interface ISimulationRunner : IDisposable
     {

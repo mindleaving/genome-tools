@@ -1,7 +1,7 @@
 ﻿using Commons.Extensions;
 using Commons.Physics;
 
-namespace ChemistryLibrary.Simulation
+namespace GenomeTools.ChemistryLibrary.Simulation
 {
     public class MoleculeDynamicsSimulationSettings
     {

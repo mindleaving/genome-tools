@@ -3,16 +3,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Measurements;
-using ChemistryLibrary.Objects;
-using ChemistryLibrary.Simulation;
-using ChemistryLibrary.Simulation.RamachadranPlotForce;
 using Commons.Extensions;
 using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Measurements;
+using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Simulation;
+using GenomeTools.ChemistryLibrary.Simulation.RamachadranPlotForce;
 using NUnit.Framework;
 
-namespace ChemistryLibraryTest.Simulation
+namespace GenomeTools.ChemistryLibraryTest.Simulation
 {
     [TestFixture]
     public class RamachadranForceCalculatorTest

@@ -4,7 +4,7 @@ using System.IO;
 using Commons.Collections;
 using Commons.DataProcessing;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public class ChromosomeDataSource : IDataSource<bool>
     {

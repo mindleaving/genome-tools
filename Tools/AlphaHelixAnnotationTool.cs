@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Extensions;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace Tools
+namespace GenomeTools.Tools
 {
     [TestFixture]
     public class AlphaHelixAnnotationTool

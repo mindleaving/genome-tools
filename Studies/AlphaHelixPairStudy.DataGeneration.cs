@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ChemistryLibrary.IO.Pdb;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.IO.Pdb;
+using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.Tools;
 using NUnit.Framework;
-using Tools;
 
-namespace Studies
+namespace GenomeTools.Studies
 {
     public partial class AlphaHelixPairStudy
     {

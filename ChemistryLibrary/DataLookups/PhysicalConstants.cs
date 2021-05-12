@@ -2,7 +2,7 @@
 using Commons.Extensions;
 using Commons.Physics;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public static class PhysicalConstants
     {

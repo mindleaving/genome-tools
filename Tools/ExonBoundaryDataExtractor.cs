@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ChemistryLibrary.Objects;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace Tools
+namespace GenomeTools.Tools
 {
     /// <summary>
     /// Extracts data for training machine learning models to detect exon/intron boundaries

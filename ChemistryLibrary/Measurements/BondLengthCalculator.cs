@@ -1,8 +1,8 @@
-﻿using ChemistryLibrary.DataLookups;
-using ChemistryLibrary.Objects;
-using Commons.Physics;
+﻿using Commons.Physics;
+using GenomeTools.ChemistryLibrary.DataLookups;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public static class BondLengthCalculator
     {

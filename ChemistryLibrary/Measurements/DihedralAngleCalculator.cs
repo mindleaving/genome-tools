@@ -1,7 +1,7 @@
 using Commons.Extensions;
 using Commons.Physics;
 
-namespace ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Measurements
 {
     public static class DihedralAngleCalculator
     {

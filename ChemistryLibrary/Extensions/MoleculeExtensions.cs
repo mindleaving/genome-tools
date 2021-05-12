@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ChemistryLibrary.Builders;
-using ChemistryLibrary.Objects;
 using Commons.Extensions;
 using Commons.Mathematics;
+using GenomeTools.ChemistryLibrary.Builders;
+using GenomeTools.ChemistryLibrary.Objects;
 
-namespace ChemistryLibrary.Extensions
+namespace GenomeTools.ChemistryLibrary.Extensions
 {
     public static class MoleculeExtensions
     {

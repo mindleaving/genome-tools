@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using ChemistryLibrary.Measurements;
 using Commons;
-using Commons.Mathematics;
-using Commons.Physics;
+using GenomeTools.ChemistryLibrary.Measurements;
 
-namespace ChemistryLibrary.DataLookups
+namespace GenomeTools.ChemistryLibrary.DataLookups
 {
     public class RamachandranPlot
     {

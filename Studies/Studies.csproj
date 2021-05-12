@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
+    <AssemblyName>GenomeTools.Studies</AssemblyName>
+    <RootNamespace>GenomeTools.Studies</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
