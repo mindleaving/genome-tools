@@ -15,6 +15,7 @@
     <RepositoryUrl>https://github.com/mindleaving/genome-tools</RepositoryUrl>
     <PackageId>mindleaving.GenomeTools.ChemistryLibrary</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

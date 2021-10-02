@@ -78,6 +78,11 @@ namespace GenomeTools.ChemistryLibrary.Extensions
             return AminoAcidOneLetterCodeMap[aminoAcidName];
         }
 
+        public static string ToStringOfOneLetterCodes(this IEnumerable<AminoAcidName> aminoAcids)
+        {
+            return new (aminoAcids.Select(x => x.ToOneLetterCode()).ToArray());
+        }
+
         public static AminoAcidName ToAminoAcidName(this char aminoAcidCode)
         {
             var upperLetterCode = char.ToUpperInvariant(aminoAcidCode);

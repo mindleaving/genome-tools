@@ -2,7 +2,7 @@
 using GenomeTools.ChemistryLibrary.IO.Pdb;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.Pdb
+namespace GenomeTools.ChemistryLibraryTest.IO.Pdb
 {
     [TestFixture]
     public class PdbReaderTest

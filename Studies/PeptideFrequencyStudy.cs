@@ -7,6 +7,7 @@ using GenomeTools.ChemistryLibrary.Extensions;
 using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.Measurements;
 using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.Tools;
 using NUnit.Framework;
 
 namespace GenomeTools.Studies
@@ -14,11 +15,13 @@ namespace GenomeTools.Studies
     [TestFixture]
     public class PeptideFrequencyStudy
     {
+        private readonly GeneLocationInfoReader geneReader = new(Path.Combine(DataLocations.Root, "Homo_sapiens.GRCh38.pep.all.fa"));
+
         [Test]
         public void FindCommonPeptideCombinations()
         {
             var outputDirectory = @"F:\HumanGenome\sequenceFrequencies\AllGRCh38Peptides";
-            var peptides = GeneLocationInfoReader.ReadPeptides(@"F:\HumanGenome\Homo_sapiens.GRCh38.pep.all.fa");
+            var peptides = geneReader.ReadAllGenes();
             Analyze(peptides, outputDirectory);
         }
 

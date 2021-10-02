@@ -4,7 +4,7 @@ using GenomeTools.ChemistryLibrary.IO.Pdb;
 using GenomeTools.ChemistryLibrary.Objects;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.Pdb
+namespace GenomeTools.ChemistryLibraryTest.IO.Pdb
 {
     [TestFixture]
     public class AminoAcidAtomNamerTest

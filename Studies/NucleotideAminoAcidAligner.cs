@@ -10,6 +10,7 @@ using GenomeTools.ChemistryLibrary.Extensions;
 using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.Measurements;
 using GenomeTools.ChemistryLibrary.Objects;
+using GenomeTools.Tools;
 using NUnit.Framework;
 
 namespace GenomeTools.Studies
@@ -17,8 +18,9 @@ namespace GenomeTools.Studies
     public class NucleotideAminoAcidAligner
     {
         private const int MinimumExonLength = 5;
-        private const string ChromosomeDataDirectory = @"D:\HumanGenome\chromosomes";
         private const string OutputDirectory = @"C:\Temp\";// @"F:\HumanGenome\peptideAlignments\";
+        private readonly GeneLocationInfoReader geneReader = new(Path.Combine(DataLocations.Root, "Homo_sapiens.GRCh38.pep.all.fa"));
+        private readonly ChromosomeDataLoader chromosomeDataLoader = new(DataLocations.Chromosomes);
 
         [Test]
         public void TestExonExtraction()
@@ -44,7 +46,7 @@ namespace GenomeTools.Studies
             if (!Directory.Exists(OutputDirectory))
                 Directory.CreateDirectory(OutputDirectory);
 
-            var peptides = GeneLocationInfoReader.ReadPeptides(@"F:\HumanGenome\Homo_sapiens.GRCh38.pep.all.fa");
+            var peptides = geneReader.ReadAllGenes();
 
             string lastChromosome = null;
             string chromosomeData = null;
@@ -53,18 +55,13 @@ namespace GenomeTools.Studies
                 var currentChromosome = peptide.Chromosome;
                 if (chromosomeData == null || currentChromosome != lastChromosome)
                 {
-                    chromosomeData = LoadChromosomeData(currentChromosome);
+                    chromosomeData = chromosomeDataLoader.Load(currentChromosome);
                     lastChromosome = currentChromosome;
                 }
 
-                AlignSequence(peptide, chromosomeData);
+                var nucleotides = chromosomeData.Substring(peptide.StartBase - 1, peptide.EndBase - peptide.StartBase + 1);
+                AlignSequence(peptide, nucleotides);
             }
-        }
-
-        private static string LoadChromosomeData(string chromosomeName)
-        {
-            var chromosomeFile = Directory.GetFiles(ChromosomeDataDirectory, $"*chromosome_{chromosomeName}.*").Single();
-            return File.ReadAllText(chromosomeFile);
         }
 
         [Test]
@@ -80,16 +77,16 @@ namespace GenomeTools.Studies
                 AminoAcidSequence = aminoAcidSequenceLetters.Select(x => x.ToAminoAcidName()).ToList()
             };
             File.Delete(Path.Combine(OutputDirectory, peptide.GeneSymbol + ".txt"));
-            var chromosomeData = LoadChromosomeData(peptide.Chromosome);
+            var chromosomeData = chromosomeDataLoader.Load(peptide.Chromosome, startBase, endBase);
             AlignSequence(peptide, chromosomeData);
         }
 
         private static void AlignSequence(
             GeneLocationInfo peptide,
-            string chromosomeData)
+            string nucleotides)
         {
             Console.WriteLine(peptide.GeneSymbol + ", chromosome " + peptide.Chromosome);
-            var nucleotides = chromosomeData.Substring(peptide.StartBase - 1, peptide.EndBase - peptide.StartBase + 1);
+            
 
             var peptideDescription = $"{peptide.GeneSymbol}:{peptide.Chromosome}:{peptide.StartBase}:{peptide.EndBase}";
             try
@@ -134,7 +131,7 @@ namespace GenomeTools.Studies
         [Test]
         public void WellAlignedSequences()
         {
-            var peptides = GeneLocationInfoReader.ReadPeptides(@"F:\HumanGenome\Homo_sapiens.GRCh38.pep.all.fa");
+            var peptides = geneReader.ReadAllGenes();
 
             string lastChromosome = null;
             string chromosomeData = null;
@@ -143,10 +140,9 @@ namespace GenomeTools.Studies
             {
                 Console.WriteLine(peptide.GeneSymbol + ", chromosome " + peptide.Chromosome);
 
-                var chromosomeFile = Directory.GetFiles(ChromosomeDataDirectory, $"*chromosome_{peptide.Chromosome}.*").Single();
                 if (chromosomeData == null || peptide.Chromosome != lastChromosome)
                 {
-                    chromosomeData = File.ReadAllText(chromosomeFile);
+                    chromosomeData = chromosomeDataLoader.Load(peptide.Chromosome);
                     lastChromosome = peptide.Chromosome;
                 }
                 var nucleotides = chromosomeData.Substring(peptide.StartBase - 1, peptide.EndBase - peptide.StartBase + 1);
