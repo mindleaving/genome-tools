@@ -15,6 +15,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
             using var reader = new StreamReader(filePath);
             var headerEntries = new List<SamHeaderEntry>();
             var alignmentEntries = new List<SamAlignmentEntry>();
+            var hasCheckedHeaders = false;
             string line;
             while ((line = reader.ReadLine()) != null)
             {
@@ -24,23 +25,80 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
                 if (isHeaderLine)
                 {
                     var headerEntry = ParseHeaderEntry(line);
+                    if (headerEntry.Type == SamHeaderEntry.HeaderEntryType.FileLevelMetadata && headerEntries.Any())
+                        throw new FormatException("Detected a HD-header after the first line of the file, which is not allowed");
+                    if (headerEntry.Type == SamHeaderEntry.HeaderEntryType.Program)
+                    {
+                        CheckUniqueIdForProgramHeaderEntry(headerEntry, headerEntries);
+                    }
+                    if (headerEntry.Type == SamHeaderEntry.HeaderEntryType.ReadGroup)
+                    {
+                        CheckUniqueIdForReadGroupHeaderEntry(headerEntry, headerEntries);
+                    }
                     headerEntries.Add(headerEntry);
                 }
                 else
                 {
+                    if (!hasCheckedHeaders)
+                    {
+                        CheckHeaders(headerEntries);
+                        hasCheckedHeaders = true;
+                    }
                     var alignmentEntry = ParseAlignmentEntry(line);
                     alignmentEntries.Add(alignmentEntry);
                 }
             }
+            if (!hasCheckedHeaders) 
+                CheckHeaders(headerEntries);
 
             return new SamLoaderResult(headerEntries, alignmentEntries);
+        }
+
+        private static void CheckUniqueIdForProgramHeaderEntry(SamHeaderEntry headerEntry, List<SamHeaderEntry> headerEntries)
+        {
+            var newProgramHeaderEntry = (ProgramSamHeaderEntry)headerEntry;
+            var hasProgramHeaderWithSameId = headerEntries.Where(x => x.Type == SamHeaderEntry.HeaderEntryType.Program)
+                .Cast<ProgramSamHeaderEntry>()
+                .Any(x => x.ProgramId == newProgramHeaderEntry.ProgramId);
+            if (hasProgramHeaderWithSameId)
+                throw new FormatException("Detected two PG-headers with same ID");
+        }
+
+        private static void CheckUniqueIdForReadGroupHeaderEntry(SamHeaderEntry headerEntry, List<SamHeaderEntry> headerEntries)
+        {
+            var newReadGroupHeaderEntry = (ReadGroupSamHeaderEntry)headerEntry;
+            var hasReadGroupHeaderWithSameId = headerEntries.Where(x => x.Type == SamHeaderEntry.HeaderEntryType.ReadGroup)
+                .Cast<ReadGroupSamHeaderEntry>()
+                .Any(x => x.ReadGroupId == newReadGroupHeaderEntry.ReadGroupId);
+            if (hasReadGroupHeaderWithSameId)
+                throw new FormatException("Detected two RG-headers with same ID");
+        }
+
+        private void CheckHeaders(List<SamHeaderEntry> headerEntries)
+        {
+            var programHeaderEntries = headerEntries
+                .Where(x => x.Type == SamHeaderEntry.HeaderEntryType.Program)
+                .Cast<ProgramSamHeaderEntry>()
+                .ToList();
+            foreach (var programSamHeaderEntry in programHeaderEntries)
+            {
+                if (!string.IsNullOrEmpty(programSamHeaderEntry.PreviousProgramId))
+                {
+                    var hasProgramHeaderWithReferencedId = programHeaderEntries.Any(x => x.ProgramId == programSamHeaderEntry.PreviousProgramId);
+                    if(!hasProgramHeaderWithReferencedId)
+                    {
+                        throw new FormatException($"Could not find a PG-header with ID '{programSamHeaderEntry.PreviousProgramId}', "
+                                                  + $"which was referenced by PG-header with ID '{programSamHeaderEntry.ProgramId}'");
+                    }
+                }
+            }
         }
 
         private SamAlignmentEntry ParseAlignmentEntry(string line)
         {
             var splittedLine = line.Split('\t');
             var qname = splittedLine[0];
-            var flag = (SamAlignmentFlag)int.Parse(splittedLine[1]);
+            var flag = (SamAlignmentFlag)uint.Parse(splittedLine[1]);
             var rname = splittedLine[2];
             var pos = int.Parse(splittedLine[3]);
             var mapq = int.Parse(splittedLine[4]);
@@ -55,6 +113,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
             {
                 var field = splittedLine[i].Split(new[] { ':' }, 3);
                 var tag = field[0];
+                if (!Regex.IsMatch(tag, "^[A-Za-z][0-9A-Za-z]$"))
+                    throw new FormatException($"Invalid tag '{tag}'");
                 var type = field[1];
                 var value = field[2];
                 object parsedValue;
@@ -62,6 +122,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
                 {
                     case "A":
                     {
+                        if (!Regex.IsMatch(value, "^[!-~]$"))
+                            throw new FormatException($"Invalid value '{value}' for tag of type '{type}'");
                         parsedValue = value;
                         break;
                     }
@@ -72,11 +134,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
                     }
                     case "f":
                     {
-                        parsedValue = double.Parse(value, NumberStyles.Any, CultureInfo.InvariantCulture);
+                        parsedValue = double.Parse(value, CultureInfo.InvariantCulture);
                         break;
                     }
                     case "Z":
                     {
+                        if (!Regex.IsMatch(value, "^[ !-~]*$"))
+                            throw new FormatException($"Invalid value '{value}' for tag of type '{type}'");
                         parsedValue = value;
                         break;
                     }
@@ -113,7 +177,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
         private object ParseArray(string value)
         {
             var valueType = value[0];
-            var splittedValues = value.Substring(1).Split(',');
+            var splittedValues = value.Split(',').Skip(1);
             switch (valueType)
             {
                 case 'c':
@@ -153,7 +217,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
             {
                 for (int i = 1; i < splittedLine.Length; i++)
                 {
-                    var keyValuePair = splittedLine[i].Split(new [] {':'}, 1);
+                    var keyValuePair = splittedLine[i].Split(new [] {':'}, 2);
                     keyValuePairs.Add(keyValuePair[0], keyValuePair[1]);
                 }
             }
@@ -164,8 +228,25 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
                 {
                     var formatVersion = Version.Parse(keyValuePairs["VN"]);
                     keyValuePairs.TryGetValue("SO", out var alignmentSortingOrder);
+                    if (alignmentSortingOrder != null)
+                    {
+                        if(!alignmentSortingOrder.ToLower().InSet("unknown", "unsorted", "queryname", "coordinate"))
+                            throw new FormatException($"Invalid SO-tag in HD-header. Value '{alignmentSortingOrder}' is not supported");
+                    }
                     keyValuePairs.TryGetValue("GO", out var groupingOfAlignment);
+                    if (groupingOfAlignment != null)
+                    {
+                        if (!groupingOfAlignment.ToLower().InSet("none", "query", "reference"))
+                            throw new FormatException($"Invalid GO-tag in HD-header. Value '{groupingOfAlignment}' is not supported");
+                    }
                     keyValuePairs.TryGetValue("SS", out var subsortingOrderOfAlignments);
+                    if (subsortingOrderOfAlignments != null)
+                    {
+                        if (alignmentSortingOrder != null && !subsortingOrderOfAlignments.ToLower().StartsWith(alignmentSortingOrder.ToLower()))
+                            throw new FormatException($"Sub-sorting order (SS-tag in HD-header) must match SO-tag. SS-tag: {subsortingOrderOfAlignments}, SO-tag: {alignmentSortingOrder}");
+                        if (!Regex.IsMatch(subsortingOrderOfAlignments, "^(coordinate|queryname|unsorted)(:[A-Za-z0-9_-]+)+$"))
+                            throw new FormatException($"Invalid SS-tag value in HD-header. Value: '{subsortingOrderOfAlignments}'");
+                    }
                     return new FileLevelMetadataSamHeaderEntry(
                         formatVersion,
                         alignmentSortingOrder,
@@ -251,12 +332,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
 
         private bool IsReferenceNameValid(string name)
         {
-            return Regex.IsMatch(name, "[0-9A-Za-z!#$%&+./:;?@^_|~-][0-9A-Za-z!#$%&*+./:;=?@^_|~-]*");
+            return Regex.IsMatch(name, "^[0-9A-Za-z!#$%&+./:;?@^_|~-][0-9A-Za-z!#$%&*+./:;=?@^_|~-]*$");
         }
 
         private bool IsSubSortingOrderValid(string subsortingOrder)
         {
-            return Regex.IsMatch(subsortingOrder, "(coordinate|queryname|unsorted)(:[A-Za-z0-9_-]+)+");
+            return Regex.IsMatch(subsortingOrder, "^(coordinate|queryname|unsorted)(:[A-Za-z0-9_-]+)+$");
         }
     }
 

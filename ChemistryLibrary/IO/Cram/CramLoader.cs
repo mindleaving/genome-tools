@@ -56,7 +56,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var recordCounter = reader.ReadLtf8();
             var numberOfReadBases = reader.ReadLtf8();
             var numberOfBlocks = reader.ReadItf8();
-            var slicePositions = new List<int>();
+            var slicePositions = reader.ReadCramItf8Array();
             var checksum = reader.ReadInt32();
             return new CramContainerHeader(
                 containerLength,
@@ -91,7 +91,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return new CramBlock(blockHeader);
         }
 
-        private PreservationMap ReadPreservationMap(BinaryReader reader)
+        private PreservationMap ReadPreservationMap(BinaryReader reader, CramBlockHeader blockHeader)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
@@ -139,7 +139,53 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             throw new NotImplementedException();
         }
 
-        private object ReadDataContainers(BinaryReader reader)
+        private List<CramDataContainer> ReadDataContainers(BinaryReader reader)
+        {
+            var dataContainers = new List<CramDataContainer>();
+            while (false) // TODO
+            {
+                var dataContainer = ReadDataContainer(reader);
+                if (IsEofContainer(dataContainer))
+                {
+                    dataContainers.Add(new CramEofContainer());
+                    return dataContainers;
+                }
+                dataContainers.Add(dataContainer);
+            }
+            return dataContainers;
+        }
+
+        private bool IsEofContainer(CramDataContainer dataContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        private CramDataContainer ReadDataContainer(BinaryReader reader)
+        {
+            var containerHeader = ReadContainerHeader(reader);
+            var compressionHeader = ReadCompressionHeader(reader);
+            var slices = ReadSlices(reader, containerHeader, compressionHeader);
+            return new CramDataContainer(containerHeader, compressionHeader, slices);
+        }
+
+        private List<CramSlice> ReadSlices(BinaryReader reader, CramContainerHeader containerHeader, CramCompressionHeader compressionHeader)
+        {
+            var slices = new List<CramSlice>();
+            foreach (var slicePosition in containerHeader.SlicePositions)
+            {
+                var slice = ReadSlice(reader, slicePosition);
+                slices.Add(slice);
+            }
+            return slices;
+        }
+
+        private CramSlice ReadSlice(BinaryReader reader, int slicePosition)
+        {
+            var sliceHeader = ReadSliceHeader(reader);
+            throw new NotImplementedException();
+        }
+
+        private CramSliceHeader ReadSliceHeader(BinaryReader reader)
         {
             throw new NotImplementedException();
         }
@@ -154,18 +200,28 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         private CramCompressionHeader ReadCompressionHeader(BinaryReader reader)
         {
             var blockHeader = ReadBlockHeader(reader);
-            var preservationMap = ReadPreservationMap(reader);
-            var dataSeriesEncoding = ReadDataSeriesEncoding(reader, preservationMap);
-            var tagEncoding = ReadTagEncoding(reader, preservationMap);
-            throw new NotImplementedException();
+            var preservationMap = ReadPreservationMap(reader, blockHeader);
+            var dataSeriesEncoding = ReadDataSeriesEncoding(reader, blockHeader, preservationMap);
+            var tagEncoding = ReadTagEncoding(reader, blockHeader);
+
+            return new CramCompressionHeader(preservationMap, dataSeriesEncoding, tagEncoding);
         }
 
-        private object ReadTagEncoding(BinaryReader reader, PreservationMap preservationMap)
+        private TagEncodingMap ReadTagEncoding(BinaryReader reader, CramBlockHeader blockHeader)
         {
-            throw new NotImplementedException();
+            var sizeInBytes = reader.ReadItf8();
+            var numberOfEntries = reader.ReadItf8();
+            var tagValueEncodings = new Dictionary<string, CramEncoding>();
+            for (int i = 0; i < numberOfEntries; i++)
+            {
+                var key = reader.ReadBytes(3);
+                var tagValueEncoding = reader.ReadEncoding();
+                tagValueEncodings.Add(Encoding.ASCII.GetString(key), tagValueEncoding);
+            }
+            return new TagEncodingMap(tagValueEncodings);
         }
 
-        private DataSeriesEncoding ReadDataSeriesEncoding(BinaryReader reader, PreservationMap preservationMap)
+        private DataSeriesEncodingMap ReadDataSeriesEncoding(BinaryReader reader, CramBlockHeader blockHeader, PreservationMap preservationMap)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
@@ -236,7 +292,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 }
             }
 
-            return new DataSeriesEncoding();
+            return new DataSeriesEncodingMap();
         }
 
         private CramBlockHeader ReadBlockHeader(BinaryReader reader)
@@ -255,8 +311,105 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         }
     }
 
+    public class CramSliceHeader
+    {
+        public int ReferenceSequenceId { get; }
+        public int AlignmentStart { get; }
+        public int AlignmentSpan { get; }
+        public int NumberOfRecords { get; }
+        public long RecordCounter { get; }
+        public int NumberOfBlocks { get; }
+        public List<int> BlockContentIds { get; }
+        public int EmbeddedReferenceBlockContentId { get; }
+        public byte[] ReferenceMD5Checksum { get; }
+        public Dictionary<string,object> Tags { get; }
+
+        public CramSliceHeader(int referenceSequenceId, int alignmentStart, int alignmentSpan,
+            int numberOfRecords, long recordCounter, int numberOfBlocks,
+            List<int> blockContentIds, int embeddedReferenceBlockContentId, byte[] referenceMd5Checksum,
+            Dictionary<string, object> tags)
+        {
+            ReferenceSequenceId = referenceSequenceId;
+            AlignmentStart = alignmentStart;
+            AlignmentSpan = alignmentSpan;
+            NumberOfRecords = numberOfRecords;
+            RecordCounter = recordCounter;
+            NumberOfBlocks = numberOfBlocks;
+            BlockContentIds = blockContentIds;
+            EmbeddedReferenceBlockContentId = embeddedReferenceBlockContentId;
+            ReferenceMD5Checksum = referenceMd5Checksum;
+            Tags = tags;
+        }
+    }
+
+    public class CramEofContainer : CramDataContainer
+    {
+        public CramEofContainer()
+            : base(
+                new CramContainerHeader(15, -1, 4542278, 0, 0, 0, 0, 1, 1339669765, new List<int>()),
+                new CramCompressionHeader(new PreservationMap(), new DataSeriesEncodingMap(), new TagEncodingMap()),
+                new List<CramSlice>())
+        {
+        }
+    }
+
+    public class CramDataContainer
+    {
+        public CramContainerHeader ContainerHeader { get; }
+        public CramCompressionHeader CompressionHeader { get; }
+        public List<CramSlice> Slices { get; }
+        public List<CramBlock> Blocks => Slices.SelectMany(x => x.Blocks).ToList();
+
+        public CramDataContainer(
+            CramContainerHeader containerHeader, 
+            CramCompressionHeader compressionHeader, 
+            List<CramSlice> slices)
+        {
+            ContainerHeader = containerHeader;
+            CompressionHeader = compressionHeader;
+            Slices = slices;
+        }
+    }
+
+    public class CramSlice
+    {
+        public List<CramBlock> Blocks { get; }
+
+        public CramSlice(List<CramBlock> blocks)
+        {
+            Blocks = blocks;
+        }
+    }
+
     public class CramCompressionHeader
     {
+        public PreservationMap PreservationMap { get; }
+        public DataSeriesEncodingMap DataSeriesEncodingMap { get; }
+        public TagEncodingMap TagEncodingMap { get; }
+
+        public CramCompressionHeader(
+            PreservationMap preservationMap, 
+            DataSeriesEncodingMap dataSeriesEncodingMap, 
+            TagEncodingMap tagEncodingMap)
+        {
+            PreservationMap = preservationMap;
+            DataSeriesEncodingMap = dataSeriesEncodingMap;
+            TagEncodingMap = tagEncodingMap;
+        }
+    }
+
+    public class TagEncodingMap
+    {
+        public Dictionary<string,CramEncoding> TagValueEncodings { get; }
+
+        public TagEncodingMap()
+        {
+            TagValueEncodings = new Dictionary<string, CramEncoding>();
+        }
+        public TagEncodingMap(Dictionary<string, CramEncoding> tagValueEncodings)
+        {
+            TagValueEncodings = tagValueEncodings;
+        }
     }
 
     public abstract class CramEncoding
@@ -393,8 +546,35 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public override Codec CodecId => Codec.Null;
     }
 
-    public class DataSeriesEncoding
+    public class DataSeriesEncodingMap
     {
+        public CramEncoding BamBitFlagEncoding { get; }
+        public CramEncoding CramBitFlagEncoding { get; }
+        public CramEncoding ReferenceIdEncoding { get; }
+        public CramEncoding InSeqPositionsEncoding { get; }
+        public CramEncoding ReadGroupsEncoding { get; }
+        public CramEncoding ReadNamesEncoding { get; }
+        public CramEncoding NextMateBitFlagEncoding { get; }
+        public CramEncoding NextFragmentReferenceSequenceIdEncoding { get; }
+        public CramEncoding NextMateAlignmentStartEncoding { get; }
+        public CramEncoding TemplateSizeEncoding { get; }
+        public CramEncoding DistanceToNextFragmentEncoding { get; }
+        public CramEncoding TagIdEncoding { get; }
+        public CramEncoding NumberOfReadFeaturesEncoding { get; }
+        public CramEncoding ReadFeaturesCodesEncoding { get; }
+        public CramEncoding InReadPositionsEncoding { get; }
+        public CramEncoding DeletionLengthEncoding { get; }
+        public CramEncoding StretchesOfBasesEncoding { get; }
+        public CramEncoding StretchesOfQualityScoresEncoding { get; }
+        public CramEncoding BaseSubstitutionCodesEncoding { get; }
+        public CramEncoding InsertionEncoding { get; }
+        public CramEncoding ReferenceSkipLengthEncoding { get; }
+        public CramEncoding PaddingEncoding { get; }
+        public CramEncoding HardClipEncoding { get; }
+        public CramEncoding SoftClipEncoding { get; }
+        public CramEncoding MappingQualitiesEncoding { get; }
+        public CramEncoding BasesEncoding { get; }
+        public CramEncoding QualityScoresEncoding { get; }
     }
 
     public class CramBlockHeader
@@ -465,6 +645,15 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public bool ReferenceRequired { get; }
         public byte[] SubstitutionMatrix { get; }
         public List<byte> TagIds { get; }
+
+        public PreservationMap()
+        {
+            ReadNames = true;
+            ApDataSeriesDelta = true;
+            ReferenceRequired = true;
+            SubstitutionMatrix = Array.Empty<byte>();
+            TagIds = new List<byte>();
+        }
 
         public PreservationMap(
             bool readNames, bool apDataSeriesDelta, bool referenceRequired,

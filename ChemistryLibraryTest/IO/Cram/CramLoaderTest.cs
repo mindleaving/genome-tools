@@ -1,3 +1,4 @@
+using System.IO;
 using GenomeTools.ChemistryLibrary.IO.Cram;
 using NUnit.Framework;
 
@@ -5,13 +6,26 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
 {
     public class CramLoaderTest
     {
-        private const string filePath = "/mnt/encrypted/backup/mygenome/genome.cram";
+        const string TestDataDirectory = @"F:\datasets\mygenome\test\cram\3.0";
+        private static object[] ValidCramFiles = Directory.GetFiles(Path.Combine(TestDataDirectory, "passed"), "*.cram");
+        private static object[] InvalidCramFiles = Directory.GetFiles(Path.Combine(TestDataDirectory, "failed"), "*.cram");
 
-        public void CanReadFileDefinition()
+        [Test]
+        [TestCaseSource(nameof(ValidCramFiles))]
+        public void CanOpenValidCramFiles(string filePath)
         {
             var sut = new CramLoader();
-            var actual = sut.Load(filePath);
-            Assert.That(actual, Is.Not.Null);
+            CramLoaderResult result = null;
+            Assert.That(() => result = sut.Load(filePath), Throws.Nothing);
+            Assert.That(result, Is.Not.Null);
+        }
+
+        [Test]
+        [TestCaseSource(nameof(InvalidCramFiles))]
+        public void InvalidCramFilesThrowException(string filePath)
+        {
+            var sut = new CramLoader();
+            Assert.That(() => sut.Load(filePath), Throws.Exception);
         }
     }
 }
