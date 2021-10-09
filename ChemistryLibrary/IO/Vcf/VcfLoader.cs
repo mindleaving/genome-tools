@@ -7,7 +7,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 {
     public class VcfLoader
     {
-        public VcfLoaderResult Load(string filePath)
+        public VcfLoaderResult Load(string filePath, Action<VcfVariantEntry, List<VcfMetadataEntry>> variantAction = null)
         {
             using var reader = new StreamReader(filePath);
             var metadataEntries = new List<VcfMetadataEntry>();
@@ -34,7 +34,10 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 if (header == null)
                     throw new FormatException("No header was found before data entries. Make sure there is a single header line starting with '#'");
                 var variant = ParseVariant(line, header);
-                variants.Add(variant);
+                if(variantAction != null)
+                    variantAction(variant, metadataEntries);
+                else
+                    variants.Add(variant);
             }
 
             return new VcfLoaderResult(metadataEntries, variants);
@@ -42,7 +45,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 
         private VcfMetadataEntry ParseMetadata(string line)
         {
-            var splittedLine = line.Substring(2).Split(new []{'='}, 2);
+            var splittedLine = line.Substring(2).Split('=', 2);
             if (splittedLine.Length != 2)
                 throw new FormatException("Metadata must have the format '##TYPE=value'");
             var metadataType = splittedLine[0];
@@ -50,8 +53,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             switch (metadataType)
             {
                 case "fileformat":
-                    if (value != "VCFv4.3")
-                        throw new NotSupportedException("Only VCF version 4.3 is supported");
+                    //if (value != "VCFv4.3")
+                    //    throw new NotSupportedException("Only VCF version 4.3 is supported");
                     return new FileFormatVcfMetadata(value);
                 case "INFO":
                     return ParseInfoMetadata(value);
@@ -142,7 +145,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 throw new FormatException("Invalid metadata key-value-pair format. Must have the format <key1=value1,key2=value2>");
             return value.Substring(1, value.Length-2)
                 .Split(',')
-                .Select(kvp => kvp.Split(new []{'='}, 2))
+                .Select(kvp => kvp.Split('=', 2))
+                .Where(kvp => kvp.Length == 2) // Workaround for invalid VCF files with commas in tag values
                 .ToDictionary(kvp => kvp[0], kvp => kvp[1]);
         }
 
@@ -165,6 +169,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             var quality = splittedLine[5];
             var filterResult = ParseFilterResult(splittedLine[6]);
             var info = ParseVariantInfo(splittedLine[7]);
+            var otherFields = new Dictionary<string, string>();
+            for (int i = 8; i < splittedLine.Length; i++)
+            {
+                var field = splittedLine[i];
+                var columnName = header.Columns[i];
+                otherFields.Add(columnName, field);
+            }
             return new VcfVariantEntry(
                 chromosome,
                 position,
@@ -173,7 +184,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 alternateBases,
                 quality,
                 filterResult,
-                info);
+                info,
+                otherFields);
         }
 
         private Dictionary<string, string> ParseVariantInfo(string infoString)
@@ -181,7 +193,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             if (infoString == ".")
                 return new Dictionary<string, string>();
             var keyValuePairs = infoString.Split(';')
-                .Select(kvp => kvp.Split(new []{'='}, 2))
+                .Select(kvp => kvp.Split('=', 2))
+                .Where(kvp => kvp.Length == 2) // Workaround for invalid VCF files with commas in tag values
                 .ToDictionary(kvp => kvp[0], kvp => kvp[1]);
             return keyValuePairs;
         }
@@ -193,204 +206,6 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             if (filterResultString == ".")
                 return null;
             return VcfFilterResult.Failed(filterResultString.Split(','));
-        }
-    }
-
-    public class GenericVcfMetadataEntry : VcfMetadataEntry
-    {
-        public override MetadataType EntryType { get; }
-        public string MetadataTypeString { get; }
-        public Dictionary<string, string> KeyValuePairs { get; }
-        public string Value { get; }
-
-        public GenericVcfMetadataEntry(MetadataType metadataType, string metadataTypeString, Dictionary<string, string> keyValuePairs)
-        {
-            EntryType = metadataType;
-            MetadataTypeString = metadataTypeString;
-            KeyValuePairs = keyValuePairs;
-        }
-
-        public GenericVcfMetadataEntry(MetadataType metadataType, string metadataTypeString, string value)
-        {
-            EntryType = metadataType;
-            MetadataTypeString = metadataTypeString;
-            Value = value;
-        }
-    }
-
-    public class ContigVcfMetadataEntry : VcfMetadataEntry
-    {
-        public override MetadataType EntryType => MetadataType.Contig;
-        public string Id { get; }
-        public string Length { get; }
-        public string Value { get; }
-
-        public ContigVcfMetadataEntry(string id, string length, string value)
-        {
-            Id = id;
-            Length = length;
-            Value = value;
-        }
-    }
-
-    public class FileFormatVcfMetadata : VcfMetadataEntry
-    {
-        public override MetadataType EntryType => MetadataType.FileFormat;
-        public string FileFormat { get; }
-
-        public FileFormatVcfMetadata(string fileFormat)
-        {
-            FileFormat = fileFormat;
-        }
-    }
-
-    public class AltVcfMetadataEntry : VcfMetadataEntry
-    {
-        public override MetadataType EntryType => MetadataType.Alt;
-        public string Id { get; }
-        public string Description { get; }
-
-        public AltVcfMetadataEntry(string id, string description)
-        {
-            Id = id;
-            Description = description;
-        }
-    }
-
-    public class FormatVcfMetadataEntry : VcfMetadataEntry
-    {
-        public string Id { get; }
-        public int Number { get; }
-        public string ValueType { get; }
-        public string Description { get; }
-
-        public FormatVcfMetadataEntry(
-            string id, int number, string valueType,
-            string description)
-        {
-            Id = id;
-            Number = number;
-            ValueType = valueType;
-            Description = description;
-        }
-
-        public override MetadataType EntryType => MetadataType.Format;
-    }
-
-    public class FilterVcfMetadataEntry : VcfMetadataEntry
-    {
-        public override MetadataType EntryType => MetadataType.Filter;
-        public string Id { get; }
-        public string Description { get; }
-
-        public FilterVcfMetadataEntry(string id, string description)
-        {
-            Id = id;
-            Description = description;
-        }
-    }
-
-    public class VcfHeader
-    {
-        public IList<string> Columns { get; }
-
-        public VcfHeader(IList<string> columns)
-        {
-            Columns = columns;
-        }
-    }
-
-    public class VcfVariantEntry
-    {
-        public string Chromosome { get; }
-        public string Position { get; }
-        public string Id { get; }
-        public string ReferenceBases { get; }
-        public string AlternateBases { get; }
-        public string Quality { get; }
-        public VcfFilterResult FilterResult { get; }
-        public Dictionary<string,string> Info { get; }
-
-        public VcfVariantEntry(
-            string chromosome, string position, string id,
-            string referenceBases, string alternateBases, string quality,
-            VcfFilterResult filterResult, 
-            Dictionary<string, string> info)
-        {
-            Chromosome = chromosome;
-            Position = position;
-            Id = id;
-            ReferenceBases = referenceBases;
-            AlternateBases = alternateBases;
-            Quality = quality;
-            FilterResult = filterResult;
-            Info = info;
-        }
-    }
-
-    public class VcfFilterResult
-    {
-        public bool Pass { get; }
-        /// <summary>
-        /// Null if <see cref="Pass"/> is true
-        /// </summary>
-        public IList<string> FailingFilters { get; }
-
-        private VcfFilterResult(bool pass, IList<string> failingFilters)
-        {
-            Pass = pass;
-            FailingFilters = failingFilters;
-        }
-
-        public static VcfFilterResult Success()
-        {
-            return new VcfFilterResult(true, null);
-        }
-
-        public static VcfFilterResult Failed(IList<string> failingFilters)
-        {
-            return new VcfFilterResult(false, failingFilters);
-        }
-    }
-
-    public abstract class VcfMetadataEntry
-    {
-        public enum MetadataType
-        {
-            FileFormat,
-            Info,
-            Format,
-            Filter,
-            Alt,
-            Assembly,
-            Contig,
-            Sample,
-            Pedigree,
-            Custom
-        }
-        public abstract MetadataType EntryType { get; }
-    }
-
-    public class AssemblyVcfMetadataEntry : VcfMetadataEntry
-    {
-        public AssemblyVcfMetadataEntry(string url)
-        {
-            Url = url;
-        }
-
-        public override MetadataType EntryType => MetadataType.Assembly;
-        public string Url { get; }
-    }
-
-    public class VcfLoaderResult
-    {
-        public List<VcfMetadataEntry> MetadataEntries { get; }
-        public List<VcfVariantEntry> Variants { get; }
-
-        public VcfLoaderResult(List<VcfMetadataEntry> metadataEntries, List<VcfVariantEntry> variants)
-        {
-            MetadataEntries = metadataEntries;
-            Variants = variants;
         }
     }
 }

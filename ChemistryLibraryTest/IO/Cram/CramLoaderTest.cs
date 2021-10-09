@@ -27,5 +27,14 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
             var sut = new CramLoader();
             Assert.That(() => sut.Load(filePath), Throws.Exception);
         }
+
+        [Test]
+        //[Ignore("Tool")]
+        public void OpenRealworldCram()
+        {
+            var cramFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.cram";
+            var sut = new CramLoader();
+            var result = sut.Load(cramFilePath);
+        }
     }
 }

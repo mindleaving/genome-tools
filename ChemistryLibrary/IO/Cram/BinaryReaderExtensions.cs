@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http.Headers;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
@@ -11,7 +10,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public static int ReadItf8(this BinaryReader reader)
         {
             var prefix = reader.ReadByte();
-            var bytesToRead = GetBytesToRead(prefix);
+            var bytesToRead = GetBytesToRead(prefix, 4);
             if (bytesToRead > 4)
                 throw new OverflowException("Tried to read ITF8 but number of bytes to read was greater than 4");
             var buffer = new byte[4]; // Make static for performance?
@@ -31,7 +30,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public static long ReadLtf8(this BinaryReader reader)
         {
             var prefix = reader.ReadByte();
-            var bytesToRead = GetBytesToRead(prefix);
+            var bytesToRead = GetBytesToRead(prefix, 8);
             var buffer = new byte[8]; // Make static for performance?
             reader.Read(buffer, 0, bytesToRead);
             var bitsFromPrefix = ((prefix << bytesToRead) & 0xff) >> bytesToRead; // Zero out leading 1's
@@ -43,13 +42,15 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return decodedNumber;
         }
 
-        private static int GetBytesToRead(byte prefix)
+        private static int GetBytesToRead(byte prefix, int maxBytes)
         {
             var bytesToRead = 0;
             var bitPosition = BitsPerByte - 1;
             while (bitPosition >= 0 && (prefix & (byte)(0x1 << bitPosition)) > 0)
             {
                 bytesToRead++;
+                if (bytesToRead == maxBytes)
+                    return maxBytes;
                 bitPosition--;
             }
             return bytesToRead;
@@ -133,5 +134,18 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
             return values;
         }
+
+        public static byte[] ReadCramByteArray(this BinaryReader reader)
+        {
+            var arrayLength = reader.ReadItf8();
+            var values = new List<byte>();
+            for (int i = 0; i < arrayLength; i++)
+            {
+                var value = reader.ReadByte();
+                values.Add(value);
+            }
+            return values.ToArray();
+        }
+        
     }
 }

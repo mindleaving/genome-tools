@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.IO.Sam;
+using ICSharpCode.SharpZipLib.BZip2;
+using ICSharpCode.SharpZipLib.GZip;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramLoader
     {
+        private readonly SamHeaderParser samHeaderParser = new();
+
         public CramLoaderResult Load(string filePath)
         {
             using var fileStream = File.OpenRead(filePath);
@@ -17,11 +23,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             if (fileDefinition.Version.Major != 3 && fileDefinition.Version.Minor != 0)
                 throw new NotSupportedException("Only version 3.0 of the CRAM specification is currently supported");
 
-            var cramHeaderContainer = ReadCramHeaderContainer(reader);
+            var cramHeader = ReadCramHeaderContainer(reader);
             var dataContainers = ReadDataContainers(reader);
-            var cramEofContainer = ReadCramEofContainer(reader);
+            if (!IsEofContainer(dataContainers.Last()))
+                throw new FormatException("No EOF-container found. File is truncated");
 
-            return new CramLoaderResult();
+            return new CramLoaderResult(cramHeader, dataContainers);
         }
 
         private CramFileDefinition ReadFileDefinition(BinaryReader reader)
@@ -35,15 +42,20 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return new CramFileDefinition(new Version(versionMajor, versionMinor), fileId);
         }
 
-        private object ReadCramHeaderContainer(BinaryReader reader)
+        private CramHeader ReadCramHeaderContainer(BinaryReader reader)
         {
             // TODO: Move to other class
             var containerHeader = ReadContainerHeader(reader);
 
-            var blocks = ReadBlocks(reader, containerHeader.NumberOfBlocks);
-
-            SkipOverCramHeaderContainerNulPadding();
-            throw new NotImplementedException();
+            var blocks = ReadBlocks(reader, containerHeader.NumberOfBlocks, null);
+            var samHeader = Encoding.ASCII.GetString(blocks[0].UncompressedDecodedData);
+            samHeader = samHeader.Substring(4); // TODO: Why are there 4 bytes before the header entries? String length?
+            var samHeaderLines = samHeader.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var samHeaderEntries = samHeaderLines
+                .Where(line => line.StartsWith("@"))
+                .Select(samHeaderParser.Parse)
+                .ToList();
+            return new CramHeader(samHeaderEntries);
         }
 
         private static CramContainerHeader ReadContainerHeader(BinaryReader reader)
@@ -71,24 +83,72 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 slicePositions);
         }
 
-        private List<CramBlock> ReadBlocks(BinaryReader reader, int numberOfBlocks)
+        private List<CramBlock> ReadBlocks(
+            BinaryReader reader, 
+            int numberOfBlocks,
+            CramCompressionHeader compressionHeader)
         {
             var blocks = new List<CramBlock>();
             for (int i = 0; i < numberOfBlocks; i++)
             {
-                var block = ReadBlock(reader);
+                var block = ReadBlock(reader, compressionHeader);
                 blocks.Add(block);
             }
             return blocks;
         }
 
-        private CramBlock ReadBlock(BinaryReader reader)
+        private CramBlock ReadBlock(BinaryReader reader, CramCompressionHeader compressionHeader)
         {
             var blockHeader = ReadBlockHeader(reader);
-            //var data = ;
+            var compressedData = reader.ReadBytes(blockHeader.CompressedSize);
+            var uncompressedData = UncompressBlockData(compressedData, blockHeader);
+            var decodedData = DecodeBlockData(uncompressedData, compressionHeader);
             var checksum = reader.ReadInt32();
 
-            return new CramBlock(blockHeader);
+            return new CramBlock(blockHeader, decodedData, checksum);
+        }
+
+        private byte[] DecodeBlockData(byte[] uncompressedData, CramCompressionHeader compressionHeader)
+        {
+            // TODO
+            return uncompressedData;
+        }
+
+        private byte[] UncompressBlockData(byte[] compressedData, CramBlockHeader blockHeader)
+        {
+            switch (blockHeader.CompressionMethod)
+            {
+                case CramBlock.CompressionMethod.Raw:
+                    return compressedData;
+                case CramBlock.CompressionMethod.Gzip:
+                {
+                    using var instream = new MemoryStream(compressedData);
+                    using var outstream = new MemoryStream(new byte[blockHeader.UncompressedSize]);
+                    GZip.Decompress(instream, outstream, false);
+                    return outstream.ToArray();
+                }
+                case CramBlock.CompressionMethod.Bzip2:
+                {
+                    using var instream = new MemoryStream(compressedData);
+                    using var outstream = new MemoryStream(new byte[blockHeader.UncompressedSize]);
+                    BZip2.Decompress(instream, outstream, false);
+                    return outstream.ToArray();
+                }
+                case CramBlock.CompressionMethod.Lzma:
+                    break;
+                case CramBlock.CompressionMethod.Rans:
+                {
+                    using var instream = new MemoryStream(compressedData);
+                    using var outstream = new MemoryStream(new byte[blockHeader.UncompressedSize]);
+                    RansDecoder.Decode(instream, outstream);
+                    var uncompressBlockData = outstream.ToArray();
+                    return uncompressBlockData;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            throw new NotImplementedException();
         }
 
         private PreservationMap ReadPreservationMap(BinaryReader reader, CramBlockHeader blockHeader)
@@ -98,8 +158,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var readNames = true;
             var apDataSeriesDelta = true;
             var referenceRequired = true;
-            byte[] substitutionMatrix = null;
-            var tagIds = new List<byte>();
+            byte[] substitutionMatrix = Array.Empty<byte>();
+            var tagIdCombinations = new List<List<TagId>>();
             for (int i = 0; i < numberOfEntries; i++)
             {
                 var key = Encoding.ASCII.GetString(reader.ReadBytes(2));
@@ -118,31 +178,57 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                         substitutionMatrix = reader.ReadBytes(5);
                         break;
                     case "TD":
+                        var tagIdBytes = reader.ReadCramByteArray();
+                        tagIdCombinations.AddRange(ParseTagIdBytes(tagIdBytes));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(key), $"Unknown key '{key}' for preservation map");
                 }
             }
-            if (substitutionMatrix == null)
-                throw new Exception("Preservation map is missing substitution matrix");
+            //if (substitutionMatrix == null)
+            //    throw new Exception("Preservation map is missing substitution matrix");
             // TODO: Check for valid tag IDs
             return new PreservationMap(
                 readNames,
                 apDataSeriesDelta,
                 referenceRequired,
                 substitutionMatrix,
-                tagIds);
+                tagIdCombinations);
         }
 
-        private void SkipOverCramHeaderContainerNulPadding()
+        private List<List<TagId>> ParseTagIdBytes(byte[] tagIdBytes)
         {
-            throw new NotImplementedException();
+            return tagIdBytes.Split<byte>(0x00, StringSplitOptions.RemoveEmptyEntries)
+                .Select(ParseTagCombination)
+                .ToList();
+        }
+
+        private List<TagId> ParseTagCombination(IEnumerable<byte> combinationBytes)
+        {
+            var tagIds = new List<TagId>();
+            var tagIdBytes = new byte[3];
+            var tagIdByteIndex = 0;
+            foreach (var combinationByte in combinationBytes)
+            {
+                tagIdBytes[tagIdByteIndex] = combinationByte;
+                tagIdByteIndex++;
+                if (tagIdByteIndex == tagIdBytes.Length)
+                {
+                    var tag = Encoding.ASCII.GetString(tagIdBytes, 0, 2);
+                    var valueType = (char)tagIdBytes[2];
+                    var tagId = new TagId(tag, valueType);
+                    tagIds.Add(tagId);
+                    tagIdByteIndex = 0;
+                }
+            }
+
+            return tagIds;
         }
 
         private List<CramDataContainer> ReadDataContainers(BinaryReader reader)
         {
             var dataContainers = new List<CramDataContainer>();
-            while (false) // TODO
+            while (true)
             {
                 var dataContainer = ReadDataContainer(reader);
                 if (IsEofContainer(dataContainer))
@@ -152,49 +238,188 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 }
                 dataContainers.Add(dataContainer);
             }
-            return dataContainers;
         }
 
         private bool IsEofContainer(CramDataContainer dataContainer)
         {
-            throw new NotImplementedException();
+            return dataContainer.ContainerHeader.NumberOfBlocks == 1
+                && dataContainer.ContainerHeader.Checksum == 1339669765
+                && dataContainer.CompressionHeader.Checksum == 1258382318;
         }
 
         private CramDataContainer ReadDataContainer(BinaryReader reader)
         {
             var containerHeader = ReadContainerHeader(reader);
+            var sliceOffset = reader.BaseStream.Position;
             var compressionHeader = ReadCompressionHeader(reader);
-            var slices = ReadSlices(reader, containerHeader, compressionHeader);
+            var slices = ReadSlices(reader, containerHeader, sliceOffset, compressionHeader);
             return new CramDataContainer(containerHeader, compressionHeader, slices);
         }
 
-        private List<CramSlice> ReadSlices(BinaryReader reader, CramContainerHeader containerHeader, CramCompressionHeader compressionHeader)
+        private List<CramSlice> ReadSlices(BinaryReader reader, CramContainerHeader containerHeader, long sliceOffset, CramCompressionHeader compressionHeader)
         {
             var slices = new List<CramSlice>();
             foreach (var slicePosition in containerHeader.SlicePositions)
             {
-                var slice = ReadSlice(reader, slicePosition);
+                var slice = ReadSlice(reader, slicePosition, sliceOffset, compressionHeader);
                 slices.Add(slice);
             }
             return slices;
         }
 
-        private CramSlice ReadSlice(BinaryReader reader, int slicePosition)
+        private CramSlice ReadSlice(
+            BinaryReader reader, int slicePosition, long firstSliceOffset,
+            CramCompressionHeader compressionHeader)
         {
+            if (reader.BaseStream.Position != firstSliceOffset + slicePosition)
+                reader.BaseStream.Seek(firstSliceOffset + slicePosition, SeekOrigin.Begin);
             var sliceHeader = ReadSliceHeader(reader);
-            throw new NotImplementedException();
+            var coreDataBlock = ReadCoreDataBlock(reader, compressionHeader);
+            var externalDataBlock = ReadExternalDataBlocks(reader, sliceHeader.NumberOfBlocks-1, compressionHeader);
+            return new CramSlice(new[] { coreDataBlock }.Concat(externalDataBlock).ToList());
         }
 
         private CramSliceHeader ReadSliceHeader(BinaryReader reader)
         {
-            throw new NotImplementedException();
+            // Block header
+            var blockHeader = ReadBlockHeader(reader);
+            if (blockHeader.CompressionMethod != CramBlock.CompressionMethod.Raw)
+                throw new NotSupportedException("Found a compressed slice header. Slice headers must not be compressed");
+
+            // Block data
+            var blockDataStartPosition = reader.BaseStream.Position;
+            var referenceSequenceId = reader.ReadItf8();
+            var alignmentStart = reader.ReadItf8();
+            var alignmentSpan = reader.ReadItf8();
+            var numberOfRecords = reader.ReadItf8();
+            var recordCounter = reader.ReadLtf8();
+            var numberOfBlocks = reader.ReadItf8();
+            var blockContentIds = reader.ReadCramItf8Array();
+            var embeddedReferenceBlockContentId = reader.ReadItf8();
+            var referenceMd5Checksum = reader.ReadBytes(16);
+
+            var blockDataEndPosition = blockDataStartPosition + blockHeader.UncompressedSize; // True because slice headers are always uncompressed
+            var tags = ReadSliceTags(reader, blockDataEndPosition);
+
+            // Block checksum
+            var blockChecksum = reader.ReadInt32();
+
+            return new CramSliceHeader(
+                referenceSequenceId,
+                alignmentStart,
+                alignmentSpan,
+                numberOfRecords,
+                recordCounter,
+                numberOfBlocks,
+                blockContentIds,
+                embeddedReferenceBlockContentId,
+                referenceMd5Checksum,
+                tags);
         }
 
-        private object ReadCramEofContainer(BinaryReader reader)
+        private Dictionary<string, object> ReadSliceTags(BinaryReader reader, long blockDataEndPosition)
         {
-            var containerHeader = ReadContainerHeader(reader);
-            var compressionHeader = ReadCompressionHeader(reader);
-            throw new NotImplementedException();
+            var tags = new Dictionary<string, object>();
+            while (reader.BaseStream.Position < blockDataEndPosition)
+            {
+                var tag = Encoding.ASCII.GetString(reader.ReadBytes(2));
+                var type = (char)reader.ReadByte();
+                switch (type)
+                {
+                    case 'A':
+                        var c = (char)reader.ReadByte();
+                        tags.Add(tag, c);
+                        break;
+                    case 'B':
+                        var array = ReadBArray(reader);
+                        tags.Add(tag, array);
+                        break;
+                    case 'Z':
+                    {
+                        var str = ReadNullTerminatedString(reader);
+                        tags.Add(tag, str);
+                        break;
+                    }
+                    case 'H':
+                    {
+                        var str = ReadNullTerminatedString(reader);
+                        var bytes = ParserHelpers.ParseHexString(str);
+                        tags.Add(tag, bytes);
+                        break;
+                    }
+                    case 'c':
+                    case 'C':
+                    case 's':
+                    case 'S':
+                    case 'i':
+                    case 'I':
+                    case 'f':
+                        var item = ReadTypedItem(reader, type);
+                        tags.Add(tag, item);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(type), $"Unknown tag-type '{type}'. Expected one of: ABZHcCsSiIf");
+                }
+            }
+            return tags;
+        }
+
+        private string ReadNullTerminatedString(BinaryReader reader)
+        {
+            var stringBuilder = new StringBuilder();
+            while (true)
+            {
+                var c = reader.ReadChar();
+                if (c == '\0')
+                    return stringBuilder.ToString();
+                stringBuilder.Append(c);
+            }
+        }
+
+        private List<object> ReadBArray(BinaryReader reader)
+        {
+            var itemType = (char)reader.ReadByte();
+            var itemCount = reader.ReadUInt32();
+            var items = new List<object>();
+            for (int i = 0; i < itemCount; i++)
+            {
+                var item = ReadTypedItem(reader, itemType);
+                items.Add(item);
+            }
+            return items;
+        }
+
+        private object ReadTypedItem(BinaryReader reader, char itemType)
+        {
+            switch (itemType)
+            {
+                case 'c':
+                    return reader.ReadSByte();
+                case 'C':
+                    return reader.ReadByte();
+                case 's':
+                    return reader.ReadInt16();
+                case 'S':
+                    return reader.ReadUInt16();
+                case 'i':
+                    return reader.ReadInt32();
+                case 'I':
+                    return reader.ReadUInt32();
+                case 'f':
+                    return reader.ReadSingle();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(itemType), $"Unknown item type '{itemType}' for B-tag array");
+            }
+        }
+
+        private CramBlock ReadCoreDataBlock(BinaryReader reader, CramCompressionHeader compressionHeader)
+        {
+            return ReadBlock(reader, compressionHeader);
+        }
+
+        private List<CramBlock> ReadExternalDataBlocks(BinaryReader reader, int numberOfBlocks, CramCompressionHeader compressionHeader)
+        {
+            return ReadBlocks(reader, numberOfBlocks, compressionHeader);
         }
 
         private CramCompressionHeader ReadCompressionHeader(BinaryReader reader)
@@ -203,22 +428,34 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var preservationMap = ReadPreservationMap(reader, blockHeader);
             var dataSeriesEncoding = ReadDataSeriesEncoding(reader, blockHeader, preservationMap);
             var tagEncoding = ReadTagEncoding(reader, blockHeader);
+            var checksum = reader.ReadInt32();
 
-            return new CramCompressionHeader(preservationMap, dataSeriesEncoding, tagEncoding);
+            return new CramCompressionHeader(preservationMap, dataSeriesEncoding, tagEncoding, checksum);
         }
 
         private TagEncodingMap ReadTagEncoding(BinaryReader reader, CramBlockHeader blockHeader)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
-            var tagValueEncodings = new Dictionary<string, CramEncoding>();
+            var tagValueEncodings = new Dictionary<TagId, CramEncoding>();
             for (int i = 0; i < numberOfEntries; i++)
             {
-                var key = reader.ReadBytes(3);
+                var keyItf8Encoded = reader.ReadItf8();
+                var tagId = DecodeTagIdForTagEncodingMapEntry(keyItf8Encoded);
                 var tagValueEncoding = reader.ReadEncoding();
-                tagValueEncodings.Add(Encoding.ASCII.GetString(key), tagValueEncoding);
+                tagValueEncodings.Add(tagId, tagValueEncoding);
             }
             return new TagEncodingMap(tagValueEncodings);
+        }
+
+        private static TagId DecodeTagIdForTagEncodingMapEntry(int keyItf8Encoded)
+        {
+            var keyBytes = BitConverter.GetBytes(keyItf8Encoded).Reverse().ToArray();
+            var key = Encoding.ASCII.GetString(keyBytes, 1, 3);
+            var tag = key.Substring(0, 2);
+            var valueType = key[2];
+            var tagId = new TagId(tag, valueType);
+            return tagId;
         }
 
         private DataSeriesEncodingMap ReadDataSeriesEncoding(BinaryReader reader, CramBlockHeader blockHeader, PreservationMap preservationMap)
@@ -226,73 +463,103 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
 
+            var dataSeriesEncodingMap = new DataSeriesEncodingMap();
             for (int i = 0; i < numberOfEntries; i++)
             {
                 var key = Encoding.ASCII.GetString(reader.ReadBytes(2));
+                var encoding = reader.ReadEncoding();
                 switch (key)
                 {
                     case "BF":
+                        dataSeriesEncodingMap.BamBitFlagEncoding = encoding;
                         break;
                     case "CF":
+                        dataSeriesEncodingMap.CramBitFlagEncoding = encoding;
                         break;
                     case "RI":
+                        dataSeriesEncodingMap.ReferenceIdEncoding = encoding;
                         break;
                     case "RL":
+                        dataSeriesEncodingMap.ReadLengthsEncoding = encoding;
                         break;
                     case "AP":
+                        dataSeriesEncodingMap.InSeqPositionsEncoding = encoding;
                         break;
                     case "RG":
+                        dataSeriesEncodingMap.ReadGroupsEncoding = encoding;
                         break;
                     case "RN":
+                        dataSeriesEncodingMap.ReadNamesEncoding = encoding;
                         break;
                     case "MF":
+                        dataSeriesEncodingMap.NextMateBitFlagEncoding = encoding;
                         break;
                     case "NS":
+                        dataSeriesEncodingMap.NextFragmentReferenceSequenceIdEncoding = encoding;
                         break;
                     case "NP":
+                        dataSeriesEncodingMap.NextMateAlignmentStartEncoding = encoding;
                         break;
                     case "TS":
+                        dataSeriesEncodingMap.TemplateSizeEncoding = encoding;
                         break;
                     case "NF":
+                        dataSeriesEncodingMap.DistanceToNextFragmentEncoding = encoding;
                         break;
                     case "TL":
+                        dataSeriesEncodingMap.TagIdEncoding = encoding;
                         break;
                     case "FN":
+                        dataSeriesEncodingMap.NumberOfReadFeaturesEncoding = encoding;
                         break;
                     case "FC":
+                        dataSeriesEncodingMap.ReadFeaturesCodesEncoding = encoding;
                         break;
                     case "FP":
+                        dataSeriesEncodingMap.InReadPositionsEncoding = encoding;
                         break;
                     case "DL":
+                        dataSeriesEncodingMap.DeletionLengthEncoding = encoding;
                         break;
                     case "BB":
+                        dataSeriesEncodingMap.StretchesOfBasesEncoding = encoding;
                         break;
                     case "QQ":
+                        dataSeriesEncodingMap.StretchesOfQualityScoresEncoding = encoding;
                         break;
                     case "BS":
+                        dataSeriesEncodingMap.BaseSubstitutionCodesEncoding = encoding;
                         break;
                     case "IN":
+                        dataSeriesEncodingMap.InsertionEncoding = encoding;
                         break;
                     case "RS":
+                        dataSeriesEncodingMap.ReferenceSkipLengthEncoding = encoding;
                         break;
                     case "PD":
+                        dataSeriesEncodingMap.PaddingEncoding = encoding;
                         break;
                     case "HC":
+                        dataSeriesEncodingMap.HardClipEncoding = encoding;
                         break;
                     case "SC":
+                        dataSeriesEncodingMap.SoftClipEncoding = encoding;
                         break;
                     case "MQ":
+                        dataSeriesEncodingMap.MappingQualitiesEncoding = encoding;
                         break;
                     case "BA":
+                        dataSeriesEncodingMap.BasesEncoding = encoding;
                         break;
                     case "QS":
+                        dataSeriesEncodingMap.QualityScoresEncoding = encoding;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(key), $"Unknown key '{key}' for data series encoding map");
                 }
             }
 
-            return new DataSeriesEncodingMap();
+            return dataSeriesEncodingMap;
         }
 
         private CramBlockHeader ReadBlockHeader(BinaryReader reader)
@@ -309,406 +576,5 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 compressedSize,
                 uncompressedSize);
         }
-    }
-
-    public class CramSliceHeader
-    {
-        public int ReferenceSequenceId { get; }
-        public int AlignmentStart { get; }
-        public int AlignmentSpan { get; }
-        public int NumberOfRecords { get; }
-        public long RecordCounter { get; }
-        public int NumberOfBlocks { get; }
-        public List<int> BlockContentIds { get; }
-        public int EmbeddedReferenceBlockContentId { get; }
-        public byte[] ReferenceMD5Checksum { get; }
-        public Dictionary<string,object> Tags { get; }
-
-        public CramSliceHeader(int referenceSequenceId, int alignmentStart, int alignmentSpan,
-            int numberOfRecords, long recordCounter, int numberOfBlocks,
-            List<int> blockContentIds, int embeddedReferenceBlockContentId, byte[] referenceMd5Checksum,
-            Dictionary<string, object> tags)
-        {
-            ReferenceSequenceId = referenceSequenceId;
-            AlignmentStart = alignmentStart;
-            AlignmentSpan = alignmentSpan;
-            NumberOfRecords = numberOfRecords;
-            RecordCounter = recordCounter;
-            NumberOfBlocks = numberOfBlocks;
-            BlockContentIds = blockContentIds;
-            EmbeddedReferenceBlockContentId = embeddedReferenceBlockContentId;
-            ReferenceMD5Checksum = referenceMd5Checksum;
-            Tags = tags;
-        }
-    }
-
-    public class CramEofContainer : CramDataContainer
-    {
-        public CramEofContainer()
-            : base(
-                new CramContainerHeader(15, -1, 4542278, 0, 0, 0, 0, 1, 1339669765, new List<int>()),
-                new CramCompressionHeader(new PreservationMap(), new DataSeriesEncodingMap(), new TagEncodingMap()),
-                new List<CramSlice>())
-        {
-        }
-    }
-
-    public class CramDataContainer
-    {
-        public CramContainerHeader ContainerHeader { get; }
-        public CramCompressionHeader CompressionHeader { get; }
-        public List<CramSlice> Slices { get; }
-        public List<CramBlock> Blocks => Slices.SelectMany(x => x.Blocks).ToList();
-
-        public CramDataContainer(
-            CramContainerHeader containerHeader, 
-            CramCompressionHeader compressionHeader, 
-            List<CramSlice> slices)
-        {
-            ContainerHeader = containerHeader;
-            CompressionHeader = compressionHeader;
-            Slices = slices;
-        }
-    }
-
-    public class CramSlice
-    {
-        public List<CramBlock> Blocks { get; }
-
-        public CramSlice(List<CramBlock> blocks)
-        {
-            Blocks = blocks;
-        }
-    }
-
-    public class CramCompressionHeader
-    {
-        public PreservationMap PreservationMap { get; }
-        public DataSeriesEncodingMap DataSeriesEncodingMap { get; }
-        public TagEncodingMap TagEncodingMap { get; }
-
-        public CramCompressionHeader(
-            PreservationMap preservationMap, 
-            DataSeriesEncodingMap dataSeriesEncodingMap, 
-            TagEncodingMap tagEncodingMap)
-        {
-            PreservationMap = preservationMap;
-            DataSeriesEncodingMap = dataSeriesEncodingMap;
-            TagEncodingMap = tagEncodingMap;
-        }
-    }
-
-    public class TagEncodingMap
-    {
-        public Dictionary<string,CramEncoding> TagValueEncodings { get; }
-
-        public TagEncodingMap()
-        {
-            TagValueEncodings = new Dictionary<string, CramEncoding>();
-        }
-        public TagEncodingMap(Dictionary<string, CramEncoding> tagValueEncodings)
-        {
-            TagValueEncodings = tagValueEncodings;
-        }
-    }
-
-    public abstract class CramEncoding
-    {
-        public enum Codec
-        {
-            Null = 0,
-            External = 1,
-            Golomb = 2,
-            Huffman = 3,
-            ByteArrayLength = 4,
-            ByteArrayStop = 5,
-            Beta = 6,
-            SubExponential = 7,
-            GolombRice = 8,
-            Gamma = 9
-        }
-        public abstract Codec CodecId { get; }
-    }
-
-    public class BetaCramEncoding : CramEncoding
-    {
-        public BetaCramEncoding(int offset, int numberOfBits)
-        {
-            Offset = offset;
-            NumberOfBits = numberOfBits;
-        }
-
-        public override Codec CodecId => Codec.Beta;
-        public int Offset { get; }
-        public int NumberOfBits { get; }
-    }
-
-    public class SubExponentialCramEncoding : CramEncoding
-    {
-        public SubExponentialCramEncoding(int offset, int k)
-        {
-            Offset = offset;
-            K = k;
-        }
-
-        public override Codec CodecId => Codec.SubExponential;
-        public int Offset { get; }
-        public int K { get; }
-    }
-
-    public class ByteArrayLengthCramEncoding : CramEncoding
-    {
-        public ByteArrayLengthCramEncoding(CramEncoding arrayLength, CramEncoding bytes)
-        {
-            ArrayLength = arrayLength;
-            Bytes = bytes;
-        }
-
-        public override Codec CodecId => Codec.ByteArrayLength;
-        public CramEncoding ArrayLength { get; }
-        public CramEncoding Bytes { get; }
-    }
-
-    public class ByteArrayStopCramEncoding : CramEncoding
-    {
-        public ByteArrayStopCramEncoding(byte stopValue, int externalBlockContentId)
-        {
-            StopValue = stopValue;
-            ExternalBlockContentId = externalBlockContentId;
-        }
-
-        public override Codec CodecId => Codec.ByteArrayStop;
-        public byte StopValue { get; }
-        public int ExternalBlockContentId { get; }
-    }
-
-    public class GammaCramEncoding : CramEncoding
-    {
-        public GammaCramEncoding(int offset)
-        {
-            Offset = offset;
-        }
-
-        public override Codec CodecId => Codec.Gamma;
-        public int Offset { get; }
-    }
-
-    public class HuffmanCramEncoding : CramEncoding
-    {
-        public HuffmanCramEncoding(List<int> symbols, List<int> weights)
-        {
-            Symbols = symbols;
-            Weights = weights;
-        }
-
-        public override Codec CodecId => Codec.Huffman;
-        public List<int> Symbols { get; }
-        public List<int> Weights { get; }
-    }
-
-    public class GolombCramEncoding : CramEncoding
-    {
-        public GolombCramEncoding(int offset, int m)
-        {
-            Offset = offset;
-            M = m;
-        }
-
-        public override Codec CodecId => Codec.Golomb;
-        public int Offset { get; }
-        public int M { get; }
-    }
-    public class GolombRiceCramEncoding : CramEncoding
-    {
-        public GolombRiceCramEncoding(int offset, int log2OfM)
-        {
-            Offset = offset;
-            Log2OfM = log2OfM;
-        }
-
-        public override Codec CodecId => Codec.GolombRice;
-        public int Offset { get; }
-        public int Log2OfM { get; }
-    }
-    public class ExternalCramEncoding : CramEncoding
-    {
-        public ExternalCramEncoding(int blockContentId)
-        {
-            BlockContentId = blockContentId;
-        }
-
-        public override Codec CodecId => Codec.External;
-        public int BlockContentId { get; }
-    }
-
-    public class NullCramEncoding : CramEncoding
-    {
-        public override Codec CodecId => Codec.Null;
-    }
-
-    public class DataSeriesEncodingMap
-    {
-        public CramEncoding BamBitFlagEncoding { get; }
-        public CramEncoding CramBitFlagEncoding { get; }
-        public CramEncoding ReferenceIdEncoding { get; }
-        public CramEncoding InSeqPositionsEncoding { get; }
-        public CramEncoding ReadGroupsEncoding { get; }
-        public CramEncoding ReadNamesEncoding { get; }
-        public CramEncoding NextMateBitFlagEncoding { get; }
-        public CramEncoding NextFragmentReferenceSequenceIdEncoding { get; }
-        public CramEncoding NextMateAlignmentStartEncoding { get; }
-        public CramEncoding TemplateSizeEncoding { get; }
-        public CramEncoding DistanceToNextFragmentEncoding { get; }
-        public CramEncoding TagIdEncoding { get; }
-        public CramEncoding NumberOfReadFeaturesEncoding { get; }
-        public CramEncoding ReadFeaturesCodesEncoding { get; }
-        public CramEncoding InReadPositionsEncoding { get; }
-        public CramEncoding DeletionLengthEncoding { get; }
-        public CramEncoding StretchesOfBasesEncoding { get; }
-        public CramEncoding StretchesOfQualityScoresEncoding { get; }
-        public CramEncoding BaseSubstitutionCodesEncoding { get; }
-        public CramEncoding InsertionEncoding { get; }
-        public CramEncoding ReferenceSkipLengthEncoding { get; }
-        public CramEncoding PaddingEncoding { get; }
-        public CramEncoding HardClipEncoding { get; }
-        public CramEncoding SoftClipEncoding { get; }
-        public CramEncoding MappingQualitiesEncoding { get; }
-        public CramEncoding BasesEncoding { get; }
-        public CramEncoding QualityScoresEncoding { get; }
-    }
-
-    public class CramBlockHeader
-    {
-        public CramBlock.CompressionMethod CompressionMethod { get; }
-        public CramBlock.BlockContentType ContentType { get; }
-        public int ContentId { get; }
-        public int CompressedSize { get; }
-        public int UncompressedSize { get; }
-
-        public CramBlockHeader(
-            CramBlock.CompressionMethod compressionMethod, 
-            CramBlock.BlockContentType contentType, 
-            int contentId,
-            int compressedSize, 
-            int uncompressedSize)
-        {
-            CompressionMethod = compressionMethod;
-            ContentType = contentType;
-            ContentId = contentId;
-            CompressedSize = compressedSize;
-            UncompressedSize = uncompressedSize;
-        }
-    }
-
-    public class CramContainerHeader
-    {
-        public int ContainerLength { get; }
-        public int ReferenceSequenceId { get; }
-        public int ReferenceStartingPosition { get; }
-        public int AlignmentSpan { get; }
-        public int NumberOfRecords { get; }
-        public long RecordCounter { get; }
-        public long NumberOfReadBases { get; }
-        public int NumberOfBlocks { get; }
-        public int Checksum { get; }
-        public List<int> SlicePositions { get; }
-
-        public CramContainerHeader(
-            int containerLength, 
-            int referenceSequenceId, 
-            int referenceStartingPosition,
-            int alignmentSpan, 
-            int numberOfRecords, 
-            long recordCounter,
-            long numberOfReadBases, 
-            int numberOfBlocks, 
-            int checksum,
-            List<int> slicePositions)
-        {
-            ContainerLength = containerLength;
-            ReferenceSequenceId = referenceSequenceId;
-            ReferenceStartingPosition = referenceStartingPosition;
-            AlignmentSpan = alignmentSpan;
-            NumberOfRecords = numberOfRecords;
-            RecordCounter = recordCounter;
-            NumberOfReadBases = numberOfReadBases;
-            NumberOfBlocks = numberOfBlocks;
-            Checksum = checksum;
-            SlicePositions = slicePositions;
-        }
-    }
-
-    public class PreservationMap
-    {
-        public bool ReadNames { get; }
-        public bool ApDataSeriesDelta { get; }
-        public bool ReferenceRequired { get; }
-        public byte[] SubstitutionMatrix { get; }
-        public List<byte> TagIds { get; }
-
-        public PreservationMap()
-        {
-            ReadNames = true;
-            ApDataSeriesDelta = true;
-            ReferenceRequired = true;
-            SubstitutionMatrix = Array.Empty<byte>();
-            TagIds = new List<byte>();
-        }
-
-        public PreservationMap(
-            bool readNames, bool apDataSeriesDelta, bool referenceRequired,
-            byte[] substitutionMatrix, List<byte> tagIds)
-        {
-            ReadNames = readNames;
-            ApDataSeriesDelta = apDataSeriesDelta;
-            ReferenceRequired = referenceRequired;
-            SubstitutionMatrix = substitutionMatrix;
-            TagIds = tagIds;
-        }
-    }
-
-    public class CramBlock
-    {
-        public enum CompressionMethod
-        {
-            Raw = 0,
-            Gzip = 1,
-            Bzip2 = 2,
-            Lzma = 3,
-            Rans = 4
-        }
-
-        public enum BlockContentType
-        {
-            FileHeader = 0,
-            CompressionHeader = 1,
-            SliceHeader = 2,
-            ExternalData = 4,
-            CoreData = 5
-        }
-
-        public CramBlockHeader Header { get; }
-
-        public CramBlock(CramBlockHeader header)
-        {
-            Header = header;
-        }
-    }
-
-    public class CramFileDefinition
-    {
-        public Version Version { get; }
-        public byte[] FileId { get; }
-
-        public CramFileDefinition(Version version, byte[] fileId)
-        {
-            Version = version;
-            FileId = fileId;
-        }
-    }
-
-    public class CramLoaderResult 
-    {
-
     }
 }
