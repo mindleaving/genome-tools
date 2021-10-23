@@ -1,13 +1,17 @@
 ﻿using System.IO;
-using System.Text;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public static class RansDecoder
     {
+        public static void Encode(Stream input, Stream output)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public static void Decode(Stream input, Stream output)
         {
-            using var reader = new BinaryReader(input, Encoding.ASCII, true);
+            using var reader = new CramReader(input, keepStreamOpen: true);
             var order = reader.ReadByte();
             var compressedSize = reader.ReadUInt32();
             var uncompressedSize = reader.ReadUInt32();
@@ -22,7 +26,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static void DecodeOrder0(BinaryReader reader, Stream output, uint uncompressedSize)
+        private static void DecodeOrder0(CramReader reader, Stream output, uint uncompressedSize)
         {
             var frequencyTable = ReadOrder0FrequencyTable(reader);
             const int StateCount = 4;
@@ -53,7 +57,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static void DecodeOrder1(BinaryReader reader, Stream output, uint uncompressedSize)
+        private static void DecodeOrder1(CramReader reader, Stream output, uint uncompressedSize)
         {
             var frequencyTable = ReadOrder1FrequencyTable(reader);
             const uint StateCount = 4;
@@ -120,7 +124,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static RansOrder1FrequencyTable ReadOrder1FrequencyTable(BinaryReader reader)
+        private static RansOrder1FrequencyTable ReadOrder1FrequencyTable(CramReader reader)
         {
             var frequencyTable = new RansOrder1FrequencyTable();
             var symbol = reader.ReadByte();
@@ -150,7 +154,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return frequencyTable;
         }
 
-        private static RansOrder0FrequencyTable ReadOrder0FrequencyTable(BinaryReader reader)
+        private static RansOrder0FrequencyTable ReadOrder0FrequencyTable(CramReader reader)
         {
             var frequencyTable = new RansOrder0FrequencyTable();
             var symbol = reader.ReadByte();
@@ -205,7 +209,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return frequency * (state >> 12) + (state & 0xfff) - cummulativeFrequency;
         }
 
-        private static uint RenormState(uint state, BinaryReader reader)
+        private static uint RenormState(uint state, CramReader reader)
         {
             while (state < (1 << 23))
             {
@@ -214,26 +218,24 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return state;
         }
 
-
-    }
-
-    public class RansOrder1FrequencyTable
-    {
-        public readonly RansOrder0FrequencyTable[] ContextFrequencyTables = new RansOrder0FrequencyTable[256];
-
-        public RansOrder1FrequencyTable()
+        public class RansOrder0FrequencyTable
         {
-            for (int i = 0; i < ContextFrequencyTables.Length; i++)
+            public readonly ushort[] SymbolFrequency = new ushort[256];
+            public readonly ushort[] CummulativeFrequency = new ushort[256];
+            public readonly byte[] InverseCummulativeLookup = new byte[0x1000];
+        }
+
+        public class RansOrder1FrequencyTable
+        {
+            public readonly RansOrder0FrequencyTable[] ContextFrequencyTables = new RansOrder0FrequencyTable[256];
+
+            public RansOrder1FrequencyTable()
             {
-                ContextFrequencyTables[i] = new RansOrder0FrequencyTable();
+                for (int i = 0; i < ContextFrequencyTables.Length; i++)
+                {
+                    ContextFrequencyTables[i] = new RansOrder0FrequencyTable();
+                }
             }
         }
-    }
-
-    public class RansOrder0FrequencyTable
-    {
-        public readonly ushort[] SymbolFrequency = new ushort[256];
-        public readonly ushort[] CummulativeFrequency = new ushort[256];
-        public readonly byte[] InverseCummulativeLookup = new byte[0x1000];
     }
 }

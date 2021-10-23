@@ -1,5 +1,6 @@
 using System.IO;
 using GenomeTools.ChemistryLibrary.IO.Cram;
+using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 using NUnit.Framework;
 
 namespace GenomeTools.ChemistryLibraryTest.IO.Cram

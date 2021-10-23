@@ -1,10 +1,91 @@
-﻿using GenomeTools.ChemistryLibrary.IO.Cram;
+﻿using System.Collections;
+using System.Collections.Generic;
+using GenomeTools.ChemistryLibrary.IO.Cram;
+using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using NUnit.Framework;
 
 namespace GenomeTools.ChemistryLibraryTest.IO.Cram
 {
     public class HuffmanCramEncodingTest
     {
+        [Test]
+        public void IntegerDecodeExample()
+        {
+            var symbolsWithCodeLength = new List<HuffmanCodeSymbol>
+            {
+                new('A', 1),
+                new('B', 3),
+                new('C', 3),
+                new('D', 3),
+                new('E', 4),
+                new('F', 4)
+            };
+            var sut = new HuffmanIntCramEncoding(symbolsWithCodeLength);
+            var input = new BitArray(new[] { true, true, true, false });
+
+            var actual = sut.Decode(input);
+
+            Assert.That(actual, Is.EqualTo('E'));
+        }
+
+        [Test]
+        public void IntegerEncodeExample()
+        {
+            var symbolsWithCodeLength = new List<HuffmanCodeSymbol>
+            {
+                new('A', 1),
+                new('B', 3),
+                new('C', 3),
+                new('D', 3),
+                new('E', 4),
+                new('F', 4)
+            };
+            var sut = new HuffmanIntCramEncoding(symbolsWithCodeLength);
+
+            var actual = sut.Encode('E');
+
+            Assert.That(actual, Is.EqualTo(new BitArray(new[] { true, true, true, false })));
+        }
+
+        [Test]
+        public void ByteDecodeExample()
+        {
+            var symbolsWithCodeLength = new List<HuffmanCodeSymbol>
+            {
+                new('A', 1),
+                new('B', 3),
+                new('C', 3),
+                new('D', 3),
+                new('E', 4),
+                new('F', 4)
+            };
+            var sut = new HuffmanByteCramEncoding(symbolsWithCodeLength);
+            var input = new BitArray(new[] { true, true, true, false });
+
+            var actual = sut.Decode(input);
+
+            Assert.That(actual, Is.EqualTo('E'));
+        }
+
+        [Test]
+        public void ByteEncodeExample()
+        {
+            var symbolsWithCodeLength = new List<HuffmanCodeSymbol>
+            {
+                new('A', 1),
+                new('B', 3),
+                new('C', 3),
+                new('D', 3),
+                new('E', 4),
+                new('F', 4)
+            };
+            var sut = new HuffmanByteCramEncoding(symbolsWithCodeLength);
+
+            var actual = sut.Encode('E');
+
+            Assert.That(actual, Is.EqualTo(new BitArray(new[] { true, true, true, false })));
+        }
+
         [Test]
         public void IntegerRoundtrip()
         {
