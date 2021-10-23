@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
@@ -56,68 +57,132 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return bytesToRead;
         }
 
-        public static CramEncoding ReadEncoding(this BinaryReader reader)
+        public static ICramEncoding<int> ReadIntegerEncoding(this BinaryReader reader)
         {
-            var codecId = (CramEncoding.Codec)reader.ReadItf8();
+            var codecId = (Codec)reader.ReadItf8();
             var numberOfBytes = reader.ReadItf8();
             switch (codecId)
             {
-                case CramEncoding.Codec.Null:
+                case Codec.Null:
                 {
-                    return new NullCramEncoding();
+                    return new NullCramEncoding<int>();
                 }
-                case CramEncoding.Codec.External:
+                case Codec.External:
                 {
                     var blockContentId = reader.ReadItf8();
-                    return new ExternalCramEncoding(blockContentId);
+                    return new ExternalCramEncoding<int>(blockContentId);
                 }
-                case CramEncoding.Codec.Golomb:
+                case Codec.Golomb:
                 {
                     var offset = reader.ReadItf8();
                     var m = reader.ReadItf8();
                     return new GolombCramEncoding(offset, m);
                 }
-                case CramEncoding.Codec.Huffman:
+                case Codec.Huffman:
                 {
                     var symbols = reader.ReadCramItf8Array();
                     var weights = reader.ReadCramItf8Array();
-                    return new HuffmanCramEncoding(symbols, weights);
+                    return new HuffmanIntCramEncoding(symbols, weights);
                 }
-                case CramEncoding.Codec.ByteArrayLength:
-                {
-                    var arrayLength = reader.ReadEncoding();
-                    var bytes = reader.ReadEncoding();
-                    return new ByteArrayLengthCramEncoding(arrayLength, bytes);
-                }
-                case CramEncoding.Codec.ByteArrayStop:
-                {
-                    var stopValue = reader.ReadByte();
-                    var externalBlockContentId = reader.ReadItf8();
-                    return new ByteArrayStopCramEncoding(stopValue, externalBlockContentId);
-                }
-                case CramEncoding.Codec.Beta:
+                case Codec.Beta:
                 {
                     var offset = reader.ReadItf8();
                     var numberOfBits = reader.ReadItf8();
                     return new BetaCramEncoding(offset, numberOfBits);
                 }
-                case CramEncoding.Codec.SubExponential:
+                case Codec.SubExponential:
                 {
                     var offset = reader.ReadItf8();
                     var k = reader.ReadItf8();
                     return new SubExponentialCramEncoding(offset, k);
                 }
-                case CramEncoding.Codec.GolombRice:
+                case Codec.GolombRice:
                 {
                     var offset = reader.ReadItf8();
                     var log2OfM = reader.ReadItf8();
                     return new GolombRiceCramEncoding(offset, log2OfM);
                 }
-                case CramEncoding.Codec.Gamma:
+                case Codec.Gamma:
                 {
                     var offset = reader.ReadItf8();
                     return new GammaCramEncoding(offset);
                 }
+                case Codec.ByteArrayLength:
+                case Codec.ByteArrayStop:
+                    throw new Exception($"Requested an integer encoding but codec '{codecId}' doesn't support integers");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static ICramEncoding<byte> ReadByteEncoding(this BinaryReader reader)
+        {
+            var codecId = (Codec)reader.ReadItf8();
+            var numberOfBytes = reader.ReadItf8();
+            switch (codecId)
+            {
+                case Codec.Null:
+                {
+                    return new NullCramEncoding<byte>();
+                }
+                case Codec.External:
+                {
+                    var blockContentId = reader.ReadItf8();
+                    return new ExternalCramEncoding<byte>(blockContentId);
+                }
+                case Codec.Huffman:
+                {
+                    var symbols = reader.ReadCramItf8Array();
+                    var weights = reader.ReadCramItf8Array();
+                    return new HuffmanByteCramEncoding(symbols.Cast<byte>().ToList(), weights);
+                }
+                case Codec.Golomb:
+                case Codec.ByteArrayLength:
+                case Codec.ByteArrayStop:
+                case Codec.Beta:
+                case Codec.SubExponential:
+                case Codec.GolombRice:
+                case Codec.Gamma:
+                    throw new Exception($"Requested a byte encoding but codec '{codecId}' doesn't support bytes");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static ICramEncoding<byte[]> ReadByteArrayEncoding(this BinaryReader reader)
+        {
+            var codecId = (Codec)reader.ReadItf8();
+            var numberOfBytes = reader.ReadItf8();
+            switch (codecId)
+            {
+                case Codec.Null:
+                {
+                    return new NullCramEncoding<byte[]>();
+                }
+                case Codec.External:
+                {
+                    var blockContentId = reader.ReadItf8();
+                    return new ExternalCramEncoding<byte[]>(blockContentId);
+                }
+                case Codec.ByteArrayLength:
+                {
+                    var arrayLength = reader.ReadIntegerEncoding();
+                    var bytes = reader.ReadByteEncoding();
+                    return new ByteArrayLengthCramEncoding(arrayLength, bytes);
+                }
+                case Codec.ByteArrayStop:
+                {
+                    var stopValue = reader.ReadByte();
+                    var externalBlockContentId = reader.ReadItf8();
+                    return new ByteArrayStopCramEncoding(stopValue, externalBlockContentId);
+                }
+                case Codec.Golomb:
+                case Codec.Huffman:
+                case Codec.Beta:
+                case Codec.SubExponential:
+                case Codec.GolombRice:
+                case Codec.Gamma:
+                    throw new Exception($"Requested a byte array encoding but codec '{codecId}' doesn't support byte arrays");
                 default:
                     throw new ArgumentOutOfRangeException();
             }

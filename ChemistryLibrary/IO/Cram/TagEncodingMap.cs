@@ -4,13 +4,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class TagEncodingMap
     {
-        public Dictionary<TagId, CramEncoding> TagValueEncodings { get; }
+        public Dictionary<TagId, ICramEncoding<byte[]>> TagValueEncodings { get; }
 
         public TagEncodingMap()
         {
-            TagValueEncodings = new Dictionary<TagId, CramEncoding>();
+            TagValueEncodings = new Dictionary<TagId, ICramEncoding<byte[]>>();
         }
-        public TagEncodingMap(Dictionary<TagId, CramEncoding> tagValueEncodings)
+        public TagEncodingMap(Dictionary<TagId, ICramEncoding<byte[]>> tagValueEncodings)
         {
             TagValueEncodings = tagValueEncodings;
         }

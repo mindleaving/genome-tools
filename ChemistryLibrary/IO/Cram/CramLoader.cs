@@ -437,12 +437,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
-            var tagValueEncodings = new Dictionary<TagId, CramEncoding>();
+            var tagValueEncodings = new Dictionary<TagId, ICramEncoding<byte[]>>();
             for (int i = 0; i < numberOfEntries; i++)
             {
                 var keyItf8Encoded = reader.ReadItf8();
                 var tagId = DecodeTagIdForTagEncodingMapEntry(keyItf8Encoded);
-                var tagValueEncoding = reader.ReadEncoding();
+                var tagValueEncoding = reader.ReadByteArrayEncoding();
                 tagValueEncodings.Add(tagId, tagValueEncoding);
             }
             return new TagEncodingMap(tagValueEncodings);
@@ -467,92 +467,91 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             for (int i = 0; i < numberOfEntries; i++)
             {
                 var key = Encoding.ASCII.GetString(reader.ReadBytes(2));
-                var encoding = reader.ReadEncoding();
                 switch (key)
                 {
                     case "BF":
-                        dataSeriesEncodingMap.BamBitFlagEncoding = encoding;
+                        dataSeriesEncodingMap.BamBitFlagEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "CF":
-                        dataSeriesEncodingMap.CramBitFlagEncoding = encoding;
+                        dataSeriesEncodingMap.CramBitFlagEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "RI":
-                        dataSeriesEncodingMap.ReferenceIdEncoding = encoding;
+                        dataSeriesEncodingMap.ReferenceIdEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "RL":
-                        dataSeriesEncodingMap.ReadLengthsEncoding = encoding;
+                        dataSeriesEncodingMap.ReadLengthsEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "AP":
-                        dataSeriesEncodingMap.InSeqPositionsEncoding = encoding;
+                        dataSeriesEncodingMap.InSeqPositionsEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "RG":
-                        dataSeriesEncodingMap.ReadGroupsEncoding = encoding;
+                        dataSeriesEncodingMap.ReadGroupsEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "RN":
-                        dataSeriesEncodingMap.ReadNamesEncoding = encoding;
+                        dataSeriesEncodingMap.ReadNamesEncoding = reader.ReadByteArrayEncoding();
                         break;
                     case "MF":
-                        dataSeriesEncodingMap.NextMateBitFlagEncoding = encoding;
+                        dataSeriesEncodingMap.NextMateBitFlagEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "NS":
-                        dataSeriesEncodingMap.NextFragmentReferenceSequenceIdEncoding = encoding;
+                        dataSeriesEncodingMap.NextFragmentReferenceSequenceIdEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "NP":
-                        dataSeriesEncodingMap.NextMateAlignmentStartEncoding = encoding;
+                        dataSeriesEncodingMap.NextMateAlignmentStartEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "TS":
-                        dataSeriesEncodingMap.TemplateSizeEncoding = encoding;
+                        dataSeriesEncodingMap.TemplateSizeEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "NF":
-                        dataSeriesEncodingMap.DistanceToNextFragmentEncoding = encoding;
+                        dataSeriesEncodingMap.DistanceToNextFragmentEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "TL":
-                        dataSeriesEncodingMap.TagIdEncoding = encoding;
+                        dataSeriesEncodingMap.TagIdEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "FN":
-                        dataSeriesEncodingMap.NumberOfReadFeaturesEncoding = encoding;
+                        dataSeriesEncodingMap.NumberOfReadFeaturesEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "FC":
-                        dataSeriesEncodingMap.ReadFeaturesCodesEncoding = encoding;
+                        dataSeriesEncodingMap.ReadFeaturesCodesEncoding = reader.ReadByteEncoding();
                         break;
                     case "FP":
-                        dataSeriesEncodingMap.InReadPositionsEncoding = encoding;
+                        dataSeriesEncodingMap.InReadPositionsEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "DL":
-                        dataSeriesEncodingMap.DeletionLengthEncoding = encoding;
+                        dataSeriesEncodingMap.DeletionLengthEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "BB":
-                        dataSeriesEncodingMap.StretchesOfBasesEncoding = encoding;
+                        dataSeriesEncodingMap.StretchesOfBasesEncoding = reader.ReadByteArrayEncoding();
                         break;
                     case "QQ":
-                        dataSeriesEncodingMap.StretchesOfQualityScoresEncoding = encoding;
+                        dataSeriesEncodingMap.StretchesOfQualityScoresEncoding = reader.ReadByteArrayEncoding();
                         break;
                     case "BS":
-                        dataSeriesEncodingMap.BaseSubstitutionCodesEncoding = encoding;
+                        dataSeriesEncodingMap.BaseSubstitutionCodesEncoding = reader.ReadByteEncoding();
                         break;
                     case "IN":
-                        dataSeriesEncodingMap.InsertionEncoding = encoding;
+                        dataSeriesEncodingMap.InsertionEncoding = reader.ReadByteArrayEncoding();
                         break;
                     case "RS":
-                        dataSeriesEncodingMap.ReferenceSkipLengthEncoding = encoding;
+                        dataSeriesEncodingMap.ReferenceSkipLengthEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "PD":
-                        dataSeriesEncodingMap.PaddingEncoding = encoding;
+                        dataSeriesEncodingMap.PaddingEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "HC":
-                        dataSeriesEncodingMap.HardClipEncoding = encoding;
+                        dataSeriesEncodingMap.HardClipEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "SC":
-                        dataSeriesEncodingMap.SoftClipEncoding = encoding;
+                        dataSeriesEncodingMap.SoftClipEncoding = reader.ReadByteArrayEncoding();
                         break;
                     case "MQ":
-                        dataSeriesEncodingMap.MappingQualitiesEncoding = encoding;
+                        dataSeriesEncodingMap.MappingQualitiesEncoding = reader.ReadIntegerEncoding();
                         break;
                     case "BA":
-                        dataSeriesEncodingMap.BasesEncoding = encoding;
+                        dataSeriesEncodingMap.BasesEncoding = reader.ReadByteEncoding();
                         break;
                     case "QS":
-                        dataSeriesEncodingMap.QualityScoresEncoding = encoding;
+                        dataSeriesEncodingMap.QualityScoresEncoding = reader.ReadByteEncoding();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(key), $"Unknown key '{key}' for data series encoding map");
