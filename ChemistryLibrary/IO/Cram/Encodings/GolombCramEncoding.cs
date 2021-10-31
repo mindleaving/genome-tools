@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
-    public class GolombCramEncoding : ICramEncoding<int>
+    public class GolombCramEncoding : ICramEncoding<int>, ICramEncoding<byte>
     {
         public GolombCramEncoding(int offset, int m)
         {
@@ -16,18 +16,20 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public int M { get; }
 
 
-        public BitArray Encode(int item)
+        public void Encode(int item, BitStream stream)
         {
             var offsetItem = item + Offset;
             var q = offsetItem / M;
             var r = offsetItem - q * M;
 
             var b = CalculateB(M);
-            var remainderBitCount = r < (1 << b) - M ? b - 1 : b;
-            var bits = new BitArray(q + 1 + remainderBitCount);
-            EncodingHelpers.WriteUnary(bits, q, 0);
-            WriteRemainder(bits, r, b, M);
-            return bits;
+            stream.WriteUnary(q);
+            WriteRemainder(stream, r, b, M);
+        }
+
+        public void Encode(byte item, BitStream stream)
+        {
+            Encode((int)item, stream);
         }
 
         private static int CalculateB(int M)
@@ -36,41 +38,48 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
             return M == 1 << log2M ? log2M : log2M + 1;
         }
 
-        private static void WriteRemainder(BitArray bits, int remainder, int b, int m)
+        private static void WriteRemainder(BitStream bits, int remainder, int b, int m)
         {
             int offsetRemainder;
+            int bitsToWrite;
             if (remainder < (1 << b) - m)
             {
                 offsetRemainder = remainder;
+                bitsToWrite = b - 1;
             }
             else
             {
                 offsetRemainder = remainder + (1 << b) - m;
+                bitsToWrite = b;
             }
             var remainderBits = new BitArray(BitConverter.GetBytes(offsetRemainder));
-            for (int bitIndex = 0; bitIndex < b; bitIndex++)
+            for (int bitIndex = 0; bitIndex < bitsToWrite; bitIndex++)
             {
-                var targetIndex = bits.Length - 1 - bitIndex;
-                bits[targetIndex] = remainderBits[bitIndex];
+                bits.WriteBit(remainderBits[bitsToWrite - 1 - bitIndex]);
             }
         }
 
-        public int Decode(BitArray bits)
+        public int Decode(BitStream bits)
         {
-            var q = EncodingHelpers.ReadUnary(bits);
+            var q = bits.ReadUnary();
             var b = CalculateB(M);
             var r = 0;
             for (int bitIndex = 0; bitIndex < b-1; bitIndex++)
             {
-                r = (r << 1) + (bits[bitIndex + q + 1] ? 1 : 0);
+                r = (r << 1) + (bits.ReadBit() ? 1 : 0);
             }
 
             if (r >= (1 << b) - M)
             {
-                var x = bits[q+b] ? 1 : 0;
+                var x = bits.ReadBit() ? 1 : 0;
                 r = r * 2 + x - ((1 << b) - M);
             }
             return q * M + r - Offset;
+        }
+
+        byte ICramEncoding<byte>.Decode(BitStream bits)
+        {
+            return (byte)Decode(bits);
         }
     }
 }

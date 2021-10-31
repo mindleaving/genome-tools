@@ -1,9 +1,10 @@
 using System;
 using System.Collections;
+using System.IO;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
-    public class BetaCramEncoding : ICramEncoding<int>
+    public class BetaCramEncoding : ICramEncoding<int>, ICramEncoding<byte>
     {
         public BetaCramEncoding(int offset, int numberOfBits)
         {
@@ -16,7 +17,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public int NumberOfBits { get; }
 
 
-        public BitArray Encode(int item)
+        public void Encode(byte item, BitStream stream)
+        {
+            Encode((int)item, stream);
+        }
+
+        public void Encode(int item, BitStream stream)
         {
             var offsetItem = item + Offset;
             if (offsetItem >= 1 << NumberOfBits)
@@ -27,27 +33,30 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
             }
             var bytes = BitConverter.GetBytes(offsetItem);
             var littleEndianBits = new BitArray(bytes);
-            var bigEndianBits = new BitArray(NumberOfBits);
-            CopyLittleEndianToBitEndian(littleEndianBits, bigEndianBits, NumberOfBits);
-            return bigEndianBits;
+            CopyLittleEndianToBitEndian(littleEndianBits, stream, NumberOfBits);
         }
 
-        private void CopyLittleEndianToBitEndian(BitArray source, BitArray target, int numberOfBits)
+        private void CopyLittleEndianToBitEndian(BitArray source, BitStream target, int numberOfBits)
         {
             for (int bitIndex = 0; bitIndex < numberOfBits; bitIndex++)
             {
-                var sourceIndex = bitIndex;
-                var targetIndex = target.Length - 1 - bitIndex;
-                target[targetIndex] = source[sourceIndex];
+                var sourceIndex = numberOfBits - 1 - bitIndex;
+                target.WriteBit(source[sourceIndex]);
             }
         }
 
-        public int Decode(BitArray bits)
+        byte ICramEncoding<byte>.Decode(BitStream bits)
+        {
+            return (byte)Decode(bits);
+        }
+
+        public int Decode(BitStream bits)
         {
             var number = 0;
             for (int bitIndex = 0; bitIndex < NumberOfBits; bitIndex++)
             {
-                number = (number << 1) + (bits[bitIndex] ? 1 : 0);
+                var bit = bits.ReadBit();
+                number = (number << 1) + (bit ? 1 : 0);
             }
             return number - Offset;
         }

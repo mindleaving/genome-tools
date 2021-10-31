@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GenomeTools.ChemistryLibrary.IO.Cram.Index;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
@@ -15,9 +16,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         /// <param name="reader">Reader</param>
         /// <param name="sliceRelativeOffset">Slice byte offset relative to first block of this container</param>
         /// <param name="firstBlockAbsoluteOffset">Absolute byte offset of first block</param>
+        /// /// <param name="containerHeader">Header of container in which the slice is positioned</param>
         /// <param name="compressionHeader">Compression header</param>
         public CramSlice Read(
-            CramReader reader, int sliceRelativeOffset, long firstBlockAbsoluteOffset,
+            CramBinaryReader reader, 
+            int sliceRelativeOffset, 
+            long firstBlockAbsoluteOffset,
+            CramContainerHeader containerHeader,
             CramCompressionHeader compressionHeader)
         {
             if (reader.Position != firstBlockAbsoluteOffset + sliceRelativeOffset)
@@ -26,10 +31,42 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var blockReader = new CramBlockReader();
             var coreDataBlock = blockReader.Read(reader, compressionHeader);
             var externalDataBlock = blockReader.ReadBlocks(reader, sliceHeader.NumberOfBlocks - 1, compressionHeader);
-            return new CramSlice(new[] { coreDataBlock }.Concat(externalDataBlock).ToList());
+            return new CramSlice(containerHeader, compressionHeader, sliceHeader, coreDataBlock, externalDataBlock);
         }
 
-        private CramSliceHeader ReadSliceHeader(CramReader reader)
+        /// <summary>
+        /// Read slice corresponding to index entry
+        /// </summary>
+        public CramSlice Read(CramBinaryReader reader, CramIndexEntry indexEntry)
+        {
+            var containerHeaderReader = new CramContainerHeaderReader();
+            var containerHeader = containerHeaderReader.Read(reader, indexEntry.AbsoluteContainerOffset);
+            var sliceOffsetReference = reader.Position;
+
+            var compressionHeaderReader = new CramCompressionHeaderReader();
+            var compressionHeader = compressionHeaderReader.Read(reader);
+
+            return Read(
+                reader,
+                indexEntry.RelativeSliceHeaderOffset,
+                sliceOffsetReference,
+                containerHeader,
+                compressionHeader);
+        }
+
+        public List<CramSlice> ReadMany(
+            CramBinaryReader reader, 
+            long sliceOffset, 
+            CramContainerHeader containerHeader, 
+            CramCompressionHeader compressionHeader)
+        {
+            return containerHeader.SlicePositions
+                .Select(slicePosition => Read(reader, slicePosition, sliceOffset, containerHeader, compressionHeader))
+                .ToList();
+        }
+
+
+        private CramSliceHeader ReadSliceHeader(CramBinaryReader reader)
         {
             // Block header
             var blockHeaderReader = new CramBlockHeaderReader();
@@ -68,7 +105,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 tags);
         }
 
-        private Dictionary<string, object> ReadSliceTags(CramReader reader, long blockDataEndPosition)
+        private Dictionary<string, object> ReadSliceTags(CramBinaryReader reader, long blockDataEndPosition)
         {
             var tags = new Dictionary<string, object>();
             var tagReader = new CramTagReader();

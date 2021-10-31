@@ -6,12 +6,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
     {
         public Codec CodecId => Codec.Null;
 
-        public BitArray Encode(T item)
+        public void Encode(T item, BitStream stream)
         {
             throw new System.NotSupportedException();
         }
 
-        public T Decode(BitArray bits)
+        public T Decode(BitStream bits)
         {
             throw new System.NotSupportedException();
         }

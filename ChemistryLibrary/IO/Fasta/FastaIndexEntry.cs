@@ -8,7 +8,10 @@
         public ushort BasesPerLine { get; }
         public ushort LineWidth { get; }
 
-        public FastaIndexEntry(string sequenceName, long firstBaseOffset, ushort basesPerLine,
+        public FastaIndexEntry(
+            string sequenceName,
+            long firstBaseOffset, 
+            ushort basesPerLine,
             ushort lineWidth)
         {
             SequenceName = sequenceName;

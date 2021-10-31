@@ -12,12 +12,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public Codec CodecId => Codec.External;
         public int BlockContentId { get; }
 
-        public BitArray Encode(T item)
+        public void Encode(T item, BitStream stream)
         {
             throw new System.NotImplementedException();
         }
 
-        public T Decode(BitArray bits)
+        public T Decode(BitStream bits)
         {
             throw new System.NotImplementedException();
         }

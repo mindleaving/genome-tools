@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
-    public class SubExponentialCramEncoding : ICramEncoding<int>
+    public class SubExponentialCramEncoding : ICramEncoding<int>, ICramEncoding<byte>
     {
         public SubExponentialCramEncoding(int offset, int k)
         {
@@ -15,55 +15,51 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public int Offset { get; }
         public int K { get; }
 
-        public BitArray Encode(int item)
+        public void Encode(int item, BitStream stream)
         {
             var offsetItem = item + Offset;
             var b = offsetItem < 1 << K 
                 ? K 
                 : EncodingHelpers.IndexOfLast1(new BitArray(BitConverter.GetBytes(offsetItem)));
             var u = offsetItem < 1 << K ? 0 : b - K + 1;
-            var result = new BitArray(u + 1 + b);
-            EncodingHelpers.WriteUnary(result, u, 0);
-            WriteLessSignificantBits(result, offsetItem, b);
-
-            return result;
+            stream.WriteUnary(u);
+            WriteLessSignificantBits(stream, offsetItem, b);
         }
 
-        private static void WriteLessSignificantBits(BitArray bits, int offsetItem, int numberOfBitsToWrite)
+        public void Encode(byte item, BitStream stream)
+        {
+            Encode((int)item, stream);
+        }
+
+        private static void WriteLessSignificantBits(BitStream bits, int offsetItem, int numberOfBitsToWrite)
         {
             var itemBits = new BitArray(BitConverter.GetBytes(offsetItem));
             for (int bitIndex = 0; bitIndex < numberOfBitsToWrite; bitIndex++)
             {
-                var sourceIndex = bitIndex;
-                var targetIndex = bits.Length - 1 - bitIndex;
-                bits[targetIndex] = itemBits[sourceIndex];
+                var sourceIndex = numberOfBitsToWrite - 1 - bitIndex;
+                bits.WriteBit(itemBits[sourceIndex]);
             }
         }
 
-        public int Decode(BitArray bits)
+        public int Decode(BitStream bits)
         {
-            var u = EncodingHelpers.ReadUnary(bits);
+            var u = bits.ReadUnary();
             int n;
             if (u == 0)
             {
-                n = ToInt32(bits, 1);
+                n = bits.ReadInt32(K);
             }
             else
             {
-                var x = ToInt32(bits, u + 1);
+                var x = bits.ReadInt32(u + K - 1);
                 n = (1 << (u + K - 1)) + x;
             }
             return n - Offset;
         }
 
-        private int ToInt32(BitArray bits, int offset)
+        byte ICramEncoding<byte>.Decode(BitStream bits)
         {
-            var number = 0;
-            for (int bitIndex = offset; bitIndex < bits.Length; bitIndex++)
-            {
-                number = (number << 1) + (bits[bitIndex] ? 1 : 0);
-            }
-            return number;
+            return (byte)Decode(bits);
         }
     }
 }

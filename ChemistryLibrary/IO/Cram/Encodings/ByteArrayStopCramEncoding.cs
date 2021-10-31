@@ -15,12 +15,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public int ExternalBlockContentId { get; }
 
 
-        public BitArray Encode(byte[] item)
+        public void Encode(byte[] item, BitStream stream)
         {
             throw new System.NotImplementedException();
         }
 
-        public byte[] Decode(BitArray bits)
+        public byte[] Decode(BitStream bits)
         {
             throw new System.NotImplementedException();
         }

@@ -5,7 +5,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramContainerHeaderReader
     {
-        public CramContainerHeader Read(CramReader reader, long? offset = null)
+        public CramContainerHeader Read(CramBinaryReader reader, long? offset = null)
         {
             if(offset.HasValue && reader.Position != offset.Value)
                 reader.Seek(offset.Value, SeekOrigin.Begin);

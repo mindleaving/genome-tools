@@ -10,11 +10,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         private readonly Dictionary<int, int> codewordSymbolMap;
         private readonly Dictionary<int, int> symbolCodewordMap;
         private readonly Dictionary<int, int> symbolCodeLengthMap;
+        private readonly int maxCodeword;
 
         public HuffmanIntCramEncoding(List<HuffmanCodeSymbol> symbols)
         {
             Symbols = symbols;
             codewordSymbolMap = GenerateCanonicalCodewords(symbols);
+            maxCodeword = codewordSymbolMap.Keys.Max();
             symbolCodewordMap = codewordSymbolMap.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
             symbolCodeLengthMap = symbols.ToDictionary(x => x.Symbol, x => x.CodeLength);
         }
@@ -23,34 +25,30 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public List<HuffmanCodeSymbol> Symbols { get; }
 
 
-        public BitArray Encode(int item)
+        public void Encode(int item, BitStream stream)
         {
             if (!symbolCodewordMap.ContainsKey(item))
                 throw new ArgumentException($"Cannot encode symbol '{item}' that's not in the alphabet.");
             var codeword = symbolCodewordMap[item];
             var codeLength = symbolCodeLengthMap[item];
             var allCodewordIntegerBits = new BitArray(BitConverter.GetBytes(codeword));
-            var codeLengthBits = new BitArray(codeLength);
             for (int targetIndex = 0; targetIndex < codeLength; targetIndex++)
             {
                 var sourceIndex = codeLength - 1 - targetIndex;
-                codeLengthBits[targetIndex] = allCodewordIntegerBits[sourceIndex];
+                stream.WriteBit(allCodewordIntegerBits[sourceIndex]);
             }
-            return codeLengthBits;
         }
 
-        public int Decode(BitArray bits)
+        public int Decode(BitStream bits)
         {
             if (Symbols.Count == 1)
                 return Symbols[0].Symbol;
-            var bitIndex = 0;
             var codeword = 0;
-            while (bitIndex < bits.Length)
+            while (codeword < maxCodeword)
             {
-                codeword = (codeword << 1) + (bits[bitIndex] ? 1 : 0);
+                codeword = (codeword << 1) + (bits.ReadBit() ? 1 : 0);
                 if (codewordSymbolMap.ContainsKey(codeword))
                     return codewordSymbolMap[codeword];
-                bitIndex++;
             }
             throw new Exception("Reached end of bit stream but didn't recognize a valid Huffman codeword");
         }

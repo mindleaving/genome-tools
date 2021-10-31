@@ -5,7 +5,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
     public interface ICramEncoding<T>
     {
         Codec CodecId { get; }
-        BitArray Encode(T item);
-        T Decode(BitArray bits);
+        void Encode(T item, BitStream stream);
+        T Decode(BitStream bits);
     }
 }

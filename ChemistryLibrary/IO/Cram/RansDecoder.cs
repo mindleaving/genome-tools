@@ -11,7 +11,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 
         public static void Decode(Stream input, Stream output)
         {
-            using var reader = new CramReader(input, keepStreamOpen: true);
+            using var reader = new CramBinaryReader(input, keepStreamOpen: true);
             var order = reader.ReadByte();
             var compressedSize = reader.ReadUInt32();
             var uncompressedSize = reader.ReadUInt32();
@@ -26,7 +26,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static void DecodeOrder0(CramReader reader, Stream output, uint uncompressedSize)
+        private static void DecodeOrder0(CramBinaryReader reader, Stream output, uint uncompressedSize)
         {
             var frequencyTable = ReadOrder0FrequencyTable(reader);
             const int StateCount = 4;
@@ -57,7 +57,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static void DecodeOrder1(CramReader reader, Stream output, uint uncompressedSize)
+        private static void DecodeOrder1(CramBinaryReader reader, Stream output, uint uncompressedSize)
         {
             var frequencyTable = ReadOrder1FrequencyTable(reader);
             const uint StateCount = 4;
@@ -124,7 +124,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private static RansOrder1FrequencyTable ReadOrder1FrequencyTable(CramReader reader)
+        private static RansOrder1FrequencyTable ReadOrder1FrequencyTable(CramBinaryReader reader)
         {
             var frequencyTable = new RansOrder1FrequencyTable();
             var symbol = reader.ReadByte();
@@ -154,7 +154,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return frequencyTable;
         }
 
-        private static RansOrder0FrequencyTable ReadOrder0FrequencyTable(CramReader reader)
+        private static RansOrder0FrequencyTable ReadOrder0FrequencyTable(CramBinaryReader reader)
         {
             var frequencyTable = new RansOrder0FrequencyTable();
             var symbol = reader.ReadByte();
@@ -209,7 +209,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return frequency * (state >> 12) + (state & 0xfff) - cummulativeFrequency;
         }
 
-        private static uint RenormState(uint state, CramReader reader)
+        private static uint RenormState(uint state, CramBinaryReader reader)
         {
             while (state < (1 << 23))
             {

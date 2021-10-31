@@ -47,6 +47,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 
         public byte[] Decompress(byte[] compressedData, CramBlockHeader blockHeader)
         {
+            if (compressedData.Length == 0)
+                return Array.Empty<byte>();
             switch (blockHeader.CompressionMethod)
             {
                 case CramBlock.CompressionMethod.Raw:

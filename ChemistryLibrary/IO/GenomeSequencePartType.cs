@@ -2,9 +2,15 @@
 {
     public enum GenomeSequencePartType
     {
-        MatchedBases,
-        Insert,
+        Bases,
+        QualityScores,
+        BaseWithQualityScore,
+        Substitution,
+        Insertion,
         Deletion,
-        Reversal
+        ReferenceSkip,
+        SoftClip,
+        HardClip,
+        Padding
     }
 }

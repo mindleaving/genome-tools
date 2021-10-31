@@ -8,7 +8,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
         public bool ReadNames { get; }
         public bool ApDataSeriesDelta { get; }
         public bool ReferenceRequired { get; }
-        public byte[] SubstitutionMatrix { get; }
+        public BaseSubstitutionMatrix SubstitutionMatrix { get; }
         public List<List<TagId>> TagIdCombinations { get; }
 
         public PreservationMap()
@@ -16,13 +16,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
             ReadNames = true;
             ApDataSeriesDelta = true;
             ReferenceRequired = true;
-            SubstitutionMatrix = Array.Empty<byte>();
+            SubstitutionMatrix = null;
             TagIdCombinations = new List<List<TagId>>();
         }
 
         public PreservationMap(
             bool readNames, bool apDataSeriesDelta, bool referenceRequired,
-            byte[] substitutionMatrix, List<List<TagId>> tagIdCombinations)
+            BaseSubstitutionMatrix substitutionMatrix, List<List<TagId>> tagIdCombinations)
         {
             ReadNames = readNames;
             ApDataSeriesDelta = apDataSeriesDelta;

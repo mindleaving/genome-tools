@@ -7,7 +7,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramTagReader
     {
-        public object ReadTagValue(CramReader reader)
+        public object ReadTagValue(CramBinaryReader reader)
         {
             var type = (char)reader.ReadByte();
             switch (type)
@@ -38,7 +38,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private string ReadNullTerminatedString(CramReader reader)
+        private string ReadNullTerminatedString(CramBinaryReader reader)
         {
             var stringBuilder = new StringBuilder();
             while (true)
@@ -50,7 +50,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
-        private List<object> ReadBArray(CramReader reader)
+        private List<object> ReadBArray(CramBinaryReader reader)
         {
             var itemType = (char)reader.ReadByte();
             var itemCount = reader.ReadUInt32();
@@ -63,7 +63,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return items;
         }
 
-        private object ReadTypedItem(CramReader reader, char itemType)
+        private object ReadTypedItem(CramBinaryReader reader, char itemType)
         {
             switch (itemType)
             {

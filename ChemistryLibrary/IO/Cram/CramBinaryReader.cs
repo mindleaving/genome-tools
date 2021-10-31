@@ -3,34 +3,30 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GenomeTools.ChemistryLibrary.Extensions;
 using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
-    public class CramReader : IDisposable
+    public class CramBinaryReader : IDisposable
     {
-        const int BitsPerByte = 8;
-
         private readonly BinaryReader reader;
 
-        public CramReader(string filePath)
+        public CramBinaryReader(string filePath)
             : this(File.OpenRead(filePath))
         {
         }
-        public CramReader(Stream stream, bool keepStreamOpen = false)
+        public CramBinaryReader(Stream stream, bool keepStreamOpen = false)
         {
-            reader = CreateReader(stream, keepStreamOpen);
+            reader = new BinaryReader(stream, Encoding.UTF8, keepStreamOpen);
         }
 
-        private static BinaryReader CreateReader(Stream stream, bool keepStreamOpen)
+        public void CheckFileFormat()
         {
-            var reader = new BinaryReader(stream, Encoding.UTF8, keepStreamOpen);
-
             var fileDefinition = ReadFileDefinition(reader);
             if (fileDefinition.Version.Major != 3 && fileDefinition.Version.Minor != 0)
                 throw new NotSupportedException("Only version 3.0 of the CRAM specification is currently supported");
-            return reader;
         }
 
         private static CramFileDefinition ReadFileDefinition(BinaryReader reader)
@@ -45,90 +41,19 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         }
 
         public long Position => reader.BaseStream.Position;
-
-        public void Seek(long offset, SeekOrigin origin)
-        {
-            reader.BaseStream.Seek(offset, origin);
-        }
-
-        public byte ReadByte()
-        {
-            return reader.ReadByte();
-        }
-
-        public byte[] ReadBytes(int count)
-        {
-            return reader.ReadBytes(count);
-        }
-
-        public void Read(byte[] buffer, int offset, int count)
-        {
-            reader.Read(buffer, offset, count);
-        }
-
-        public int ReadInt32()
-        {
-            return reader.ReadInt32();
-        }
-
-        public uint ReadUInt32()
-        {
-            return reader.ReadUInt32();
-        }
-
-        public char ReadChar()
-        {
-            return reader.ReadChar();
-        }
-
-        public int ReadItf8()
-        {
-            var prefix = ReadByte();
-            var bytesToRead = GetBytesToRead(prefix, 4);
-            if (bytesToRead > 4)
-                throw new OverflowException("Tried to read ITF8 but number of bytes to read was greater than 4");
-            var buffer = new byte[4]; // Make static for performance?
-            Read(buffer, 0, bytesToRead);
-            var bitsFromPrefix = ((prefix << bytesToRead) & 0xff) >> bytesToRead; // Zero out leading 1's
-            var decodedNumber = bitsFromPrefix;
-            for (int i = 0; i < bytesToRead; i++)
-            {
-                if (i == buffer.Length - 1)
-                    decodedNumber = (decodedNumber << 4) + (buffer[i] & 0x0f); // Only use last 4 bits of 5th byte
-                else
-                    decodedNumber = (decodedNumber << BitsPerByte) + buffer[i];
-            }
-            return decodedNumber;
-        }
-
-        public long ReadLtf8()
-        {
-            var prefix = ReadByte();
-            var bytesToRead = GetBytesToRead(prefix, 8);
-            var buffer = new byte[8]; // Make static for performance?
-            Read(buffer, 0, bytesToRead);
-            var bitsFromPrefix = ((prefix << bytesToRead) & 0xff) >> bytesToRead; // Zero out leading 1's
-            long decodedNumber = bitsFromPrefix;
-            for (int i = 0; i < bytesToRead; i++)
-            {
-                decodedNumber = (decodedNumber << BitsPerByte) + buffer[i];
-            }
-            return decodedNumber;
-        }
-
-        private int GetBytesToRead(byte prefix, int maxBytes)
-        {
-            var bytesToRead = 0;
-            var bitPosition = BitsPerByte - 1;
-            while (bitPosition >= 0 && (prefix & (byte)(0x1 << bitPosition)) > 0)
-            {
-                bytesToRead++;
-                if (bytesToRead == maxBytes)
-                    return maxBytes;
-                bitPosition--;
-            }
-            return bytesToRead;
-        }
+        public void Seek(long offset, SeekOrigin origin) => reader.BaseStream.Seek(offset, origin);
+        public byte ReadByte() => reader.ReadByte();
+        public byte[] ReadBytes(int count) => reader.ReadBytes(count);
+        public void Read(byte[] buffer, int offset, int count) => reader.Read(buffer, offset, count);
+        public int ReadInt32() => reader.ReadInt32();
+        public uint ReadUInt32() => reader.ReadUInt32();
+        public char ReadChar() => reader.ReadChar();
+        public sbyte ReadSByte() => reader.ReadSByte();
+        public short ReadInt16() => reader.ReadInt16();
+        public ushort ReadUInt16() => reader.ReadUInt16();
+        public float ReadSingle() => reader.ReadSingle();
+        public int ReadItf8() => reader.ReadItf8();
+        public long ReadLtf8() => reader.ReadLtf8();
 
         public ICramEncoding<int> ReadIntegerEncoding()
         {
@@ -191,6 +116,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
         }
 
+        public void ReadAndDiscardUnknownEncoding()
+        {
+            var codecId = (Codec)ReadItf8();
+            var numberOfBytes = ReadItf8();
+            ReadBytes(numberOfBytes);
+        }
+
         public ICramEncoding<byte> ReadByteEncoding()
         {
             var codecId = (Codec)ReadItf8();
@@ -216,12 +148,36 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                     return new HuffmanByteCramEncoding(huffmanCodeSymbols);
                 }
                 case Codec.Golomb:
+                {
+                    var offset = ReadItf8();
+                    var m = ReadItf8();
+                    return new GolombCramEncoding(offset, m);
+                }
+                case Codec.Beta:
+                {
+                    var offset = ReadItf8();
+                    var numberOfBits = ReadItf8();
+                    return new BetaCramEncoding(offset, numberOfBits);
+                }
+                case Codec.SubExponential:
+                {
+                    var offset = ReadItf8();
+                    var k = ReadItf8();
+                    return new SubExponentialCramEncoding(offset, k);
+                }
+                case Codec.GolombRice:
+                {
+                    var offset = ReadItf8();
+                    var log2OfM = ReadItf8();
+                    return new GolombRiceCramEncoding(offset, log2OfM);
+                }
+                case Codec.Gamma:
+                {
+                    var offset = ReadItf8();
+                    return new GammaCramEncoding(offset);
+                }
                 case Codec.ByteArrayLength:
                 case Codec.ByteArrayStop:
-                case Codec.Beta:
-                case Codec.SubExponential:
-                case Codec.GolombRice:
-                case Codec.Gamma:
                     throw new Exception($"Requested a byte encoding but codec '{codecId}' doesn't support bytes");
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -294,26 +250,6 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public void Dispose()
         {
             reader.Dispose();
-        }
-
-        public sbyte ReadSByte()
-        {
-            return reader.ReadSByte();
-        }
-
-        public short ReadInt16()
-        {
-            return reader.ReadInt16();
-        }
-
-        public ushort ReadUInt16()
-        {
-            return reader.ReadUInt16();
-        }
-
-        public float ReadSingle()
-        {
-            return reader.ReadSingle();
         }
     }
 }

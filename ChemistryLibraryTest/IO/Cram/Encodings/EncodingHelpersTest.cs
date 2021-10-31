@@ -1,8 +1,7 @@
-﻿using GenomeTools.ChemistryLibrary.IO.Cram;
-using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
+﻿using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.IO.Cram
+namespace GenomeTools.ChemistryLibraryTest.IO.Cram.Encodings
 {
     public class EncodingHelpersTest
     {

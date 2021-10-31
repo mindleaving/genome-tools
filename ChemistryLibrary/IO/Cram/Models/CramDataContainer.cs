@@ -8,7 +8,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
         public CramContainerHeader ContainerHeader { get; }
         public CramCompressionHeader CompressionHeader { get; }
         public List<CramSlice> Slices { get; }
-        public List<CramBlock> Blocks => Slices.SelectMany(x => x.Blocks).ToList();
+        public List<CramBlock> Blocks => Slices.SelectMany(x => x.ExternalBlocks).ToList();
 
         public CramDataContainer(
             CramContainerHeader containerHeader, 

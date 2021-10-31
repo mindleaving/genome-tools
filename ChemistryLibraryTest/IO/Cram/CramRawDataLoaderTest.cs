@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace GenomeTools.ChemistryLibraryTest.IO.Cram
 {
-    public class CramLoaderTest
+    public class CramRawDataLoaderTest
     {
         const string TestDataDirectory = @"F:\datasets\mygenome\test\cram\3.0";
         private static object[] ValidCramFiles = Directory.GetFiles(Path.Combine(TestDataDirectory, "passed"), "*.cram");
@@ -15,8 +15,8 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
         [TestCaseSource(nameof(ValidCramFiles))]
         public void CanOpenValidCramFiles(string filePath)
         {
-            var sut = new CramLoader();
-            CramLoaderResult result = null;
+            var sut = new CramRawDataLoader();
+            CramRawData result = null;
             Assert.That(() => result = sut.Load(filePath), Throws.Nothing);
             Assert.That(result, Is.Not.Null);
         }
@@ -25,17 +25,8 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
         [TestCaseSource(nameof(InvalidCramFiles))]
         public void InvalidCramFilesThrowException(string filePath)
         {
-            var sut = new CramLoader();
+            var sut = new CramRawDataLoader();
             Assert.That(() => sut.Load(filePath), Throws.Exception);
-        }
-
-        [Test]
-        //[Ignore("Tool")]
-        public void OpenRealworldCram()
-        {
-            var cramFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.cram";
-            var sut = new CramLoader();
-            var result = sut.Load(cramFilePath);
         }
     }
 }

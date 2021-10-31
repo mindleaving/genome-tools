@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
-    public class GammaCramEncoding : ICramEncoding<int>
+    public class GammaCramEncoding : ICramEncoding<int>, ICramEncoding<byte>
     {
         public GammaCramEncoding(int offset)
         {
@@ -14,47 +14,48 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         public int Offset { get; }
 
 
-        public BitArray Encode(int item)
+        public void Encode(int item, BitStream stream)
         {
             var offsetItem = item + Offset;
             var bits = new BitArray(BitConverter.GetBytes(offsetItem));
             var n = EncodingHelpers.IndexOfLast1(bits)+1;
-            var result = new BitArray(2 * n);
-            CopyBitsLittleToBigEndian(bits, result, n);
-            return result;
+            for (int i = 0; i < n; i++)
+            {
+                stream.WriteBit(false);
+            }
+            CopyBitsLittleToBigEndian(bits, stream, n);
         }
 
-        private void CopyBitsLittleToBigEndian(BitArray source, BitArray target, int bitCount)
+        public void Encode(byte item, BitStream stream)
+        {
+            Encode((int)item, stream);
+        }
+
+        private void CopyBitsLittleToBigEndian(BitArray source, BitStream target, int bitCount)
         {
             for (int bitIndex = 0; bitIndex < bitCount; bitIndex++)
             {
-                var targetIndex = target.Length - 1 - bitIndex;
-                var sourceIndex = bitIndex;
-                target[targetIndex] = source[sourceIndex];
+                var sourceIndex = bitCount - 1 - bitIndex;
+                target.WriteBit(source[sourceIndex]);
             }
         }
 
-        public int Decode(BitArray bits)
+        public int Decode(BitStream bits)
         {
             var n = CountZeros(bits);
-            var result = ToInt32(bits, n) - Offset;
+            var result = (1 << (n-1)) + bits.ReadInt32(n-1) - Offset;
             return result;
         }
 
-        private int ToInt32(BitArray bits, int startIndex)
+        byte ICramEncoding<byte>.Decode(BitStream bits)
         {
-            var number = 0;
-            for (int i = startIndex; i < bits.Length; i++)
-            {
-                number = (number << 1) + (bits[i] ? 1 : 0);
-            }
-            return number;
+            return (byte)Decode(bits);
         }
 
-        private int CountZeros(BitArray bits)
+        private int CountZeros(BitStream bits)
         {
             var count = 0;
-            while (bits[count] == false)
+            while (bits.ReadBit() == false)
             {
                 count++;
             }

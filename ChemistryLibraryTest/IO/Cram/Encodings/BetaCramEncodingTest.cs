@@ -1,9 +1,10 @@
 ﻿using System;
-using GenomeTools.ChemistryLibrary.IO.Cram;
+using System.IO;
+using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.IO.Cram
+namespace GenomeTools.ChemistryLibraryTest.IO.Cram.Encodings
 {
     public class BetaCramEncodingTest
     {
@@ -14,8 +15,11 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
         public void Roundtrip(int value, int offset, int numberOfBits)
         {
             var sut = new BetaCramEncoding(offset, numberOfBits);
-            var encoded = sut.Encode(value);
-            var decoded = sut.Decode(encoded);
+            var stream = new BitStream(new MemoryStream());
+
+            sut.Encode(value, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            var decoded = sut.Decode(stream);
 
             Assert.That(decoded, Is.EqualTo(value));
         }
@@ -26,9 +30,10 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
             var value = 18;
             var offset = 0;
             var numberOfBits = 4; // Max number: 15
+            var stream = new BitStream(new MemoryStream());
             var sut = new BetaCramEncoding(offset, numberOfBits); 
 
-            Assert.That(() => sut.Encode(value), Throws.TypeOf<ArgumentOutOfRangeException>());
+            Assert.That(() => sut.Encode(value, stream), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
     }
 }

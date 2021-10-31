@@ -5,7 +5,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramBlockReader
     {
-        public CramBlock Read(CramReader reader, CramCompressionHeader compressionHeader)
+        public CramBlock Read(CramBinaryReader reader, CramCompressionHeader compressionHeader)
         {
             var blockHeaderReader = new CramBlockHeaderReader();
             var blockHeader = blockHeaderReader.Read(reader);
@@ -19,7 +19,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         }
 
         public List<CramBlock> ReadBlocks(
-            CramReader reader, 
+            CramBinaryReader reader, 
             int numberOfBlocks,
             CramCompressionHeader compressionHeader)
         {

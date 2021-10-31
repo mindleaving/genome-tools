@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using GenomeTools.ChemistryLibrary.IO.Cram;
+using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 using GenomeTools.ChemistryLibrary.IO.Vcf;
 using NUnit.Framework;
 
@@ -10,6 +12,21 @@ namespace GenomeTools.Studies
 {
     public class WholeGenomeSequencingStudy
     {
+        [Test]
+        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.cram", @"F:\datasets\mygenome\hg38.fna")]
+        public void GetReadsInRegion(string alignmentFilePath, string referenceSequenceFilePath)
+        {
+            var cramHeaderReader = new CramHeaderReader();
+            var cramHeader = cramHeaderReader.Read(alignmentFilePath);
+            var referenceSequenceMap = ReferenceSequenceMap.FromSamHeaderEntries(cramHeader.SamHeader);
+            var alignmentAccessor = new CramGenomeSequenceAlignmentAccessor(alignmentFilePath, referenceSequenceFilePath, referenceSequenceMap);
+            var alignment = alignmentAccessor.GetAlignment("chr1", 31244330, 31244340);
+            Console.WriteLine($">{alignment.Chromosome}:{alignment.StartIndex}:{alignment.EndIndex}");
+            Console.WriteLine($"REF: {alignment.ReferenceSequence}");
+            Console.WriteLine($"OWN: {alignment.AlignmentSequence}");
+            Console.WriteLine($"Read count: {alignment.Reads}");
+        }
+
         [Test]
         [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.vcf")]
         public void AnalyzeVariantPositionDistribution(string vcfFilePath)

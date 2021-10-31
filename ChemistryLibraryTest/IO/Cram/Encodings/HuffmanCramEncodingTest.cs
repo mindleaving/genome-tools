@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GenomeTools.ChemistryLibrary.IO.Cram;
+﻿using System.Collections.Generic;
+using System.IO;
+using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.IO.Cram
+namespace GenomeTools.ChemistryLibraryTest.IO.Cram.Encodings
 {
     public class HuffmanCramEncodingTest
     {
@@ -21,7 +21,7 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
                 new('F', 4)
             };
             var sut = new HuffmanIntCramEncoding(symbolsWithCodeLength);
-            var input = new BitArray(new[] { true, true, true, false });
+            var input = new BitStream(new byte[] { 0b11100000 });
 
             var actual = sut.Decode(input);
 
@@ -41,10 +41,13 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
                 new('F', 4)
             };
             var sut = new HuffmanIntCramEncoding(symbolsWithCodeLength);
+            var streamBuffer = new byte[1];
+            var stream = new BitStream(streamBuffer);
 
-            var actual = sut.Encode('E');
+            sut.Encode('E', stream);
+            stream.Flush();
 
-            Assert.That(actual, Is.EqualTo(new BitArray(new[] { true, true, true, false })));
+            Assert.That(streamBuffer[0], Is.EqualTo(0b11100000));
         }
 
         [Test]
@@ -60,7 +63,7 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
                 new('F', 4)
             };
             var sut = new HuffmanByteCramEncoding(symbolsWithCodeLength);
-            var input = new BitArray(new[] { true, true, true, false });
+            var input = new BitStream(new byte[] { 0b11100000 });
 
             var actual = sut.Decode(input);
 
@@ -80,10 +83,13 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
                 new('F', 4)
             };
             var sut = new HuffmanByteCramEncoding(symbolsWithCodeLength);
+            var streamBuffer = new byte[1];
+            var stream = new BitStream(streamBuffer);
 
-            var actual = sut.Encode('E');
+            sut.Encode('E', stream);
+            stream.Flush();
 
-            Assert.That(actual, Is.EqualTo(new BitArray(new[] { true, true, true, false })));
+            Assert.That(streamBuffer[0], Is.EqualTo(0b11100000));
         }
 
         [Test]
@@ -95,8 +101,10 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
 
             foreach (var value in values)
             {
-                var encoded = sut.Encode(value);
-                var decoded = sut.Decode(encoded);
+                var stream = new BitStream(new MemoryStream());
+                sut.Encode(value, stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                var decoded = sut.Decode(stream);
 
                 Assert.That(decoded, Is.EqualTo(value));
             }
@@ -111,8 +119,10 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
 
             foreach (var value in values)
             {
-                var encoded = sut.Encode(value);
-                var decoded = sut.Decode(encoded);
+                var stream = new BitStream(new MemoryStream());
+                sut.Encode(value, stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                var decoded = sut.Decode(stream);
 
                 Assert.That(decoded, Is.EqualTo(value));
             }

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using GenomeTools.ChemistryLibrary.IO.Cram;
 using GenomeTools.ChemistryLibrary.IO.Cram.Index;
 using NUnit.Framework;
 
@@ -18,7 +17,9 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
             CramIndex result = null;
             Assert.That(() => result = sut.Load(filePath), Throws.Nothing);
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.GetEntriesForReferenceSequence(-1), Is.Not.Empty);
+
+            // We don't know the reference sequence IDs and hence cannot test for valid entries of a particular reference ID
+            //Assert.That(result.GetEntriesForReferenceSequence(-1), Is.Not.Empty);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramCompressionHeaderReader
     {
-        public CramCompressionHeader Read(CramReader reader)
+        public CramCompressionHeader Read(CramBinaryReader reader)
         {
             var blockHeaderReader = new CramBlockHeaderReader();
             var blockHeader = blockHeaderReader.Read(reader);
@@ -22,14 +22,14 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return new CramCompressionHeader(preservationMap, dataSeriesEncoding, tagEncoding, checksum);
         }
 
-        private PreservationMap ReadPreservationMap(CramReader reader, CramBlockHeader blockHeader)
+        private PreservationMap ReadPreservationMap(CramBinaryReader reader, CramBlockHeader blockHeader)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
             var readNames = true;
             var apDataSeriesDelta = true;
             var referenceRequired = true;
-            byte[] substitutionMatrix = Array.Empty<byte>();
+            BaseSubstitutionMatrix substitutionMatrix = null;
             var tagIdCombinations = new List<List<TagId>>();
             for (int i = 0; i < numberOfEntries; i++)
             {
@@ -46,7 +46,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                         referenceRequired = reader.ReadByte() == 0x1;
                         break;
                     case "SM":
-                        substitutionMatrix = reader.ReadBytes(5);
+                        substitutionMatrix = new BaseSubstitutionMatrix(reader.ReadBytes(5));
                         break;
                     case "TD":
                         var tagIdBytes = reader.ReadCramByteArray();
@@ -58,7 +58,6 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             }
             //if (substitutionMatrix == null)
             //    throw new Exception("Preservation map is missing substitution matrix");
-            // TODO: Check for valid tag IDs
             return new PreservationMap(
                 readNames,
                 apDataSeriesDelta,
@@ -96,7 +95,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return tagIds;
         }
 
-        private TagEncodingMap ReadTagEncoding(CramReader reader, CramBlockHeader blockHeader)
+        private Dictionary<TagId,ICramEncoding<byte[]>> ReadTagEncoding(CramBinaryReader reader, CramBlockHeader blockHeader)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
@@ -108,7 +107,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 var tagValueEncoding = reader.ReadByteArrayEncoding();
                 tagValueEncodings.Add(tagId, tagValueEncoding);
             }
-            return new TagEncodingMap(tagValueEncodings);
+            return tagValueEncodings;
         }
 
         private static TagId DecodeTagIdForTagEncodingMapEntry(int keyItf8Encoded)
@@ -121,7 +120,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return tagId;
         }
 
-        private DataSeriesEncodingMap ReadDataSeriesEncoding(CramReader reader, CramBlockHeader blockHeader, PreservationMap preservationMap)
+        private DataSeriesEncodingMap ReadDataSeriesEncoding(CramBinaryReader reader, CramBlockHeader blockHeader, PreservationMap preservationMap)
         {
             var sizeInBytes = reader.ReadItf8();
             var numberOfEntries = reader.ReadItf8();
@@ -217,7 +216,9 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                         dataSeriesEncodingMap.QualityScoresEncoding = reader.ReadByteEncoding();
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(key), $"Unknown key '{key}' for data series encoding map");
+                        // See: https://github.com/samtools/hts-specs/issues/598
+                        reader.ReadAndDiscardUnknownEncoding();
+                        break;
                 }
             }
 

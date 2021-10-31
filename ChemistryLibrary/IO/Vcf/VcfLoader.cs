@@ -16,6 +16,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             string line;
             while ((line = reader.ReadLine()) != null)
             {
+                if(string.IsNullOrWhiteSpace(line))
+                    continue;
                 var isMetadata = line.StartsWith("##");
                 if (isMetadata)
                 {

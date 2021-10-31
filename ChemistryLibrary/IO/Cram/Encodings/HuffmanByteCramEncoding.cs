@@ -11,12 +11,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
         }
 
 
-        public BitArray Encode(byte item)
+        public void Encode(byte item, BitStream stream)
         {
-            return base.Encode(item);
+            base.Encode(item, stream);
         }
 
-        byte ICramEncoding<byte>.Decode(BitArray bits)
+        byte ICramEncoding<byte>.Decode(BitStream bits)
         {
             return (byte)base.Decode(bits);
         }

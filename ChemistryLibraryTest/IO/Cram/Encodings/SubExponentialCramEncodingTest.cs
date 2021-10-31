@@ -1,8 +1,9 @@
-﻿using GenomeTools.ChemistryLibrary.IO.Cram;
+﻿using System.IO;
+using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using NUnit.Framework;
 
-namespace GenomeTools.ChemistryLibraryTest.IO.Cram
+namespace GenomeTools.ChemistryLibraryTest.IO.Cram.Encodings
 {
     public class SubExponentialCramEncodingTest
     {
@@ -16,8 +17,11 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
         public void Roundtrip(int value, int offset, int k)
         {
             var sut = new SubExponentialCramEncoding(offset, k);
-            var encoded = sut.Encode(value);
-            var decoded = sut.Decode(encoded);
+            var stream = new BitStream(new MemoryStream());
+
+            sut.Encode(value, stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            var decoded = sut.Decode(stream);
 
             Assert.That(decoded, Is.EqualTo(value));
         }

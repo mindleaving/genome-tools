@@ -16,13 +16,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
             return lastOneIndex;
         }
 
-        public static void WriteUnary(BitArray bits, int value, int bitOffset)
+        public static void WriteUnary(this BitStream stream, int value)
         {
             for (int i = 0; i < value; i++)
             {
-                bits[bitOffset + i] = true;
+                stream.WriteBit(true);
             }
-            // Redundant: bits[bitOffset + value] = false;
+            stream.WriteBit(false);
         }
 
         public static int Log2Floor(int value)
@@ -31,14 +31,25 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
             return IndexOfLast1(bits);
         }
 
-        public static int ReadUnary(BitArray bits)
+        public static int ReadUnary(this BitStream bits)
         {
             var u = 0;
-            while (bits[u] == true)
+            while (bits.ReadBit() == true)
             {
                 u++;
             }
             return u;
+        }
+
+        public static int ReadInt32(this BitStream bits, int count)
+        {
+            var number = 0;
+            for (int i = 0; i < count; i++)
+            {
+                var bit = bits.ReadBit();
+                number = (number << 1) + (bit ? 1 : 0);
+            }
+            return number;
         }
     }
 }
