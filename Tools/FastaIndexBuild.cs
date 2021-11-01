@@ -3,10 +3,10 @@ using NUnit.Framework;
 
 namespace GenomeTools.Tools
 {
-    public class BuildFastaIndex
+    public class FastaIndexBuild
     {
         [Test]
-        [TestCase(@"F:\datasets\mygenome\hg38.fna")]
+        [TestCase(@"F:\datasets\mygenome\references\hg38.fa")]
         public void BuildIndex(string filePath)
         {
             var indexBuilder = new FastaIndexBuilder();

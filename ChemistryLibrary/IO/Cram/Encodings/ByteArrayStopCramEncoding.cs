@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
     public class ByteArrayStopCramEncoding : ICramEncoding<byte[]>
@@ -17,12 +15,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 
         public void Encode(byte[] item, BitStream stream)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotSupportedException();
         }
 
         public byte[] Decode(BitStream bits)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotSupportedException();
         }
     }
 }

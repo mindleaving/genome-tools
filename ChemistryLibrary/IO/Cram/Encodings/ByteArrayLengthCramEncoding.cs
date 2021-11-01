@@ -1,28 +1,26 @@
-using System.Collections;
-
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Encodings
 {
     public class ByteArrayLengthCramEncoding : ICramEncoding<byte[]>
     {
-        public ByteArrayLengthCramEncoding(ICramEncoding<int> arrayLength, ICramEncoding<byte> bytes)
+        public ByteArrayLengthCramEncoding(ICramEncoding<int> arrayLengthEncoding, ICramEncoding<byte> valuesEncoding)
         {
-            ArrayLength = arrayLength;
-            Bytes = bytes;
+            ArrayLengthEncoding = arrayLengthEncoding;
+            ValuesEncoding = valuesEncoding;
         }
 
         public Codec CodecId => Codec.ByteArrayLength;
-        public ICramEncoding<int> ArrayLength { get; }
-        public ICramEncoding<byte> Bytes { get; }
+        public ICramEncoding<int> ArrayLengthEncoding { get; }
+        public ICramEncoding<byte> ValuesEncoding { get; }
 
 
         public void Encode(byte[] item, BitStream stream)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotSupportedException();
         }
 
         public byte[] Decode(BitStream bits)
         {
-            throw new System.NotImplementedException();
+            throw new System.NotSupportedException();
         }
     }
 }

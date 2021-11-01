@@ -13,7 +13,7 @@ namespace GenomeTools.Studies
     public class WholeGenomeSequencingStudy
     {
         [Test]
-        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.cram", @"F:\datasets\mygenome\hg38.fna")]
+        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.cram", @"F:\datasets\mygenome\references\hg38.fa")]
         public void GetReadsInRegion(string alignmentFilePath, string referenceSequenceFilePath)
         {
             var cramHeaderReader = new CramHeaderReader();

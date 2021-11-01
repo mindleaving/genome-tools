@@ -193,7 +193,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 readLength);
             if(qualityScores != null)
                 features.Add(new GenomeReadFeature(GenomeSequencePartType.QualityScores, 0, qualityScores: qualityScores.ToCharArray()));
-            return GenomeRead.MappedRead(referenceId, readPosition, features, mappingQuality);
+            return GenomeRead.MappedRead(referenceId, readPosition, readLength, features, mappingQuality);
         }
 
         private GenomeReadFeature DecodeReadFeature(
@@ -341,12 +341,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 
         private char TranslateBaseByte(byte nucleotideByte)
         {
-            throw new NotImplementedException();
+            return (char)nucleotideByte;
         }
 
         private char TranslateQualityScoreByte(byte qualityScoreByte)
         {
-            throw new NotImplementedException();
+            return (char)qualityScoreByte;
         }
 
         private GenomeRead DecodeUnmappedRead(
@@ -423,6 +423,32 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 var externalBlock = externalBlockStreams[externalEncoding.BlockContentId];
                 return externalBlock.ReadBytes((int)(externalBlock.BaseStream.Length - externalBlock.BaseStream.Position));
             }
+
+            if (encoding.CodecId == Codec.ByteArrayStop)
+            {
+                var byteArrayStopEncoding = (ByteArrayStopCramEncoding)encoding;
+                var externalBlock = externalBlockStreams[byteArrayStopEncoding.ExternalBlockContentId];
+                var bytes = new List<byte>();
+                byte b;
+                while ((b = externalBlock.ReadByte()) != byteArrayStopEncoding.StopValue)
+                {
+                    bytes.Add(b);
+                }
+                return bytes.ToArray();
+            }
+
+            if (encoding.CodecId == Codec.ByteArrayLength)
+            {
+                var byteLengthEncoding = (ByteArrayLengthCramEncoding)encoding;
+                var arrayLength = DecodeIntegerItem(byteLengthEncoding.ArrayLengthEncoding, coreDataStream, externalBlockStreams);
+                var bytes = new byte[arrayLength];
+                for (int i = 0; i < arrayLength; i++)
+                {
+                    bytes[i] = DecodeByteItem(byteLengthEncoding.ValuesEncoding, coreDataStream, externalBlockStreams);
+                }
+                return bytes;
+            }
+
             return encoding.Decode(coreDataStream);
         }
     }

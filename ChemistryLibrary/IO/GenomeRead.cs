@@ -6,241 +6,135 @@ namespace GenomeTools.ChemistryLibrary.IO
 {
     public class GenomeRead : IGenomeSequence
     {
-        private readonly string compiledSequence;
-        private readonly string compiledQualityScores;
+        private readonly string readSequence;
+        private readonly string referenceAlignedSequence;
+        private readonly string readQualityScores;
+        private readonly string referenceAlignedQualityScores;
 
-        private IReadOnlyList<GenomeReadFeature> ReadFeatures { get; }
-
-        public int? ReferenceId { get; }
-        public int? ReadPosition { get; }
+        public IReadOnlyList<GenomeReadFeature> ReadFeatures { get; }
+        public int Length => readSequence.Length;
         public bool IsMapped { get; }
-        public int Length => compiledSequence.Length;
         public int? MappingQuality { get; }
+        public int? ReferenceId { get; }
+        public int? ReferenceStartIndex { get; }
+        public int? ReferenceEndIndex { get; }
 
         private GenomeRead(
-            bool isMapped, int? referenceId, int? readPosition,
-            List<GenomeReadFeature> readFeatures, string compiledSequence, string compiledQualityScores,
+            bool isMapped, 
+            int? referenceId, 
+            int? referenceStartIndex,
+            int? referenceEndIndex,
+            IReadOnlyList<GenomeReadFeature> readFeatures, 
+            string readSequence, 
+            string readQualityScores,
+            string referenceAlignedSequence,
+            string referenceAlignedQualityScores,
             int? mappingQuality = null)
         {
-            if (isMapped && (!referenceId.HasValue || !readPosition.HasValue))
+            if (isMapped && (!referenceId.HasValue || !referenceStartIndex.HasValue))
             {
                 throw new ArgumentException("Mapped genome reads must have a reference ID and position");
             }
 
-            this.compiledSequence = compiledSequence;
-            this.compiledQualityScores = compiledQualityScores;
+            if (referenceStartIndex.HasValue && !referenceEndIndex.HasValue)
+            {
+                throw new ArgumentNullException(nameof(referenceEndIndex), "If a genome read has a start index it must have an end index as well");
+            }
+
+            this.readSequence = readSequence;
+            this.readQualityScores = readQualityScores;
+            this.referenceAlignedSequence = referenceAlignedSequence;
+            this.referenceAlignedQualityScores = referenceAlignedQualityScores;
             IsMapped = isMapped;
             ReferenceId = referenceId;
-            ReadPosition = readPosition;
+            ReferenceStartIndex = referenceStartIndex;
+            ReferenceEndIndex = referenceEndIndex;
             ReadFeatures = readFeatures;
             MappingQuality = mappingQuality;
         }
 
-        private static int CalculateLength(List<GenomeReadFeature> readFeatures)
+        public static GenomeRead MappedRead(
+            int referenceId, 
+            int referenceStartIndex, 
+            int readLength,
+            List<GenomeReadFeature> readFeatures, 
+            int mappingQuality)
         {
-            var length = 0;
-            foreach (var feature in readFeatures)
-            {
-                switch (feature.Type)
-                {
-                    case GenomeSequencePartType.Bases:
-                        length += feature.Sequence.Count;
-                        break;
-                    case GenomeSequencePartType.QualityScores:
-                        length += feature.QualityScores.Count;
-                        break;
-                    case GenomeSequencePartType.BaseWithQualityScore:
-                        length += 1;
-                        break;
-                    case GenomeSequencePartType.Substitution:
-                        length += 1;
-                        break;
-                    case GenomeSequencePartType.Insertion:
-                        length += feature.Sequence.Count;
-                        break;
-                    case GenomeSequencePartType.Deletion:
-                        // Deletions don't contibute to length
-                        break;
-                    case GenomeSequencePartType.ReferenceSkip:
-                        length += feature.SkipLength.Value;
-                        break;
-                    case GenomeSequencePartType.SoftClip:
-                        length += feature.Sequence.Count;
-                        break;
-                    case GenomeSequencePartType.HardClip:
-                        length += feature.SkipLength.Value;
-                        break;
-                    case GenomeSequencePartType.Padding:
-                        length += feature.SkipLength.Value;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            return length;
-        }
+            readFeatures.Sort((a,b) => a.InReadPosition.CompareTo(b.InReadPosition));
 
-        public static GenomeRead MappedRead(int referenceId, int readPosition, List<GenomeReadFeature> readFeatures, int mappingQuality)
-        {
-            var readLength = CalculateLength(readFeatures);
-            var compiledSequence = CompileSequence(readFeatures, readLength);
-            var compiledQualityScores = CompileQualityScores(readFeatures, readLength);
+            var readFormatter = new GenomeReadFormatter();
+            var readSequence = readFormatter.GetReadSequence(readFeatures, readLength);
+            var readQualityScores = readFormatter.GetReadQualityScores(readFeatures, readLength);
+            var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, readLength);
+            var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength);
+            var insertionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion).Sum(x => x.Sequence.Count);
+            var deletionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion).Sum(x => x.DeletionLength.Value);
+            var referenceEndIndex = referenceStartIndex + readLength - insertionsLength + deletionsLength - 1;
             return new GenomeRead(
                 true,
                 referenceId,
-                readPosition,
+                referenceStartIndex,
+                referenceEndIndex,
                 readFeatures,
-                compiledSequence,
-                compiledQualityScores,
+                readSequence,
+                readQualityScores,
+                referenceAlignedSequence,
+                referenceAlignedQualityScores,
                 mappingQuality);
         }
 
-        public static GenomeRead UnmappedRead(IEnumerable<char> sequence, IEnumerable<char> qualityScores, int? referenceId = null, int? readPosition = null)
+        public static GenomeRead UnmappedRead(IEnumerable<char> sequence, IEnumerable<char> qualityScores, int? referenceId = null, int? referenceStartIndex = null)
         {
-            var compiledSequence = new string(sequence.ToArray());
-            var compiledQualityScores = qualityScores != null ?new string(qualityScores.ToArray()) : null;
+            var readSequence = new string(sequence.ToArray());
+            var readQualityScores = qualityScores != null ? new string(qualityScores.ToArray()) : null;
             var features = new List<GenomeReadFeature>
             {
-                new(GenomeSequencePartType.Bases, 0, compiledSequence.ToList(), compiledQualityScores.ToList())
+                new(GenomeSequencePartType.Bases, 0, readSequence.ToList(), readQualityScores?.ToList())
             };
+            int? referenceEndIndex = null;
+            if (referenceStartIndex.HasValue)
+                referenceEndIndex = referenceStartIndex + readSequence.Length - 1;
             return new GenomeRead(
                 false,
                 referenceId,
-                readPosition,
+                referenceStartIndex,
+                referenceEndIndex,
                 features,
-                compiledSequence,
-                compiledQualityScores);
+                readSequence,
+                readQualityScores,
+                null,
+                null);
         }
 
         public string GetSequence()
         {
-            return compiledSequence;
+            return readSequence;
         }
 
-        public string GetSequenceWithoutInserts()
+        public string GetReferenceAlignedSequence()
         {
-            var sequenceWithoutInserts = compiledSequence;
-            foreach (var insert in ReadFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion))
-            {
-                sequenceWithoutInserts = sequenceWithoutInserts.Remove(insert.InReadPosition, insert.Sequence.Count);
-            }
-            return sequenceWithoutInserts;
+            if(!IsMapped)
+                throw new InvalidOperationException("Reference aligned sequence is not supported for unmapped reads, even if they are placed. Use GetSequence() instead");
+            return referenceAlignedSequence;
         }
 
         public string GetQualityScores()
         {
-            return compiledQualityScores;
+            return readQualityScores;
         }
 
-        private static string CompileSequence(List<GenomeReadFeature> readFeatures, int readLength)
+        public string GetReferenceQualityScores()
         {
-            var sequence = new char[readLength];
-            Array.Fill(sequence, '-');
-            var deletionOffset = 0;
-            foreach (var feature in readFeatures)
-            {
-                var inReadPositionWithOffset = feature.InReadPosition + deletionOffset;
-                switch (feature.Type)
-                {
-                    case GenomeSequencePartType.Bases:
-                    case GenomeSequencePartType.SoftClip:
-                    case GenomeSequencePartType.Insertion:
-                        Copy(feature.Sequence, 0, sequence, inReadPositionWithOffset, feature.Sequence.Count);
-                        break;
-                    case GenomeSequencePartType.QualityScores:
-                        if(feature.Sequence != null)
-                        {
-                            Copy(feature.Sequence, 0, sequence, inReadPositionWithOffset, feature.Sequence.Count);
-                        }
-                        break;
-                    case GenomeSequencePartType.BaseWithQualityScore:
-                    case GenomeSequencePartType.Substitution:
-                        sequence[inReadPositionWithOffset] = feature.Sequence[0];
-                        break;
-                    case GenomeSequencePartType.Deletion:
-                        deletionOffset += feature.DeletionLength.Value;
-                        break;
-                    case GenomeSequencePartType.ReferenceSkip:
-                    case GenomeSequencePartType.HardClip:
-                    case GenomeSequencePartType.Padding:
-                        if (feature.Sequence != null)
-                        {
-                            Copy(feature.Sequence, 0, sequence, inReadPositionWithOffset, feature.Sequence.Count);
-                        }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            return new string(sequence);
-        }
-
-        private static string CompileQualityScores(List<GenomeReadFeature> readFeatures, int readLength)
-        {
-            var qualityScores = new char[readLength];
-            Array.Fill(qualityScores, '-');
-            var deletionOffset = 0;
-            foreach (var feature in readFeatures)
-            {
-                var inReadPositionWithOffset = feature.InReadPosition + deletionOffset;
-                switch (feature.Type)
-                {
-                    case GenomeSequencePartType.QualityScores:
-                        Copy(feature.QualityScores, 0, qualityScores, inReadPositionWithOffset, feature.QualityScores.Count);
-                        break;
-                    case GenomeSequencePartType.Bases:
-                    case GenomeSequencePartType.SoftClip:
-                    case GenomeSequencePartType.Insertion:
-                        if(feature.QualityScores != null)
-                        {
-                            Copy(feature.QualityScores, 0, qualityScores, inReadPositionWithOffset, feature.QualityScores.Count);
-                        }
-                        break;
-                    case GenomeSequencePartType.BaseWithQualityScore:
-                        qualityScores[inReadPositionWithOffset] = feature.QualityScores[0];
-                        break;
-                    case GenomeSequencePartType.Substitution:
-                        if(feature.QualityScores != null)
-                        {
-                            qualityScores[inReadPositionWithOffset] = feature.QualityScores[0];
-                        }
-                        break;
-                    case GenomeSequencePartType.Deletion:
-                        deletionOffset += feature.DeletionLength.Value;
-                        break;
-                    case GenomeSequencePartType.ReferenceSkip:
-                    case GenomeSequencePartType.HardClip:
-                    case GenomeSequencePartType.Padding:
-                        if (feature.QualityScores != null)
-                        {
-                            Copy(feature.QualityScores, 0, qualityScores, inReadPositionWithOffset, feature.QualityScores.Count);
-                        }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            return new string(qualityScores);
-        }
-
-
-        private static void Copy(
-            IList<char> source, int sourceOffset, IList<char> target,
-            int targetOffset, int length)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                var sourceIndex = sourceOffset + i;
-                var targetIndex = targetOffset + i;
-                target[targetIndex] = source[sourceIndex];
-            }
+            if(!IsMapped)
+                throw new InvalidOperationException("Reference aligned quality scores are not supported for unmapped reads, even if they are placed. Use GetQualityScores() instead");
+            return referenceAlignedQualityScores;
         }
 
         public char GetBaseAtPosition(int inReadPosition)
         {
             if (inReadPosition >= Length)
                 throw new IndexOutOfRangeException($"Position was outside of read. Position: {inReadPosition}. Length: {Length}");
-            return compiledSequence[inReadPosition];
+            return readSequence[inReadPosition];
         }
     }
 }

@@ -6,6 +6,7 @@
 
         public string SequenceName { get; }
         public int StartIndex { get; }
+        public int Length => sequence.Length;
 
         public GenomeSequence(string sequence, string sequenceName, int startIndex)
         {

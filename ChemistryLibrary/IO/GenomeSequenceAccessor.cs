@@ -60,7 +60,7 @@ namespace GenomeTools.ChemistryLibrary.IO
             fileStream.Seek(startByteOffset, SeekOrigin.Begin);
             using var streamReader = new StreamReader(fileStream);
             var currentIndex = startIndex;
-            while (currentIndex < endIndex)
+            while (currentIndex <= endIndex)
             {
                 var line = streamReader.ReadLine();
                 if (line == null)

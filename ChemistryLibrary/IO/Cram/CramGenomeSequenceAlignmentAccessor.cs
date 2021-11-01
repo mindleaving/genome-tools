@@ -32,22 +32,21 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         public IGenomeSequence GetAlignmentSequence(string chromosome, int startIndex, int endIndex)
         {
             var alignment = GetAlignment(chromosome, startIndex, endIndex);
-            var consensusSequenceBuilder = new GenomeConsensusSequenceBuilder();
-            var consensusSequence = consensusSequenceBuilder.Build(alignment);
-            return consensusSequence;
+            return alignment.AlignmentSequence;
         }
 
         public GenomeSequenceAlignment GetAlignment(string chromosome, int startIndex, int endIndex)
         {
             var referenceSequence = GetReferenceSequence(chromosome, startIndex, endIndex);
-            var alignmentSequence = GetAlignmentSequence(chromosome, startIndex, endIndex);
             var reads = GetReadsInRange(chromosome, startIndex, endIndex);
+            var consensusSequenceBuilder = new GenomeConsensusSequenceBuilder();
+            var consensusSequence = consensusSequenceBuilder.Build(reads, chromosome);
             return new GenomeSequenceAlignment(
                 chromosome,
                 startIndex,
                 endIndex,
-                referenceSequence.GetSequence(),
-                alignmentSequence.GetSequence(),
+                referenceSequence,
+                consensusSequence,
                 reads);
         }
 
@@ -62,8 +61,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 var sliceRecords = reader.ReadSliceRecords(slice, referenceSequenceAccessor);
                 var overlappingReads = sliceRecords
                     .Select(x => x.Read)
-                    .Where(x => x.ReadPosition.HasValue)
-                    .Where(x => !(endIndex < x.ReadPosition.Value || startIndex >= x.ReadPosition.Value+x.Length))
+                    .Where(x => x.ReferenceStartIndex.HasValue)
+                    .Where(x => !(endIndex < x.ReferenceStartIndex.Value || startIndex >= x.ReferenceStartIndex.Value+x.Length))
                     .ToList();
                 readsInRange.AddRange(overlappingReads);
             }

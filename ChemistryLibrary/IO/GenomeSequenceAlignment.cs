@@ -4,8 +4,13 @@ namespace GenomeTools.ChemistryLibrary.IO
 {
     public class GenomeSequenceAlignment
     {
-        public GenomeSequenceAlignment(string chromosome, int startIndex, int endIndex,
-            string referenceSequence, string alignmentSequence, List<GenomeRead> reads)
+        public GenomeSequenceAlignment(
+            string chromosome, 
+            int startIndex, 
+            int endIndex,
+            IGenomeSequence referenceSequence, 
+            IGenomeSequence alignmentSequence, 
+            List<GenomeRead> reads)
         {
             Chromosome = chromosome;
             StartIndex = startIndex;
@@ -18,8 +23,8 @@ namespace GenomeTools.ChemistryLibrary.IO
         public string Chromosome { get; }
         public int StartIndex { get; }
         public int EndIndex { get; }
-        public string ReferenceSequence { get; }
-        public string AlignmentSequence { get; }
+        public IGenomeSequence ReferenceSequence { get; }
+        public IGenomeSequence AlignmentSequence { get; }
         public List<GenomeRead> Reads { get; }
     }
 }

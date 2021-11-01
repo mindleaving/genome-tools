@@ -12,10 +12,9 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var compressedData = reader.ReadBytes(blockHeader.CompressedSize);
             var blockCompressor = new CramBlockCompressor();
             var uncompressedData = blockCompressor.Decompress(compressedData, blockHeader);
-            var decodedData = DecodeBlockData(uncompressedData, compressionHeader);
             var checksum = reader.ReadInt32();
 
-            return new CramBlock(blockHeader, decodedData, checksum);
+            return new CramBlock(blockHeader, uncompressedData, checksum);
         }
 
         public List<CramBlock> ReadBlocks(
@@ -30,12 +29,6 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 blocks.Add(block);
             }
             return blocks;
-        }
-
-        private byte[] DecodeBlockData(byte[] uncompressedData, CramCompressionHeader compressionHeader)
-        {
-            // TODO
-            return uncompressedData;
         }
     }
 }

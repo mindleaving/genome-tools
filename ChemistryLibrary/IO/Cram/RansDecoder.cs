@@ -68,14 +68,14 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 states[stateIndex] = reader.ReadUInt32();
             }
 
-            var outputByteIndex = 0u;
+            var batchByteIndex = 0u;
             var batchSize = uncompressedSize / StateCount; // Intentionally uses the truncation of the integer division
             var useLocalMemoryStream = !(output is MemoryStream);
             // Use a memory stream for performance and to ensure that we can seek
             var localOutputStream = useLocalMemoryStream
                 ? new MemoryStream(new byte[uncompressedSize])
                 : output;
-            while (outputByteIndex < batchSize)
+            while (batchByteIndex < batchSize)
             {
                 for (int stateIndex = 0; stateIndex < StateCount; stateIndex++)
                 {
@@ -84,7 +84,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                     var context = lowerBounds[stateIndex];
                     var contextFrequencyTable = frequencyTable.ContextFrequencyTables[context];
                     var symbol = ConvertFrequencyToSymbol(contextFrequencyTable, frequency);
-                    localOutputStream.Seek(outputByteIndex + stateIndex * batchSize, SeekOrigin.Begin);
+                    localOutputStream.Seek(batchByteIndex + stateIndex * batchSize, SeekOrigin.Begin);
                     localOutputStream.WriteByte(symbol);
                     var cummulativeFrequency = contextFrequencyTable.CummulativeFrequency[symbol];
                     var symbolFrequency = contextFrequencyTable.SymbolFrequency[symbol];
@@ -93,12 +93,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                     lowerBounds[stateIndex] = symbol;
                 }
 
-                outputByteIndex++;
+                batchByteIndex++;
             }
 
             // Handle remaining bytes
-            outputByteIndex *= StateCount;
-            localOutputStream.Seek(outputByteIndex + (StateCount-1) * batchSize, SeekOrigin.Begin);
+            var outputByteIndex = batchByteIndex * StateCount;
+            localOutputStream.Seek(outputByteIndex, SeekOrigin.Begin);
             while (outputByteIndex < uncompressedSize)
             {
                 var stateIndex = StateCount - 1;
