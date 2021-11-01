@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GenomeTools.ChemistryLibrary.IO;
 
-namespace GenomeTools.ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeRead : IGenomeSequence
     {
@@ -56,20 +57,23 @@ namespace GenomeTools.ChemistryLibrary.IO
         public static GenomeRead MappedRead(
             int referenceId, 
             int referenceStartIndex, 
+            IGenomeSequenceAccessor referenceAccessor,
             int readLength,
             List<GenomeReadFeature> readFeatures, 
             int mappingQuality)
         {
-            readFeatures.Sort((a,b) => a.InReadPosition.CompareTo(b.InReadPosition));
-
-            var readFormatter = new GenomeReadFormatter();
-            var readSequence = readFormatter.GetReadSequence(readFeatures, readLength);
-            var readQualityScores = readFormatter.GetReadQualityScores(readFeatures, readLength);
-            var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, readLength);
-            var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength);
             var insertionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion).Sum(x => x.Sequence.Count);
             var deletionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion).Sum(x => x.DeletionLength.Value);
             var referenceEndIndex = referenceStartIndex + readLength - insertionsLength + deletionsLength - 1;
+            var referenceSequence = referenceAccessor.GetSequenceById(referenceId, referenceStartIndex, referenceEndIndex).GetSequence();
+
+            readFeatures.Sort((a,b) => a.InReadPosition.CompareTo(b.InReadPosition));
+
+            var readFormatter = new GenomeReadFormatter();
+            var readSequence = readFormatter.GetReadSequence(readFeatures, readLength, referenceSequence);
+            var readQualityScores = readFormatter.GetReadQualityScores(readFeatures, readLength);
+            var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, referenceSequence);
+            var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength);
             return new GenomeRead(
                 true,
                 referenceId,
@@ -135,6 +139,13 @@ namespace GenomeTools.ChemistryLibrary.IO
             if (inReadPosition >= Length)
                 throw new IndexOutOfRangeException($"Position was outside of read. Position: {inReadPosition}. Length: {Length}");
             return readSequence[inReadPosition];
+        }
+
+        public char GetQualityScoreAtPosition(int inReadPosition)
+        {
+            if (inReadPosition >= Length)
+                throw new IndexOutOfRangeException($"Position was outside of read. Position: {inReadPosition}. Length: {Length}");
+            return readQualityScores[inReadPosition];
         }
     }
 }

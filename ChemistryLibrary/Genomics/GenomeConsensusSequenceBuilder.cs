@@ -2,7 +2,7 @@
 using System.Linq;
 using Commons.Extensions;
 
-namespace GenomeTools.ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeConsensusSequenceBuilder
     {
@@ -20,7 +20,7 @@ namespace GenomeTools.ChemistryLibrary.IO
             var sequenceEndIndex = readQueue.Select(x => x.ReferenceEndIndex.Value).Max();
             var readsInFrame = new List<GenomeRead>();
             var consensusSequence = new List<char>();
-            for (int sequenceIndex = sequenceStartIndex; sequenceIndex < sequenceEndIndex; sequenceIndex++)
+            for (int sequenceIndex = sequenceStartIndex; sequenceIndex <= sequenceEndIndex; sequenceIndex++)
             {
                 // Add reads that have come into frame
                 while (readQueue.Count > 0 && readQueue.Peek().ReferenceStartIndex.Value <= sequenceIndex)

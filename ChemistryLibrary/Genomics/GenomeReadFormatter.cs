@@ -2,23 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GenomeTools.ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeReadFormatter
     {
-        
-        public string GetReadSequence(List<GenomeReadFeature> readFeatures, int readLength)
+        public string GetReadSequence(
+            List<GenomeReadFeature> readFeatures, 
+            int readLength,
+            string referenceSequence)
         {
-            var sequence = new char[readLength];
-            Array.Fill(sequence, '\0');
+            var sequence = referenceSequence;
+            var deletions = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion);
+            var insertions = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion);
+            foreach (var insertDelete in insertions.Concat(deletions).OrderBy(x => x.InReadPosition))
+            {
+                switch (insertDelete.Type)
+                {
+                    case GenomeSequencePartType.Insertion:
+                    {
+                        var bases = new string(insertDelete.Sequence.ToArray());
+                        sequence = sequence.Insert(insertDelete.InReadPosition, bases);
+                        break;
+                    }
+                    case GenomeSequencePartType.Deletion:
+                        sequence = sequence.Remove(insertDelete.InReadPosition, insertDelete.DeletionLength.Value);
+                        break;
+                }
+            }
+
+            if (sequence.Length != readLength)
+                throw new Exception("Sequence hasn't the expected length. Are all relevant features taken into account?");
+
+            var sequenceArray = sequence.ToCharArray();
+
             foreach (var feature in readFeatures)
             {
                 switch (feature.Type)
                 {
                     case GenomeSequencePartType.Bases:
                     case GenomeSequencePartType.SoftClip:
-                    case GenomeSequencePartType.Insertion:
-                        Copy(feature.Sequence, 0, sequence, feature.InReadPosition, feature.Sequence.Count);
+                        Copy(feature.Sequence, 0, sequenceArray, feature.InReadPosition, feature.Sequence.Count);
                         break;
                     case GenomeSequencePartType.ReferenceSkip:
                     case GenomeSequencePartType.HardClip:
@@ -26,35 +49,29 @@ namespace GenomeTools.ChemistryLibrary.IO
                     case GenomeSequencePartType.QualityScores:
                         if(feature.Sequence != null)
                         {
-                            Copy(feature.Sequence, 0, sequence, feature.InReadPosition, feature.Sequence.Count);
+                            Copy(feature.Sequence, 0, sequenceArray, feature.InReadPosition, feature.Sequence.Count);
                         }
                         break;
                     case GenomeSequencePartType.BaseWithQualityScore:
                     case GenomeSequencePartType.Substitution:
-                        sequence[feature.InReadPosition] = feature.Sequence[0];
+                        sequenceArray[feature.InReadPosition] = feature.Sequence[0];
                         break;
+                    case GenomeSequencePartType.Insertion:
                     case GenomeSequencePartType.Deletion:
-                        // Ignore
+                        // Have already been handled
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            return new string(sequence);
+            return new string(sequenceArray);
         }
 
-        public string GetReferenceAlignedSequence(List<GenomeReadFeature> readFeatures, int readLength)
+        public string GetReferenceAlignedSequence(
+            List<GenomeReadFeature> readFeatures,
+            string referenceSequence)
         {
-            var deletionLength = readFeatures
-                .Where(x => x.Type == GenomeSequencePartType.Deletion)
-                .Select(x => x.DeletionLength.Value)
-                .Sum();
-            var insertionLength = readFeatures
-                .Where(x => x.Type == GenomeSequencePartType.Insertion)
-                .Select(x => x.Sequence.Count)
-                .Sum();
-            var sequence = new char[readLength + deletionLength - insertionLength];
-            Array.Fill(sequence, '-');
+            var sequence = referenceSequence.ToCharArray();
             var deletionOffset = 0;
             var insertionOffset = 0;
             foreach (var feature in readFeatures)
@@ -80,6 +97,10 @@ namespace GenomeTools.ChemistryLibrary.IO
                         sequence[referencePosition] = feature.Sequence[0];
                         break;
                     case GenomeSequencePartType.Deletion:
+                        for (int i = 0; i < feature.DeletionLength; i++)
+                        {
+                            sequence[referencePosition+i] = '-';
+                        }
                         deletionOffset += feature.DeletionLength.Value;
                         break;
                     case GenomeSequencePartType.ReferenceSkip:
@@ -100,7 +121,7 @@ namespace GenomeTools.ChemistryLibrary.IO
         public string GetReadQualityScores(List<GenomeReadFeature> readFeatures, int readLength)
         {
             var qualityScores = new char[readLength];
-            Array.Fill(qualityScores, '\0');
+            Array.Fill(qualityScores, '!');
             foreach (var feature in readFeatures)
             {
                 switch (feature.Type)
@@ -149,7 +170,7 @@ namespace GenomeTools.ChemistryLibrary.IO
                 .Select(x => x.Sequence.Count)
                 .Sum();
             var qualityScores = new char[readLength+deletionLength-insertionLength];
-            Array.Fill(qualityScores, '\0');
+            Array.Fill(qualityScores, '!');
             var deletionOffset = 0;
             var insertionOffset = 0;
             foreach (var feature in readFeatures)

@@ -1,4 +1,4 @@
-﻿namespace GenomeTools.ChemistryLibrary.IO
+﻿namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeSequence : IGenomeSequence
     {
@@ -23,6 +23,11 @@
         public char GetBaseAtPosition(int position)
         {
             return sequence[position];
+        }
+
+        public char GetQualityScoreAtPosition(int position)
+        {
+            return '~';
         }
     }
 }

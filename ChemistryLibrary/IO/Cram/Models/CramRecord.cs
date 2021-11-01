@@ -1,4 +1,6 @@
-﻿namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
+﻿using GenomeTools.ChemistryLibrary.Genomics;
+
+namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
 {
     public class CramRecord
     {

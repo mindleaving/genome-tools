@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using GenomeTools.ChemistryLibrary.Extensions;
+using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.IO.Cram.Encodings;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 
@@ -13,7 +14,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
     {
         public List<CramRecord> ReadSliceRecords(
             CramSlice slice,
-            GenomeSequenceAccessor referenceSequenceAccessor)
+            IGenomeSequenceAccessor referenceSequenceAccessor)
         {
             var compressionHeader = slice.CompressionHeader;
             var coreDataStream = new BitStream(slice.CoreDataBlock.UncompressedDecodedData);
@@ -163,7 +164,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             BitStream coreDataStream, 
             Dictionary<int, BinaryReader> externalBlockStreams,
             int referenceId,
-            GenomeSequenceAccessor referenceSequenceAccessor,
+            IGenomeSequenceAccessor referenceSequenceAccessor,
             int readPosition,
             int readLength)
         {
@@ -193,7 +194,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 readLength);
             if(qualityScores != null)
                 features.Add(new GenomeReadFeature(GenomeSequencePartType.QualityScores, 0, qualityScores: qualityScores.ToCharArray()));
-            return GenomeRead.MappedRead(referenceId, readPosition, readLength, features, mappingQuality);
+            return GenomeRead.MappedRead(referenceId, readPosition, referenceSequenceAccessor, readLength, features, mappingQuality);
         }
 
         private GenomeReadFeature DecodeReadFeature(

@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 using GenomeTools.ChemistryLibrary.IO.Fasta;
 
 namespace GenomeTools.ChemistryLibrary.IO
 {
-    public class GenomeSequenceAccessor
+    public class GenomeSequenceAccessor : IGenomeSequenceAccessor, IDisposable
     {
         private readonly string sequenceFilePath;
         private readonly string indexFilePath;
         private readonly ReferenceSequenceMap sequenceNameOrder;
         private Dictionary<string, FastaIndexEntry> indexEntries;
+        private Stream fileStream;
 
         public GenomeSequenceAccessor(
             string sequenceFilePath,
@@ -26,12 +28,14 @@ namespace GenomeTools.ChemistryLibrary.IO
 
         private void Initialize()
         {
-            if(indexEntries != null)
-                return;
-            if (!File.Exists(indexFilePath))
-                BuildReferenceIndex();
             if (indexEntries == null)
+            {
+                if (!File.Exists(indexFilePath))
+                    BuildReferenceIndex();
                 LoadReferenceIndex();
+            }
+            if(fileStream == null)
+                fileStream = File.OpenRead(sequenceFilePath);
         }
 
         private void BuildReferenceIndex()
@@ -56,16 +60,15 @@ namespace GenomeTools.ChemistryLibrary.IO
             var startByteOffset = indexEntry.FirstBaseOffset + startLineNumber * indexEntry.LineWidth + startCharacterInLine;
 
             var sequenceBuilder = new StringBuilder();
-            using var fileStream = File.OpenRead(sequenceFilePath);
             fileStream.Seek(startByteOffset, SeekOrigin.Begin);
-            using var streamReader = new StreamReader(fileStream);
+            using var streamReader = new StreamReader(fileStream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, 1024, leaveOpen: true);
             var currentIndex = startIndex;
             while (currentIndex <= endIndex)
             {
                 var line = streamReader.ReadLine();
                 if (line == null)
                     throw new Exception($"Could not find parts of sequence '{sequenceName}:{startIndex}:{endIndex}' in reference file");
-                sequenceBuilder.Append(line);
+                sequenceBuilder.Append(line.ToUpper());
                 currentIndex += line.Length;
             }
 
@@ -77,6 +80,11 @@ namespace GenomeTools.ChemistryLibrary.IO
         {
             var sequenceName = sequenceNameOrder.GetSequenceNameFromIndex(referenceId);
             return GetSequenceByName(sequenceName, startIndex, endIndex);
+        }
+
+        public void Dispose()
+        {
+            fileStream?.Dispose();
         }
     }
 }

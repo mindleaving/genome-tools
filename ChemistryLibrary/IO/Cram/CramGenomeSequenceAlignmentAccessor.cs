@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.IO.Cram.Index;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
-    public class CramGenomeSequenceAlignmentAccessor : IGenomeAlignmentAccessor
+    public class CramGenomeSequenceAlignmentAccessor : IGenomeAlignmentAccessor, IDisposable
     {
         private readonly string alignmentFilePath;
         private readonly ReferenceSequenceMap referenceSequenceMap;
@@ -100,6 +102,11 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
         {
             var cramIndexReader = new CramIndexLoader();
             alignmentIndex = cramIndexReader.Load(alignmentIndexFilePath);
+        }
+
+        public void Dispose()
+        {
+            referenceSequenceAccessor.Dispose();
         }
     }
 }

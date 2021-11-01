@@ -1,4 +1,6 @@
-﻿namespace GenomeTools.ChemistryLibrary.IO
+﻿using GenomeTools.ChemistryLibrary.Genomics;
+
+namespace GenomeTools.ChemistryLibrary.IO
 {
     public interface IGenomeAlignmentAccessor
     {

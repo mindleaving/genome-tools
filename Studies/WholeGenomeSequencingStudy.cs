@@ -12,19 +12,23 @@ namespace GenomeTools.Studies
 {
     public class WholeGenomeSequencingStudy
     {
+        private string alignmentFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.cram";
+        private string referenceSequenceFilePath = @"F:\datasets\mygenome\references\hg38.fa";
+
         [Test]
-        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.cram", @"F:\datasets\mygenome\references\hg38.fa")]
-        public void GetReadsInRegion(string alignmentFilePath, string referenceSequenceFilePath)
+        [TestCase("chr1", 31244000, 31245000)]
+        [TestCase("chr7", 117479963, 117668665)]
+        public void GetReadsInRegion(string chromosome, int startIndex, int endIndex)
         {
             var cramHeaderReader = new CramHeaderReader();
             var cramHeader = cramHeaderReader.Read(alignmentFilePath);
             var referenceSequenceMap = ReferenceSequenceMap.FromSamHeaderEntries(cramHeader.SamHeader);
-            var alignmentAccessor = new CramGenomeSequenceAlignmentAccessor(alignmentFilePath, referenceSequenceFilePath, referenceSequenceMap);
-            var alignment = alignmentAccessor.GetAlignment("chr1", 31244330, 31244340);
+            using var alignmentAccessor = new CramGenomeSequenceAlignmentAccessor(alignmentFilePath, referenceSequenceFilePath, referenceSequenceMap);
+            var alignment = alignmentAccessor.GetAlignment(chromosome, startIndex, endIndex);
             Console.WriteLine($">{alignment.Chromosome}:{alignment.StartIndex}:{alignment.EndIndex}");
-            Console.WriteLine($"REF: {alignment.ReferenceSequence}");
-            Console.WriteLine($"OWN: {alignment.AlignmentSequence}");
-            Console.WriteLine($"Read count: {alignment.Reads}");
+            Console.WriteLine($"Read count: {alignment.Reads.Count}");
+            Console.WriteLine();
+            GenomeAlignmentPrinter.Print(alignment, GenomeAlignmentPrinter.PrintTarget.File, $@"F:\datasets\mygenome\{chromosome}_{startIndex}_{endIndex}.txt");
         }
 
         [Test]

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GenomeTools.ChemistryLibrary.IO
+namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeSequenceAlignment
     {
