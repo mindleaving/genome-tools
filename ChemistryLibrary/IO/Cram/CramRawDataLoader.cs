@@ -6,13 +6,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
     public class CramRawDataLoader
     {
-        public CramRawData Load(string filePath)
+        public CramRawData Load(string filePath, string referenceSequenceFilePath = null)
         {
             using var reader = new CramBinaryReader(filePath);
             reader.CheckFileFormat();
             var headerReader = new CramHeaderReader();
 
-            var cramHeader = headerReader.Read(reader, reader.Position);
+            var cramHeader = headerReader.Read(reader, reader.Position, referenceSequenceFilePath);
             var dataContainerReader = new CramDataContainerReader();
             var dataContainers = dataContainerReader.ReadMany(reader, reader.Position);
             if (dataContainers.Last() is not CramEofContainer)

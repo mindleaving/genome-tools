@@ -14,7 +14,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
         public string Md5Checksum { get; }
         public string Species { get; }
         public string MoleculeTopology { get; }
-        public string StorageLocation { get; }
+        public string StorageLocation { get; set; }
 
         public ReferenceSequenceSamHeaderEntry(
             string referenceSequenceName, uint referenceSequenceLength, string alternativeLocus,

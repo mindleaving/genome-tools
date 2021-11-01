@@ -20,8 +20,8 @@ namespace GenomeTools.Studies
         [TestCase("chr7", 117479963, 117668665)]
         public void GetReadsInRegion(string chromosome, int startIndex, int endIndex)
         {
-            var cramHeaderReader = new CramHeaderReader();
-            var cramHeader = cramHeaderReader.Read(alignmentFilePath);
+            var cramHeaderReader = new CramHeaderReader(CramHeaderReader.Md5CheckFailureMode.WriteToConsole);
+            var cramHeader = cramHeaderReader.Read(alignmentFilePath, referenceSequenceFilePath);
             var referenceSequenceMap = ReferenceSequenceMap.FromSamHeaderEntries(cramHeader.SamHeader);
             using var alignmentAccessor = new CramGenomeSequenceAlignmentAccessor(alignmentFilePath, referenceSequenceFilePath, referenceSequenceMap);
             var alignment = alignmentAccessor.GetAlignment(chromosome, startIndex, endIndex);
