@@ -12,6 +12,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         private readonly string readQualityScores;
         private readonly string referenceAlignedQualityScores;
 
+        public string Id { get; }
         public IReadOnlyList<GenomeReadFeature> ReadFeatures { get; }
         public int Length => readSequence.Length;
         public bool IsMapped { get; }
@@ -21,6 +22,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         public int? ReferenceEndIndex { get; }
 
         private GenomeRead(
+            string id, 
             bool isMapped, 
             int? referenceId, 
             int? referenceStartIndex,
@@ -46,6 +48,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             this.readQualityScores = readQualityScores;
             this.referenceAlignedSequence = referenceAlignedSequence;
             this.referenceAlignedQualityScores = referenceAlignedQualityScores;
+            Id = id;
             IsMapped = isMapped;
             ReferenceId = referenceId;
             ReferenceStartIndex = referenceStartIndex;
@@ -60,7 +63,8 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             IGenomeSequenceAccessor referenceAccessor,
             int readLength,
             List<GenomeReadFeature> readFeatures, 
-            int mappingQuality)
+            int mappingQuality,
+            string id = null)
         {
             var insertionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion).Sum(x => x.Sequence.Count);
             var deletionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion).Sum(x => x.DeletionLength.Value);
@@ -75,6 +79,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, referenceSequence);
             var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength);
             return new GenomeRead(
+                id,
                 true,
                 referenceId,
                 referenceStartIndex,
@@ -87,7 +92,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                 mappingQuality);
         }
 
-        public static GenomeRead UnmappedRead(IEnumerable<char> sequence, IEnumerable<char> qualityScores, int? referenceId = null, int? referenceStartIndex = null)
+        public static GenomeRead UnmappedRead(IEnumerable<char> sequence, IEnumerable<char> qualityScores, string id = null, int? referenceId = null, int? referenceStartIndex = null)
         {
             var readSequence = new string(sequence.ToArray());
             var readQualityScores = qualityScores != null ? new string(qualityScores.ToArray()) : null;
@@ -99,6 +104,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             if (referenceStartIndex.HasValue)
                 referenceEndIndex = referenceStartIndex + readSequence.Length - 1;
             return new GenomeRead(
+                id,
                 false,
                 referenceId,
                 referenceStartIndex,

@@ -15,8 +15,11 @@ namespace GenomeTools.ChemistryLibraryTest.IO
 
             var sut = new UnbufferedStreamReader(inputStream);
 
+            Assert.That(sut.Position, Is.EqualTo(0));
             Assert.That(sut.ReadLine(), Is.EqualTo("Line1"));
+            Assert.That(sut.Position, Is.EqualTo(6));
             Assert.That(sut.ReadLine(), Is.EqualTo("Line2"));
+            Assert.That(sut.Position, Is.EqualTo(11));
             Assert.That(sut.ReadLine(), Is.Null);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram.Index
@@ -19,6 +20,11 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Index
             if (!sequenceIndexEntries.ContainsKey(sequenceId))
                 return new List<CramIndexEntry>();
             return sequenceIndexEntries[sequenceId];
+        }
+
+        public List<CramIndexEntry> GetAll()
+        {
+            return sequenceIndexEntries.SelectMany(kvp => kvp.Value).ToList();
         }
     }
 }

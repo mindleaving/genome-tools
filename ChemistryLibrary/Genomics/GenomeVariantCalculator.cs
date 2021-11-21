@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Commons.Extensions;
+using GenomeTools.ChemistryLibrary.Measurements;
 
-namespace GenomeTools.ChemistryLibrary.Measurements
+namespace GenomeTools.ChemistryLibrary.Genomics
 {
     public class GenomeVariantCalculator
     {
-        public GenomeVariantProbability CalculateVariantProbability(char referenceBase, List<BaseWithQualityScore> votes)
+        public GenomeVariantProbability CalculateVariantProbability(char referenceBase, List<NucleotideWithQualityScore> votes)
         {
             var scoreMap = "ACGTN".ToDictionary(c => c, _ => 0.0);
 
@@ -56,30 +57,6 @@ namespace GenomeTools.ChemistryLibrary.Measurements
             var q = phredQualityScore - 33;
             var p = Math.Pow(10, -q / 10.0);
             return p;
-        }
-    }
-
-    public class BaseWithQualityScore
-    {
-        public char Nucleotide { get; }
-        public char QualityScore { get; }
-
-        public BaseWithQualityScore(char nucleotide, char qualityScore)
-        {
-            Nucleotide = nucleotide;
-            QualityScore = qualityScore;
-        }
-    }
-
-    public class GenomeVariantProbability
-    {
-        public double HomozygousProbability { get; }
-        public double HeterozygousProability { get; }
-
-        public GenomeVariantProbability(double homozygousProbability, double heterozygousProability)
-        {
-            HomozygousProbability = homozygousProbability;
-            HeterozygousProability = heterozygousProability;
         }
     }
 }

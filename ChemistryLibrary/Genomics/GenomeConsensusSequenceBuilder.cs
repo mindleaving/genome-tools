@@ -46,7 +46,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         public NucleotideStatistics(IEnumerable<char> nucleotides)
         {
             statistics = nucleotides.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
-            MostCommonNucleotide = statistics.MaximumItem(x => x.Value).Key;
+            MostCommonNucleotide = statistics.Count > 0 ? statistics.MaximumItem(x => x.Value).Key : 'N';
         }
 
         public char MostCommonNucleotide { get; }

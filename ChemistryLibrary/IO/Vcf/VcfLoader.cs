@@ -7,7 +7,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 {
     public class VcfLoader
     {
-        public VcfLoaderResult Load(string filePath, Action<VcfVariantEntry, List<VcfMetadataEntry>> variantAction = null)
+        public VcfLoaderResult Load(
+            string filePath, 
+            Action<VcfVariantEntry, List<VcfMetadataEntry>> variantAction = null,
+            Dictionary<string,string> sequenceNameTranslation = null,
+            long fileOffset = -1,
+            Func<VcfVariantEntry, bool> variantFilter = null,
+            Func<VcfVariantEntry, bool> stopCriteria = null)
         {
             using var reader = new StreamReader(filePath);
             var metadataEntries = new List<VcfMetadataEntry>();
@@ -30,12 +36,21 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 if (isHeader)
                 {
                     header = ParseHeader(line);
+                    if (fileOffset > 0)
+                    {
+                        reader.DiscardBufferedData();
+                        reader.BaseStream.Seek(fileOffset, SeekOrigin.Begin);
+                    }
                     continue;
                 }
 
                 if (header == null)
                     throw new FormatException("No header was found before data entries. Make sure there is a single header line starting with '#'");
-                var variant = ParseVariant(line, header);
+                var variant = ParseVariant(line, header, sequenceNameTranslation);
+                if(stopCriteria != null && stopCriteria(variant))
+                    break;
+                if(variantFilter != null && !variantFilter(variant))
+                    continue;
                 if(variantAction != null)
                     variantAction(variant, metadataEntries);
                 else
@@ -43,6 +58,12 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             }
 
             return new VcfLoaderResult(metadataEntries, variants);
+        }
+
+        public VcfHeader ReadHeader(string filePath)
+        {
+            var headerLine = File.ReadLines(filePath).SkipWhile(x => x.StartsWith("##")).First(x => x.StartsWith("#"));
+            return ParseHeader(headerLine);
         }
 
         private VcfMetadataEntry ParseMetadata(string line)
@@ -152,22 +173,24 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 .ToDictionary(kvp => kvp[0], kvp => kvp[1]);
         }
 
-        private VcfHeader ParseHeader(string line)
+        public VcfHeader ParseHeader(string line)
         {
             var columns = line.Substring(1).Split('\t');
             return new VcfHeader(columns);
         }
 
-        private VcfVariantEntry ParseVariant(string line, VcfHeader header)
+        public VcfVariantEntry ParseVariant(string line, VcfHeader header, Dictionary<string, string> sequenceNameTranslation)
         {
             var splittedLine = line.Split('\t');
             if (splittedLine.Length < 8)
                 throw new FormatException($"A variant-line must contain at least 8 values delimited by a TAB, but line had only {splittedLine.Length} values");
             var chromosome = splittedLine[0];
-            var position = splittedLine[1];
+            if(sequenceNameTranslation != null && sequenceNameTranslation.ContainsKey(chromosome))
+                chromosome = sequenceNameTranslation[chromosome];
+            var position = int.Parse(splittedLine[1]);
             var id = splittedLine[2];
             var referenceBases = splittedLine[3];
-            var alternateBases = splittedLine[4];
+            var alternateBases = splittedLine[4].Split(',');
             var quality = splittedLine[5];
             var filterResult = ParseFilterResult(splittedLine[6]);
             var info = ParseVariantInfo(splittedLine[7]);

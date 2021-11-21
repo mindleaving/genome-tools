@@ -1,4 +1,4 @@
-﻿using GenomeTools.Studies;
+﻿using GenomeTools.Tools;
 
 namespace PerformanceProfiling
 {
@@ -6,8 +6,8 @@ namespace PerformanceProfiling
     {
         public static void Main()
         {
-            var testClass = new WholeGenomeSequencingStudy();
-            testClass.GetReadsInRegion("chr1", 31244000, 31245000);
+            var vcfIndexBuilderRunner = new VcfIndexBuilderRunner();
+            vcfIndexBuilderRunner.Run(@"F:\datasets\mygenome\OtherGenomes\genome-1000_chr6.vcf");
         }
     }
 }

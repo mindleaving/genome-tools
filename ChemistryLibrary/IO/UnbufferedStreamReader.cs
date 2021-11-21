@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using Commons.Extensions;
 
 namespace GenomeTools.ChemistryLibrary.IO
 {
     public class UnbufferedStreamReader : IDisposable
     {
+        private const int BufferSize = 1024;
         public Encoding Encoding { get; }
-        public long Position => bufferedByte.HasValue ? stream.Position - 1 : stream.Position;
+        public long Position { get; private set; }
 
-        private byte? bufferedByte = null;
+        private readonly byte[] buffer = new byte[BufferSize];
+        private int bufferIndex = -1;
+        private int bufferLength = 0;
         private readonly Stream stream;
         private readonly bool leaveStreamOpen;
 
@@ -28,35 +33,44 @@ namespace GenomeTools.ChemistryLibrary.IO
 
         public string ReadLine()
         {
-            var buffer = new List<byte>();
-            if (bufferedByte.HasValue)
-            {
-                buffer.Add(bufferedByte.Value);
-                bufferedByte = null;
-            }
-            int result;
+            if(bufferIndex < 0)
+                FillBuffer();
+            var line = new List<byte>();
             var carriageReturnFound = false;
-            while ((result = stream.ReadByte()) >= 0)
+            while (bufferIndex < bufferLength)
             {
-                var b = (byte)result;
+                var b = buffer[bufferIndex];
+                if (carriageReturnFound && b != '\n')
+                    break;
+                AdvanceBuffer();
                 if(b == '\n')
                     break;
-                if (carriageReturnFound)
-                {
-                    bufferedByte = b;
-                    break;
-                }
                 if (b == '\r')
                 {
                     carriageReturnFound = true;
+                    continue;
                 }
-                buffer.Add(b);
+                line.Add(b);
             }
 
-            if (stream.Position >= stream.Length && buffer.Count == 0)
+            if (stream.Position >= stream.Length && line.Count == 0)
                 return null;
 
-            return Encoding.GetString(buffer.ToArray());
+            return Encoding.GetString(line.ToArray());
+        }
+
+        private void AdvanceBuffer()
+        {
+            bufferIndex++;
+            Position++;
+            if (bufferIndex >= bufferLength) 
+                FillBuffer();
+        }
+
+        private void FillBuffer()
+        {
+            bufferLength = stream.Read(buffer, 0, BufferSize);
+            bufferIndex = 0;
         }
 
         public void Dispose()
