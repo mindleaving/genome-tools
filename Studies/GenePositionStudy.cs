@@ -3,27 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Commons.Extensions;
 using Commons.IO;
 using Commons.Mathematics;
+using GenomeTools.ChemistryLibrary.Genomics;
 using NUnit.Framework;
 
 namespace GenomeTools.Studies
 {
-    public class GenePosition
-    {
-        public string GeneSymbol { get; }
-        public string Chromosome { get; }
-        public Range<int> Position { get; }
-
-        public GenePosition(string geneSymbol, string chromosome, Range<int> position)
-        {
-            GeneSymbol = geneSymbol;
-            Chromosome = chromosome;
-            Position = position;
-        }
-    }
-
     public class GenePositionStudy
     {
         [Test]

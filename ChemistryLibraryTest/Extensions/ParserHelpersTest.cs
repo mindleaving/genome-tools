@@ -1,4 +1,5 @@
-﻿using GenomeTools.ChemistryLibrary.Extensions;
+﻿using System.Linq;
+using GenomeTools.ChemistryLibrary.Extensions;
 using NUnit.Framework;
 
 namespace GenomeTools.ChemistryLibraryTest.Extensions
@@ -15,6 +16,19 @@ namespace GenomeTools.ChemistryLibraryTest.Extensions
             Assert.That(actual[1], Is.EqualTo("Number=1"));
             Assert.That(actual[2], Is.EqualTo("Type=String"));
             Assert.That(actual[3], Is.EqualTo("Description=\"Physical phasing haplotype information, describing how the alternate alleles are phased in relation to one another; will always be heterozygous and is not intended to describe called alleles\""));
+        }
+
+        [Test]
+        public void SplitAtLengthReturnsLinesAndRemainder()
+        {
+            var input = "AAAABBBBCC";
+
+            var actual = input.SplitAtLength(4).ToList();
+
+            Assert.That(actual.Count, Is.EqualTo(3));
+            Assert.That(actual[0], Is.EqualTo("AAAA"));
+            Assert.That(actual[1], Is.EqualTo("BBBB"));
+            Assert.That(actual[2], Is.EqualTo("CC"));
         }
     }
 }

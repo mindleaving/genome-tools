@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Commons.Extensions;
 using Commons.Mathematics;
@@ -129,6 +128,8 @@ namespace GenomeTools.ChemistryLibrary.Measurements
             Func<T, T, bool> itemComparer)
         {
             var score = substitutionMatrix[maxScoreRowIndex, maxScoreColumnIndex];
+            if (score == 0)
+                return new AlignmentResult<T>(new List<AlignmentMatch<T>>());
             var rowIndex = maxScoreRowIndex;
             var columnIndex = maxScoreColumnIndex;
             var isMatchInProgress = true;

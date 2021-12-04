@@ -7,6 +7,18 @@ namespace GenomeTools.ChemistryLibrary.Extensions
 {
     public static class ParserHelpers
     {
+        public static IEnumerable<string> SplitAtLength(this string str, int width)
+        {
+            var index = 0;
+            while (index + width < str.Length)
+            {
+                yield return str.Substring(index, width);
+                index += width;
+            }
+
+            if (index < str.Length)
+                yield return str.Substring(index);
+        }
         public static List<string> QuoteAwareSplit(
             this string line,
             char separator,

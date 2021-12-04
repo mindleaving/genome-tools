@@ -6,15 +6,31 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 {
     public class VcfIndexReader
     {
-        public List<VcfIndexEntry> Read(string filePath)
+        private readonly string filePath;
+        private readonly Dictionary<string, string> sequenceNameTranslation;
+
+        public VcfIndexReader(string filePath, Dictionary<string, string> sequenceNameTranslation = null)
         {
-            return File.ReadLines(filePath).Where(line => !string.IsNullOrWhiteSpace(line)).Select(ParseEntry).ToList();
+            this.filePath = filePath;
+            this.sequenceNameTranslation = sequenceNameTranslation;
+        }
+        public List<VcfIndexEntry> Read()
+        {
+            return File.ReadLines(filePath)
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => ParseEntry(line, sequenceNameTranslation))
+                .ToList();
         }
 
-        private VcfIndexEntry ParseEntry(string line)
+        private static VcfIndexEntry ParseEntry(string line, IReadOnlyDictionary<string, string> sequenceNameTranslation)
         {
             var splittedLine = line.Split('\t');
-            return new VcfIndexEntry(splittedLine[0], int.Parse(splittedLine[1]), long.Parse(splittedLine[2]));
+            var chromosome = sequenceNameTranslation != null && sequenceNameTranslation.ContainsKey(splittedLine[0])
+                ? sequenceNameTranslation[splittedLine[0]]
+                : splittedLine[0];
+            var position = int.Parse(splittedLine[1]);
+            var fileOffset = long.Parse(splittedLine[2]);
+            return new VcfIndexEntry(chromosome, position, fileOffset);
         }
     }
 }

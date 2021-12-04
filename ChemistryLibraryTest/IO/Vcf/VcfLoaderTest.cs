@@ -15,9 +15,9 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Vcf
         [TestCaseSource(nameof(ValidVcfFiles))]
         public void CanOpenValidVcfFiles(string filePath)
         {
-            var sut = new VcfLoader();
+            var sut = new VcfAccessor(filePath);
             VcfLoaderResult result = null;
-            Assert.That(() => result = sut.Load(filePath), Throws.Nothing);
+            Assert.That(() => result = sut.Load(), Throws.Nothing);
             Assert.That(result, Is.Not.Null);
         }
 
@@ -25,8 +25,8 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Vcf
         [TestCaseSource(nameof(InvalidVcfFiles))]
         public void InvalidVcfFilesThrowException(string filePath)
         {
-            var sut = new VcfLoader();
-            Assert.That(() => sut.Load(filePath), Throws.Exception);
+            var sut = new VcfAccessor(filePath);
+            Assert.That(() => sut.Load(), Throws.Exception);
         }
     }
 }

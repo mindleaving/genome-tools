@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.IO.Vcf;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace GenomeTools.Studies.GenomeAnalysis
@@ -27,7 +29,7 @@ namespace GenomeTools.Studies.GenomeAnalysis
             InsertionLengthRatio = InsertionLength / (double) GeneLength;
             SNPCount = variants.Count(x => x.IsSNP);
             SNPRatio = variants.Count > 0 ? SNPCount / (double)variants.Count : 0;
-            HeterogenousCount = variants.Count(x => x.IsHeterogenous);
+            HeterogenousCount = variants.Count(x => x.OtherFields[personId][0] != x.OtherFields[personId][2]); // TODO: Makes a lot of assumptions
             HeterogenousCountRatio = variants.Count > 0 ? HeterogenousCount / (double)variants.Count : 0;
             TotalVariantLength = SNPCount + InsertionLength + DeletionLength;
             TotalVariantLengthRatio = TotalVariantLength / (double)GeneLength;
@@ -38,7 +40,7 @@ namespace GenomeTools.Studies.GenomeAnalysis
             GeneParentalOrigin parentalOrigin,
             GenePosition genePosition)
         {
-            Id = GenerateId(personId, parentalOrigin, genePosition.GeneSymbol);
+            Id = ObjectId.GenerateNewId();
             PersonId = personId;
             ParentalOrigin = parentalOrigin;
             GeneSymbol = genePosition.GeneSymbol;
@@ -47,14 +49,6 @@ namespace GenomeTools.Studies.GenomeAnalysis
             EndIndex = genePosition.Position.To;
             GeneLength = genePosition.Position.To - genePosition.Position.From + 1;
             VariantPositions = new List<int>();
-        }
-
-        private static string GenerateId(string personId, GeneParentalOrigin parentalOrigin, string geneSymbol)
-        {
-            var parentalOriginSuffix = parentalOrigin == GeneParentalOrigin.Parent1 ? "_P1" 
-                : parentalOrigin == GeneParentalOrigin.Parent2 ? "_P2" 
-                : string.Empty;
-            return $"{geneSymbol}_{personId}{parentalOriginSuffix}";
         }
 
         public void UpdateRatios()
@@ -69,7 +63,7 @@ namespace GenomeTools.Studies.GenomeAnalysis
         }
 
         [BsonId]
-        public string Id { get; private set; }
+        public ObjectId Id { get; private set; }
         public string PersonId { get; private set; }
         public GeneParentalOrigin ParentalOrigin { get; private set; }
         public string GeneSymbol { get; private set; }
@@ -98,8 +92,8 @@ namespace GenomeTools.Studies.GenomeAnalysis
 
     public enum GeneParentalOrigin
     {
+        Unknown = 0,
         Parent1 = 1,
-        Parent2 = 2,
-        Both = 3
+        Parent2 = 2
     }
 }

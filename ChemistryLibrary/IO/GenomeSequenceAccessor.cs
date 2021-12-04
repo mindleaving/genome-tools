@@ -49,7 +49,13 @@ namespace GenomeTools.ChemistryLibrary.IO
             indexEntries = indexLoader.ReadIndex(indexFilePath).ToDictionary(x => x.SequenceName, x => x);
         }
 
-        public IGenomeSequence GetSequenceByName(string sequenceName, int startIndex, int endIndex)
+        public List<string> GetSequenceNames()
+        {
+            Initialize();
+            return indexEntries.Keys.ToList();
+        }
+
+        public IGenomeSequence GetSequenceByName(string sequenceName, int startIndex = 0, int? endIndex = null)
         {
             Initialize();
             if (!indexEntries.ContainsKey(sequenceName))
@@ -58,12 +64,14 @@ namespace GenomeTools.ChemistryLibrary.IO
             var startLineNumber = startIndex / indexEntry.BasesPerLine;
             var startCharacterInLine = startIndex - indexEntry.BasesPerLine * startLineNumber;
             var startByteOffset = indexEntry.FirstBaseOffset + startLineNumber * indexEntry.LineWidth + startCharacterInLine;
+            if (!endIndex.HasValue)
+                endIndex = (int)indexEntry.Length-1;
 
             var sequenceBuilder = new StringBuilder();
             fileStream.Seek(startByteOffset, SeekOrigin.Begin);
             using var streamReader = new StreamReader(fileStream, Encoding.ASCII, detectEncodingFromByteOrderMarks: false, 1024, leaveOpen: true);
             var currentIndex = startIndex;
-            while (currentIndex <= endIndex)
+            while (currentIndex <= endIndex.Value)
             {
                 var line = streamReader.ReadLine();
                 if (line == null)
@@ -72,11 +80,11 @@ namespace GenomeTools.ChemistryLibrary.IO
                 currentIndex += line.Length;
             }
 
-            var sequence = sequenceBuilder.ToString().Substring(0, endIndex - startIndex + 1);
+            var sequence = sequenceBuilder.ToString().Substring(0, endIndex.Value - startIndex + 1);
             return new GenomeSequence(sequence, sequenceName, startIndex);
         }
 
-        public IGenomeSequence GetSequenceById(int referenceId, int startIndex, int endIndex)
+        public IGenomeSequence GetSequenceById(int referenceId, int startIndex = 0, int? endIndex = null)
         {
             var sequenceName = sequenceNameOrder.GetSequenceNameFromIndex(referenceId);
             return GetSequenceByName(sequenceName, startIndex, endIndex);

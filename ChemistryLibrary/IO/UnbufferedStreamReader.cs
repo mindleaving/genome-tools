@@ -9,7 +9,7 @@ namespace GenomeTools.ChemistryLibrary.IO
 {
     public class UnbufferedStreamReader : IDisposable
     {
-        private const int BufferSize = 1024;
+        private const int BufferSize = 128*1024;
         public Encoding Encoding { get; }
         public long Position { get; private set; }
 

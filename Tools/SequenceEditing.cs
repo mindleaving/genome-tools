@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using GenomeTools.ChemistryLibrary.Genomics;
 using NUnit.Framework;
 
 namespace GenomeTools.Tools
@@ -13,7 +14,7 @@ namespace GenomeTools.Tools
         public void RunInvertRNA(string sequenceOrFile)
         {
             var sequence = TryLoadOrReturnSequence(sequenceOrFile);
-            var invertedSequence = new string(sequence.Select(InvertRNA).ToArray());
+            var invertedSequence = new string(sequence.Select(SequenceInverter.InvertRNA).ToArray());
             PrintTwoSequences(sequence, invertedSequence);
         }
 
@@ -22,7 +23,7 @@ namespace GenomeTools.Tools
         public void RunInvertDNA(string sequenceOrFile)
         {
             var sequence = TryLoadOrReturnSequence(sequenceOrFile);
-            var invertedSequence = new string(sequence.Select(InvertDNA).ToArray());
+            var invertedSequence = new string(sequence.Select(SequenceInverter.InvertDNA).ToArray());
             PrintTwoSequences(sequence, invertedSequence);
         }
 
@@ -31,7 +32,7 @@ namespace GenomeTools.Tools
         public void ComplementaryDNA(string sequenceOrFile)
         {
             var sequence = TryLoadOrReturnSequence(sequenceOrFile);
-            var complementarySequence = new string(sequence.Select(InvertDNA).Reverse().ToArray());
+            var complementarySequence = new string(sequence.Select(SequenceInverter.InvertDNA).Reverse().ToArray());
             PrintTwoSequences(sequence, complementarySequence);
         }
 
@@ -71,40 +72,6 @@ namespace GenomeTools.Tools
         {
             Console.WriteLine($"Sequence: {sequence}");
             Console.WriteLine($"Modified: {invertedSequence}");
-        }
-
-        private static char InvertRNA(char code)
-        {
-            switch (code)
-            {
-                case 'G':
-                    return 'C';
-                case 'C':
-                    return 'G';
-                case 'A':
-                    return 'U';
-                case 'U':
-                    return 'A';
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
-        private static char InvertDNA(char code)
-        {
-            switch (code)
-            {
-                case 'G':
-                    return 'C';
-                case 'C':
-                    return 'G';
-                case 'A':
-                    return 'T';
-                case 'T':
-                    return 'A';
-                default:
-                    throw new NotSupportedException();
-            }
         }
     }
 }

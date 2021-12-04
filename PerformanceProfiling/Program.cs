@@ -1,13 +1,14 @@
-﻿using GenomeTools.Tools;
+﻿using System;
+using System.Threading.Tasks;
+using GenomeTools.Studies;
 
 namespace PerformanceProfiling
 {
     public static class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
-            var vcfIndexBuilderRunner = new VcfIndexBuilderRunner();
-            vcfIndexBuilderRunner.Run(@"F:\datasets\mygenome\OtherGenomes\genome-1000_chr6.vcf");
+            throw new NotImplementedException();
         }
     }
 }

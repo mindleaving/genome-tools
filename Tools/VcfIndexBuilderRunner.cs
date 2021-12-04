@@ -6,7 +6,7 @@ namespace GenomeTools.Tools
     public class VcfIndexBuilderRunner
     {
         [Test]
-        [TestCase(@"F:\datasets\mygenome\OtherGenomes\genome-1000_chr6.vcf")]
+        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.vcf")]
         public void Run(string filePath)
         {
             var indexBuilder = new VcfIndexBuilder();

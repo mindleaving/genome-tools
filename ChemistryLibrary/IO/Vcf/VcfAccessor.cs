@@ -2,20 +2,60 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using Commons.Extensions;
+using GenomeTools.ChemistryLibrary.Genomics;
 
 namespace GenomeTools.ChemistryLibrary.IO.Vcf
 {
-    public class VcfLoader
+    public class VcfAccessor
     {
+        private readonly string filePath;
+        private List<VcfIndexEntry> indexEntries;
+        private readonly Dictionary<string, string> sequenceNameTranslation;
+
+        public VcfAccessor(string filePath,
+            Dictionary<string,string> sequenceNameTranslation = null)
+        {
+            this.filePath = filePath;
+            this.sequenceNameTranslation = sequenceNameTranslation;
+        }
+
+        public VcfLoaderResult LoadInRange(
+            GenePosition genePosition, 
+            Action<VcfVariantEntry,List<VcfMetadataEntry>> variantAction = null)
+        {
+            if (indexEntries == null) 
+                LoadIndex();
+            var chromosomeIndexEntries = indexEntries.Where(x => x.Chromosome == genePosition.Chromosome).ToList();
+            if (!chromosomeIndexEntries.Any())
+                throw new KeyNotFoundException($"Variant file doesn't contain variants for chromosome '{genePosition.Chromosome}'");
+            var vcfIndexEntryBeforeGenePosition = chromosomeIndexEntries
+                .Where(x => x.Position <= genePosition.Position.From)
+                .ToList();
+            var fileOffset = vcfIndexEntryBeforeGenePosition.Count > 0
+                ? vcfIndexEntryBeforeGenePosition.MaximumItem(x => x.Position).FileOffset
+                : chromosomeIndexEntries.First().FileOffset;
+            return Load(
+                variantAction,
+                fileOffset: fileOffset,
+                variantFilter: x => x.Chromosome == genePosition.Chromosome && genePosition.Position.Contains(x.Position),
+                stopCriteria: x => x.Chromosome != genePosition.Chromosome || x.Position > genePosition.Position.To);
+        }
+
+        private void LoadIndex()
+        {
+            var vcfIndexReader = new VcfIndexReader(filePath + ".vcfi", sequenceNameTranslation);
+            indexEntries = vcfIndexReader.Read();
+        }
+
         public VcfLoaderResult Load(
-            string filePath, 
             Action<VcfVariantEntry, List<VcfMetadataEntry>> variantAction = null,
-            Dictionary<string,string> sequenceNameTranslation = null,
             long fileOffset = -1,
             Func<VcfVariantEntry, bool> variantFilter = null,
             Func<VcfVariantEntry, bool> stopCriteria = null)
         {
-            using var reader = new StreamReader(filePath);
+            using var reader = new StreamReader(filePath, Encoding.UTF8, false, 128*1000);
             var metadataEntries = new List<VcfMetadataEntry>();
             VcfHeader header = null;
             var variants = new List<VcfVariantEntry>();
@@ -60,13 +100,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new VcfLoaderResult(metadataEntries, variants);
         }
 
-        public VcfHeader ReadHeader(string filePath)
+        public VcfHeader ReadHeader()
         {
             var headerLine = File.ReadLines(filePath).SkipWhile(x => x.StartsWith("##")).First(x => x.StartsWith("#"));
             return ParseHeader(headerLine);
         }
 
-        private VcfMetadataEntry ParseMetadata(string line)
+        private static VcfMetadataEntry ParseMetadata(string line)
         {
             var splittedLine = line.Substring(2).Split('=', 2);
             if (splittedLine.Length != 2)
@@ -100,7 +140,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             }
         }
 
-        private VcfMetadataEntry ParseGenericMetadata(VcfMetadataEntry.MetadataType metadataType, string metadataTypeString, string value)
+        private static VcfMetadataEntry ParseGenericMetadata(VcfMetadataEntry.MetadataType metadataType, string metadataTypeString, string value)
         {
             if(value.StartsWith("<") && value.EndsWith(">"))
             {
@@ -110,7 +150,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new GenericVcfMetadataEntry(metadataType, metadataTypeString, value);
         }
 
-        private VcfMetadataEntry ParseContigMetadata(string value)
+        private static VcfMetadataEntry ParseContigMetadata(string value)
         {
             var keyValuePairs = ParseMetadataKeyValuePairs(value);
             var id = keyValuePairs["ID"];
@@ -119,7 +159,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new ContigVcfMetadataEntry(id, length, url);
         }
 
-        private VcfMetadataEntry ParseAltMetadata(string value)
+        private static VcfMetadataEntry ParseAltMetadata(string value)
         {
             var keyValuePairs = ParseMetadataKeyValuePairs(value);
             var id = keyValuePairs["ID"];
@@ -127,7 +167,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new AltVcfMetadataEntry(id, description);
         }
 
-        private FormatVcfMetadataEntry ParseFormatMetadata(string value)
+        private static FormatVcfMetadataEntry ParseFormatMetadata(string value)
         {
             var keyValuePairs = ParseMetadataKeyValuePairs(value);
             var id = keyValuePairs["ID"];
@@ -138,7 +178,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new FormatVcfMetadataEntry(id, number, valueType, description);
         }
 
-        private FilterVcfMetadataEntry ParseFilterMetadata(string filter)
+        private static FilterVcfMetadataEntry ParseFilterMetadata(string filter)
         {
             var keyValuePairs = ParseMetadataKeyValuePairs(filter);
             var id = keyValuePairs["ID"];
@@ -146,7 +186,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new FilterVcfMetadataEntry(id, description);
         }
 
-        private InfoVcfMetadataEntry ParseInfoMetadata(string info)
+        private static InfoVcfMetadataEntry ParseInfoMetadata(string info)
         {
             var keyValuePairs = ParseMetadataKeyValuePairs(info);
             var id = keyValuePairs["ID"];
@@ -162,7 +202,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 keyValuePairs);
         }
 
-        private Dictionary<string,string> ParseMetadataKeyValuePairs(string value)
+        private static Dictionary<string,string> ParseMetadataKeyValuePairs(string value)
         {
             if (!value.StartsWith("<") || !value.EndsWith(">"))
                 throw new FormatException("Invalid metadata key-value-pair format. Must have the format <key1=value1,key2=value2>");
@@ -173,13 +213,13 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 .ToDictionary(kvp => kvp[0], kvp => kvp[1]);
         }
 
-        public VcfHeader ParseHeader(string line)
+        public static VcfHeader ParseHeader(string line)
         {
             var columns = line.Substring(1).Split('\t');
             return new VcfHeader(columns);
         }
 
-        public VcfVariantEntry ParseVariant(string line, VcfHeader header, Dictionary<string, string> sequenceNameTranslation)
+        public static VcfVariantEntry ParseVariant(string line, VcfHeader header, Dictionary<string,string> sequenceNameTranslation = null)
         {
             var splittedLine = line.Split('\t');
             if (splittedLine.Length < 8)
@@ -213,7 +253,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 otherFields);
         }
 
-        private Dictionary<string, string> ParseVariantInfo(string infoString)
+        private static Dictionary<string, string> ParseVariantInfo(string infoString)
         {
             if (infoString == ".")
                 return new Dictionary<string, string>();
@@ -224,7 +264,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return keyValuePairs;
         }
 
-        private VcfFilterResult ParseFilterResult(string filterResultString)
+        private static VcfFilterResult ParseFilterResult(string filterResultString)
         {
             if(filterResultString.ToLower() == "pass")
                 return VcfFilterResult.Success();

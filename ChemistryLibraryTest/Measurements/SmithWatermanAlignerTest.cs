@@ -11,6 +11,18 @@ namespace GenomeTools.ChemistryLibraryTest.Measurements
     public class SmithWatermanAlignerTest
     {
         [Test]
+        public void NonMatchingSingleLetterReturnEmptyResult()
+        {
+            var sequence1 = "T";
+            var sequence2 = "G";
+            var sut = new SmithWatermanAligner<char>();
+
+            var actual = sut.Align(sequence1.ToCharArray(), sequence2.ToCharArray(), (a, b) => a == b);
+
+            Assert.That(actual.Matches.Count, Is.EqualTo(0));
+        }
+
+        [Test]
         public void SingleLetterIsAlignedToCorrectPosition()
         {
             var sequence1 = "A";
@@ -23,6 +35,14 @@ namespace GenomeTools.ChemistryLibraryTest.Measurements
             Assert.That(actual.Matches[0].Sequence1StartIndex, Is.EqualTo(0));
             Assert.That(actual.Matches[0].Sequence2StartIndex, Is.EqualTo(2));
             Assert.That(actual.Matches[0].Sequence1, Is.EqualTo("A"));
+
+            // Switch sequences
+            actual = sut.Align(sequence2.ToCharArray(), sequence1.ToCharArray(), (a, b) => a == b);
+
+            Assert.That(actual.Matches.Count, Is.EqualTo(1));
+            Assert.That(actual.Matches[0].Sequence1StartIndex, Is.EqualTo(2));
+            Assert.That(actual.Matches[0].Sequence2StartIndex, Is.EqualTo(0));
+            Assert.That(actual.Matches[0].Sequence2, Is.EqualTo("A"));
         }
 
         /// <summary>
@@ -68,6 +88,18 @@ namespace GenomeTools.ChemistryLibraryTest.Measurements
             Assert.That(secondMatch.Sequence1StartIndex, Is.EqualTo(3));
             Assert.That(secondMatch.Sequence2StartIndex, Is.EqualTo(5));
             Assert.That(secondMatch.Sequence1, Is.EqualTo("AC"));
+        }
+
+        [Test]
+        public void BadlyMatchingSequencesDontThrowException()
+        {
+            var sequence1 = "TGGCACGTGCG";
+            var sequence2 = "GAGTCTACC";
+            var sut = new SmithWatermanAligner<char>();
+
+            var actual = sut.Align(sequence1.ToCharArray(), sequence2.ToCharArray(), (a, b) => a == b);
+
+            Assert.That(actual.Matches.Count, Is.GreaterThan(0));
         }
 
         [Test]

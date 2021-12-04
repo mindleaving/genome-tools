@@ -34,7 +34,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Fasta
                 var trimmedLine =  line.Trim();
                 if (currentSection != null && (trimmedLine.StartsWith(">") || trimmedLine.Length < currentSection.BasesPerLine))
                 {
-                    if (line.Length < currentSection.BasesPerLine)
+                    if (!trimmedLine.StartsWith(">"))
                         currentSection.Length += trimmedLine.Length;
                     if(writer != null)
                         WriteSectionToIndex(currentSection, writer);

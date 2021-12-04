@@ -16,7 +16,6 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
         public Dictionary<string, string> OtherFields { get; }
         public bool IsInsertion => AlternateBases.Any(x => x.Length > ReferenceBases.Length);
         public bool IsDeletion => AlternateBases.Any(x => x.Length < ReferenceBases.Length);
-        public bool IsHeterogenous => AlternateBases.Count > 1;
         public bool IsSNP => ReferenceBases.Length == 1 && AlternateBases.Any(x => x.Length == 1);
         public int LongestInsertionLength => AlternateBases.Where(x => x.Length > ReferenceBases.Length).Max(x => x.Length - ReferenceBases.Length);
         public int LongestDeletionLength => AlternateBases.Where(x => x.Length < ReferenceBases.Length).Max(x => ReferenceBases.Length - x.Length);

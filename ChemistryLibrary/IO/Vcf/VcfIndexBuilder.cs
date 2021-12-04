@@ -25,10 +25,10 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
         {
             var indexEntries = new List<VcfIndexEntry>();
             using var streamReader = new UnbufferedStreamReader(vcfStream);
-            var vcfLoader = new VcfLoader();
 
             var lineCount = 0;
             VcfHeader header = null;
+            var lastChromosome = "";
             while (true)
             {
                 var fileOffset = streamReader.Position;
@@ -39,16 +39,19 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                     continue;
                 if (line.StartsWith("#"))
                 {
-                    header = vcfLoader.ParseHeader(line);
+                    header = VcfAccessor.ParseHeader(line);
                     continue;
                 }
+                var variantEntry = VcfAccessor.ParseVariant(line, header);
+                if (variantEntry.Chromosome != lastChromosome) 
+                    lineCount = 0;
                 if (lineCount % N == 0)
                 {
-                    var variantEntry = vcfLoader.ParseVariant(line, header, null);
                     var indexEntry = new VcfIndexEntry(variantEntry.Chromosome, variantEntry.Position, fileOffset);
                     indexEntries.Add(indexEntry);
                 }
                 lineCount++;
+                lastChromosome = variantEntry.Chromosome;
             }
 
             return indexEntries;
