@@ -237,15 +237,9 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                         compressionHeader.DataSeriesEncodingMap.BaseSubstitutionCodesEncoding,
                         coreDataStream,
                         externalBlockStreams);
-                    char referenceBase;
-                    try
-                    {
-                        referenceBase = referenceSequence.GetBaseAtPosition(featurePosition);
-                    }
-                    catch (IndexOutOfRangeException)
-                    {
-                        referenceBase = 'N';
-                    }
+                    var referenceBase = featurePosition >= 0 && featurePosition < referenceSequence.Length 
+                        ? referenceSequence.GetBaseAtPosition(featurePosition)
+                        : 'N';
                     var nucleotide = compressionHeader.PreservationMap.SubstitutionMatrix.Substitute(referenceBase, substitutionCode);
                     return new GenomeReadFeature(GenomeSequencePartType.Bases, featurePosition, new List<char> { nucleotide });
                 }

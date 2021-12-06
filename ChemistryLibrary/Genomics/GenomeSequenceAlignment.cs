@@ -9,7 +9,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             int startIndex, 
             int endIndex,
             IGenomeSequence referenceSequence, 
-            IGenomeSequence alignmentSequence, 
+            GenomeConsensusSequence alignmentSequence, 
             List<GenomeRead> reads)
         {
             Chromosome = chromosome;
@@ -24,7 +24,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         public int StartIndex { get; }
         public int EndIndex { get; }
         public IGenomeSequence ReferenceSequence { get; }
-        public IGenomeSequence AlignmentSequence { get; }
+        public GenomeConsensusSequence AlignmentSequence { get; }
         public List<GenomeRead> Reads { get; }
     }
 }

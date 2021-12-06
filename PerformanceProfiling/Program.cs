@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GenomeTools.Studies;
 
 namespace PerformanceProfiling
@@ -8,7 +7,8 @@ namespace PerformanceProfiling
     {
         public static async Task Main()
         {
-            throw new NotImplementedException();
+            var wgsStudy = new WholeGenomeSequencingStudy();
+            await wgsStudy.CallVariants("chr1");
         }
     }
 }

@@ -22,27 +22,37 @@ namespace GenomeTools.Studies
             Array.Fill(referenceLine, ' ');
             var consensusLine = new char[length];
             Array.Fill(consensusLine, ' ');
+            var secondaryConsensusLine = new char[length];
+            Array.Fill(secondaryConsensusLine, ' ');
             var diffLine = new char[length];
             Array.Fill(diffLine, ' ');
             var referenceSequence = alignment.ReferenceSequence.GetSequence();
-            var consensusSequence = alignment.AlignmentSequence.GetSequence();
+            var consensusSequence = alignment.AlignmentSequence.PrimarySequence.GetSequence();
             if (consensusSequence.Length != length)
                 throw new Exception("Consensus sequence has an unexpected length. Expected length equal to range spanned by all mapped reads");
+            var secondaryConsensusSequence = alignment.AlignmentSequence.SecondarySequence.GetSequence();
+            if (secondaryConsensusSequence.Length != length)
+                throw new Exception("Secondary consensus sequence has an unexpected length. Expected length equal to range spanned by all mapped reads");
             for (int referencePosition = referenceStartIndex; referencePosition <= referenceEndIndex; referencePosition++)
             {
                 var localIndex = referencePosition - referenceStartIndex;
                 consensusLine[localIndex] = consensusSequence[localIndex];
+                secondaryConsensusLine[localIndex] = secondaryConsensusSequence[localIndex];
                 if (referencePosition >= alignment.StartIndex && referencePosition <= alignment.EndIndex)
                 {
                     referenceLine[localIndex] = referenceSequence[referencePosition - alignment.StartIndex];
-                    if (referenceLine[localIndex] != consensusLine[localIndex])
+                    if (referenceLine[localIndex] != consensusLine[localIndex] 
+                        || referenceLine[localIndex] != secondaryConsensusLine[localIndex])
+                    {
                         diffLine[localIndex] = '!';
+                    }
                 }
             }
 
-            WriteLine($"REF: {new string(referenceLine)}", printTarget, filePath);
-            WriteLine($"OWN: {new string(consensusLine)}", printTarget, filePath);
-            WriteLine($"DIF: {new string(diffLine)}", printTarget, filePath);
+            WriteLine($"REF:  {new string(referenceLine)}", printTarget, filePath);
+            WriteLine($"OWN:  {new string(consensusLine)}", printTarget, filePath);
+            WriteLine($"OWN2: {new string(secondaryConsensusLine)}", printTarget, filePath);
+            WriteLine($"DIF:  {new string(diffLine)}", printTarget, filePath);
             var readLines = new List<char[]>();
             foreach (var read in alignment.Reads.Where(x => x.IsMapped))
             {
@@ -64,7 +74,7 @@ namespace GenomeTools.Studies
             var lineIndex = 0;
             foreach (var readLine in readLines)
             {
-                WriteLine($"{lineIndex:000}: {new string(readLine)}", printTarget, filePath);
+                WriteLine($"{lineIndex:000}:  {new string(readLine)}", printTarget, filePath);
                 lineIndex++;
             }
         }

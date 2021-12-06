@@ -12,16 +12,15 @@ namespace GenomeTools.ChemistryLibraryTest.IO
         {
             var sequence = new GenomeSequence("AGTTTCCCGAAT", "Test", 0);
             var referenceAccessor = new DummyReferenceAccessor("AGTTTCCCGAAT");
-            var read = new List<GenomeRead>
+            var reads = new List<GenomeRead>
             {
                 CreateMappedRead(referenceAccessor, sequence)
             };
-            var alignment = new GenomeSequenceAlignment("chr1", 0, 11, sequence, sequence, read);
             var sut = new GenomeConsensusSequenceBuilder();
 
-            var actual = sut.Build(alignment);
+            var actual = sut.Build(reads, "chr1", 0, sequence.Length-1);
 
-            Assert.That(actual.GetSequence(), Is.EqualTo(sequence.GetSequence()));
+            Assert.That(actual.PrimarySequence.GetSequence(), Is.EqualTo(sequence.GetSequence()));
         }
 
         [Test]
@@ -30,18 +29,17 @@ namespace GenomeTools.ChemistryLibraryTest.IO
             var sequence = new GenomeSequence("AGTTTCCCGAAT", "Test", 0);
             var otherSequence = new GenomeSequence("AGCGGTTCGCGG", "Other", 0);
             var referenceAccessor = new DummyReferenceAccessor("AGTTTCCCGAAT");
-            var read = new List<GenomeRead>
+            var reads = new List<GenomeRead>
             {
                 CreateMappedRead(referenceAccessor, sequence),
                 CreateMappedRead(referenceAccessor, otherSequence),
                 CreateMappedRead(referenceAccessor, sequence)
             };
-            var alignment = new GenomeSequenceAlignment("chr1", 0, 11, sequence, sequence, read);
             var sut = new GenomeConsensusSequenceBuilder();
 
-            var actual = sut.Build(alignment);
+            var actual = sut.Build(reads, "chr1", 0, sequence.Length-1);
 
-            Assert.That(actual.GetSequence(), Is.EqualTo(sequence.GetSequence()));
+            Assert.That(actual.PrimarySequence.GetSequence(), Is.EqualTo(sequence.GetSequence()));
         }
 
         private static GenomeRead CreateMappedRead(IGenomeSequenceAccessor referenceAccessor, IGenomeSequence sequence)

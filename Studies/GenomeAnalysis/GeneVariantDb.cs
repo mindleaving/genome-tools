@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using GenomeTools.ChemistryLibrary.IO.Vcf;
 using MongoDB.Driver;
 
 namespace GenomeTools.Studies.GenomeAnalysis
@@ -9,6 +10,7 @@ namespace GenomeTools.Studies.GenomeAnalysis
     public class GeneVariantDb
     {
         private readonly IMongoDatabase database;
+        private readonly IMongoCollection<GenomeSequenceVariant> sequenceVariantCollection;
         private readonly IMongoCollection<GeneVariant> geneVariantsCollection;
         private readonly IMongoCollection<GeneVariantStatistics> geneVariantStatisticsCollection;
         private readonly IMongoCollection<AggregatedGeneVariantStatistics> aggregatedGeneVariantStatisticsCollection;
@@ -18,6 +20,7 @@ namespace GenomeTools.Studies.GenomeAnalysis
         {
             var client = new MongoClient("mongodb://localhost");
             database = client.GetDatabase(databaseName);
+            sequenceVariantCollection = database.GetCollection<GenomeSequenceVariant>(nameof(GenomeSequenceVariant));
             geneVariantsCollection = database.GetCollection<GeneVariant>(nameof(GeneVariant));
             geneVariantStatisticsCollection = database.GetCollection<GeneVariantStatistics>(nameof(GeneVariantStatistics));
             aggregatedGeneVariantStatisticsCollection = database.GetCollection<AggregatedGeneVariantStatistics>(nameof(AggregatedGeneVariantStatistics));
@@ -59,6 +62,21 @@ namespace GenomeTools.Studies.GenomeAnalysis
         public async Task Store(GeneVariant geneVariant)
         {
             await geneVariantsCollection.InsertOneAsync(geneVariant);
+        }
+
+        public Task Store(GenomeSequenceVariant variant)
+        {
+            return sequenceVariantCollection.InsertOneAsync(variant);
+        }
+
+        public Task DeleteAllForPersonAndChromosome(string personId, string chromosome)
+        {
+            return sequenceVariantCollection.DeleteManyAsync(x => x.PersonId == personId && x.Chromosome == chromosome);
+        }
+
+        public Task<GenomeSequenceVariant> GetLastGenomeSequenceVariant(string chromosome)
+        {
+            return sequenceVariantCollection.Find(x => x.Chromosome == chromosome).SortByDescending(x => x.ReferenceEndIndex).FirstOrDefaultAsync();
         }
     }
 }

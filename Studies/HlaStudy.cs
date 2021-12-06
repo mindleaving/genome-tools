@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Commons.Extensions;
 using GenomeTools.ChemistryLibrary.Extensions;
 using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.Genomics.Alignment;
@@ -17,11 +15,12 @@ namespace GenomeTools.Studies
 {
     public class HlaStudy
     {
+        private const string PersonId = "JanScholtyssek";
         private const string VariantFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.vcf";
         private const string AlignmentFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.cram";
-        private const string ReferenceSequenceFilePath = @"F:\datasets\mygenome\references\hg38.p13.fa";
+        private const string ReferenceSequenceFilePath = @"F:\datasets\mygenome\references\nebula-hg38.fna";
         private const string GenePositionFilePath = @"F:\HumanGenome\gene_positions.csv";
-        private const string HlaAllelDirectory = @"F:\datasets\mygenome\HLA\Allels";
+        private const string HlaAllelDirectory = @"F:\HumanGenome\HLA\Allels";
         private const string OutputDirectory = @"F:\HumanGenome\HLA";
         private const string GeneVariantDatabaseName = "Genomics";
 
@@ -47,11 +46,13 @@ namespace GenomeTools.Studies
         [TestCase("HLA-G")]
         public async Task DetermineHlaAllels(string geneSymbol)
         {
-            //var referenceAccessor = new GenomeSequenceAccessor(ReferenceSequenceFilePath, null);
             var genePositions = GenePositionStudy.ReadGenePositions(GenePositionFilePath);
             var hlaGenePosition = genePositions.First(x => x.GeneSymbol == geneSymbol);
+            //var alignmentAccessorFactory = new CramGenomeSequenceAlignmentAccessorFactory(AlignmentFilePath, ReferenceSequenceFilePath);
+            //using var alignmentAccessor = alignmentAccessorFactory.Create();
+            //var alignment = alignmentAccessor.GetAlignment(hlaGenePosition);
             var sequenceNameTranslation = Enumerable.Range(1, 22).Select(x => x.ToString()).Concat(new[] { "X", "Y", "M" }).ToDictionary(x => $"chr{x}", x => x);
-            var variantLoader = new VcfAccessor(VariantFilePath, sequenceNameTranslation);
+            var variantLoader = new VcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
             var geneVariantDb = new GeneVariantDb(GeneVariantDatabaseName);
 
             var myVariants = variantLoader.LoadInRange(hlaGenePosition);

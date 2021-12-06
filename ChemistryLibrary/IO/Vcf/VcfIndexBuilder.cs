@@ -42,7 +42,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                     header = VcfAccessor.ParseHeader(line);
                     continue;
                 }
-                var variantEntry = VcfAccessor.ParseVariant(line, header);
+                var variantEntry = VcfAccessor.ParseVariant(line, header, null);
                 if (variantEntry.Chromosome != lastChromosome) 
                     lineCount = 0;
                 if (lineCount % N == 0)

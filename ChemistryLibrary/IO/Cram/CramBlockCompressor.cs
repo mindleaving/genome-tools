@@ -73,7 +73,18 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
                 {
                     using var instream = new MemoryStream(compressedData);
                     using var outstream = new MemoryStream(new byte[blockHeader.UncompressedSize]);
-                    RansDecoder.Decode(instream, outstream);
+                    try
+                    {
+                        RansDecoder.Decode(instream, outstream);
+                    }
+                    catch
+                    {
+                        var debugOutputDirectory = @"C:\temp\RansDecoder";
+                        var debugFilePath = Path.Combine(debugOutputDirectory, $"{Guid.NewGuid()}_{blockHeader.CompressedSize}_{blockHeader.UncompressedSize}.bin");
+                        File.WriteAllBytes(
+                            debugFilePath, 
+                            compressedData);
+                    }
                     var uncompressBlockData = outstream.ToArray();
                     return uncompressBlockData;
                 }

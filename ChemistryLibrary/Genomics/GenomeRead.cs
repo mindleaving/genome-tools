@@ -147,11 +147,25 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             return readSequence[inReadPosition];
         }
 
+        public char GetBaseAtReferencePosition(int referencePosition)
+        {
+            if(!IsMapped)
+                throw new InvalidOperationException("Genome read is not mapped to reference");
+            return referenceAlignedSequence[referencePosition-ReferenceStartIndex.Value];
+        }
+
         public char GetQualityScoreAtPosition(int inReadPosition)
         {
             if (inReadPosition >= Length)
                 throw new IndexOutOfRangeException($"Position was outside of read. Position: {inReadPosition}. Length: {Length}");
             return readQualityScores[inReadPosition];
+        }
+
+        public char GetQualityScoreAtReferencePosition(int referencePosition)
+        {
+            if(!IsMapped)
+                throw new InvalidOperationException("Genome read is not mapped to reference");
+            return referenceAlignedQualityScores[referencePosition-ReferenceStartIndex.Value];
         }
     }
 }

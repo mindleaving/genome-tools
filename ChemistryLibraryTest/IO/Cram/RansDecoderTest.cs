@@ -110,5 +110,24 @@ namespace GenomeTools.ChemistryLibraryTest.IO.Cram
             // Array write time for 1,000,000 items: 2.1772 ms
             // MemoryStream write time for 1,000,000 items: 7.881 ms
         }
+
+        private static readonly string[] DebugFilePaths = Directory.GetFiles(@"C:\temp\RansDecoder", "*.bin");
+        [Test]
+        [TestCaseSource(nameof(DebugFilePaths))]
+        public void Debug(string filePath)
+        {
+            var input = File.OpenRead(filePath);
+            var output = new MemoryStream();
+
+            try
+            {
+                RansDecoder.Decode(input, output);
+            }
+            catch
+            {
+                var bytes = output.ToArray();
+                File.WriteAllBytes(filePath + ".out", bytes);
+            }
+        }
     }
 }

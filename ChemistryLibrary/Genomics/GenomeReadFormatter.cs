@@ -99,6 +99,8 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                     case GenomeSequencePartType.Deletion:
                         for (int i = 0; i < feature.DeletionLength; i++)
                         {
+                            if(referencePosition+i < 0 || referencePosition+i >= sequence.Length)
+                                continue;
                             sequence[referencePosition+i] = '-';
                         }
                         deletionOffset += feature.DeletionLength.Value;

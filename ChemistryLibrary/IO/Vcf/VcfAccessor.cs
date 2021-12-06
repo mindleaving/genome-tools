@@ -10,13 +10,17 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 {
     public class VcfAccessor
     {
+        private readonly string personId;
         private readonly string filePath;
         private List<VcfIndexEntry> indexEntries;
         private readonly Dictionary<string, string> sequenceNameTranslation;
 
-        public VcfAccessor(string filePath,
+        public VcfAccessor(
+            string personId,
+            string filePath,
             Dictionary<string,string> sequenceNameTranslation = null)
         {
+            this.personId = personId;
             this.filePath = filePath;
             this.sequenceNameTranslation = sequenceNameTranslation;
         }
@@ -86,7 +90,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
 
                 if (header == null)
                     throw new FormatException("No header was found before data entries. Make sure there is a single header line starting with '#'");
-                var variant = ParseVariant(line, header, sequenceNameTranslation);
+                var variant = ParseVariant(line, header, personId, sequenceNameTranslation);
                 if(stopCriteria != null && stopCriteria(variant))
                     break;
                 if(variantFilter != null && !variantFilter(variant))
@@ -219,7 +223,11 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
             return new VcfHeader(columns);
         }
 
-        public static VcfVariantEntry ParseVariant(string line, VcfHeader header, Dictionary<string,string> sequenceNameTranslation = null)
+        public static VcfVariantEntry ParseVariant(
+            string line, 
+            VcfHeader header, 
+            string personId,
+            Dictionary<string,string> sequenceNameTranslation = null)
         {
             var splittedLine = line.Split('\t');
             if (splittedLine.Length < 8)
@@ -242,6 +250,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                 otherFields.Add(columnName, field);
             }
             return new VcfVariantEntry(
+                personId,
                 chromosome,
                 position,
                 id,

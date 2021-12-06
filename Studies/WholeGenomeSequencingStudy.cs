@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Commons.Extensions;
-using Commons.Mathematics;
 using GenomeTools.ChemistryLibrary.IO.Cram;
 using GenomeTools.ChemistryLibrary.IO.Cram.Index;
 using GenomeTools.ChemistryLibrary.IO.Cram.Models;
@@ -21,9 +20,107 @@ namespace GenomeTools.Studies
         public const string PersonId = "JanScholtyssek";
         private const string VariantFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.vcf";
         private const string AlignmentFilePath = @"F:\datasets\mygenome\genome-janscholtyssek.cram";
-        private const string ReferenceSequenceFilePath = @"F:\datasets\mygenome\references\hg38.p13.fa";
+        private const string ReferenceSequenceFilePath = @"F:\datasets\mygenome\references\nebula-hg38.fna";
         private const string GenePositionFilePath = @"F:\HumanGenome\gene_positions.csv";
         private const string GeneVariantDatabaseName = "GenVariantStatistics";
+
+        [Test]
+        [TestCase("chr1")]
+        [TestCase("chr2")]
+        [TestCase("chr3")]
+        [TestCase("chr4")]
+        [TestCase("chr5")]
+        [TestCase("chr6")]
+        [TestCase("chr7")]
+        [TestCase("chr8")]
+        [TestCase("chr9")]
+        [TestCase("chr10")]
+        [TestCase("chr11")]
+        [TestCase("chr12")]
+        [TestCase("chr13")]
+        [TestCase("chr14")]
+        [TestCase("chr15")]
+        [TestCase("chr16")]
+        [TestCase("chr17")]
+        [TestCase("chr18")]
+        [TestCase("chr19")]
+        [TestCase("chr20")]
+        [TestCase("chr21")]
+        [TestCase("chr22")]
+        [TestCase("chrX")]
+        [TestCase("chrY")]
+        public async Task CallVariants(string chromosome)
+        {
+            const int ChunkSize = 10_000;
+            const int VariantLengthSequenceCutoff = 100;
+            var chromosomeSize = ChromosomeSizes[chromosome];
+            var alignmentAccessorFactory = new CramGenomeSequenceAlignmentAccessorFactory(AlignmentFilePath, ReferenceSequenceFilePath);
+            using var alignmentAccessor = alignmentAccessorFactory.Create();
+            var genomeVariantDatabase = new GeneVariantDb(GeneVariantDatabaseName);
+            var lastAddedVariantForChromosome = await genomeVariantDatabase.GetLastGenomeSequenceVariant(chromosome);
+            var startIndex = lastAddedVariantForChromosome.ReferenceEndIndex + 1;
+            var isVariantInProgress = false;
+            var variantStartIndex = 0;
+            StringBuilder variantReferenceSequence = null;
+            StringBuilder variantPrimarySequence = null;
+            StringBuilder variantSecondarySequence = null;
+            for (int chunkStartIndex = startIndex; chunkStartIndex < chromosomeSize; chunkStartIndex += ChunkSize)
+            {
+                var chunkEndIndex = chunkStartIndex + ChunkSize - 1;
+                var alignment = alignmentAccessor.GetAlignment(chromosome, chunkStartIndex, chunkEndIndex);
+
+                for (int referenceIndex = alignment.StartIndex; referenceIndex <= alignment.EndIndex; referenceIndex++)
+                {
+                    var localIndex = referenceIndex - alignment.StartIndex;
+                    var referenceNucleotide = alignment.ReferenceSequence.GetBaseAtPosition(localIndex);
+                    var primaryConsensusNucleotide = alignment.AlignmentSequence.PrimarySequence.GetBaseAtPosition(localIndex);
+                    var secondaryConsensusNucleotide = alignment.AlignmentSequence.SecondarySequence.GetBaseAtPosition(localIndex);
+
+                    var isDiff = referenceNucleotide != 'N' 
+                                 && primaryConsensusNucleotide != 'N'
+                                 && (primaryConsensusNucleotide != referenceNucleotide || secondaryConsensusNucleotide != referenceNucleotide);
+                    if(!isDiff)
+                    {
+                        if (isVariantInProgress)
+                        {
+                            var variant = new GenomeSequenceVariant(
+                                PersonId,
+                                chromosome,
+                                variantStartIndex,
+                                referenceIndex-1,
+                                variantReferenceSequence.ToString(),
+                                variantPrimarySequence.ToString(),
+                                variantSecondarySequence.ToString());
+                            await genomeVariantDatabase.Store(variant);
+                            isVariantInProgress = false;
+                        }
+                        continue;
+                    }
+
+                    if (!isVariantInProgress)
+                    {
+                        variantStartIndex = referenceIndex;
+                        variantReferenceSequence = new StringBuilder();
+                        variantPrimarySequence = new StringBuilder();
+                        variantSecondarySequence = new StringBuilder();
+                        isVariantInProgress = true;
+                    }
+
+                    if (referenceIndex - variantStartIndex < VariantLengthSequenceCutoff)
+                    {
+                        variantReferenceSequence.Append(referenceNucleotide);
+                        variantPrimarySequence.Append(primaryConsensusNucleotide);
+                        variantSecondarySequence.Append(secondaryConsensusNucleotide);
+                    }
+                    else if(variantReferenceSequence.Length > 0) // Clear sequences when cutoff is reached and don't include them at all in the database object
+                    {
+                        variantReferenceSequence.Clear();
+                        variantPrimarySequence.Clear();
+                        variantSecondarySequence.Clear();
+                    }
+                }
+            }
+        }
 
         [Test]
         public async Task VariantsComparedTo1000Genomes()
@@ -74,7 +171,7 @@ namespace GenomeTools.Studies
         {
             var genePositions = GenePositionStudy.ReadGenePositions(GenePositionFilePath);
             var sequenceNameTranslation = Enumerable.Range(1, 22).Select(x => x.ToString()).Concat(new[] { "X", "Y", "M" }).ToDictionary(x => $"chr{x}", x => x);
-            var vcfAccessor = new VcfAccessor(VariantFilePath, sequenceNameTranslation);
+            var vcfAccessor = new VcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
             var geneVariantDb = new GeneVariantDb(GeneVariantDatabaseName);
             var outputLines = new List<string>
             {
@@ -179,7 +276,7 @@ namespace GenomeTools.Studies
         [Test]
         public void VariantRefAltExploration()
         {
-            var variantLoader = new VcfAccessor(VariantFilePath);
+            var variantLoader = new VcfAccessor(PersonId, VariantFilePath);
             var nonSnpVariants = new List<string>();
 
             void GetNonSnpVariant(VcfVariantEntry variant, List<VcfMetadataEntry> metadataEntries)
@@ -198,7 +295,7 @@ namespace GenomeTools.Studies
         [Test]
         public void VariantStatistics()
         {
-            var variantLoader = new VcfAccessor(VariantFilePath);
+            var variantLoader = new VcfAccessor(PersonId, VariantFilePath);
 
             var variantCount = 0;
             var deletionCount = 0;
@@ -287,19 +384,48 @@ namespace GenomeTools.Studies
         }
 
         [Test]
+        [TestCase("HLA-A")]
+        [TestCase("HLA-B")]
+        [TestCase("HLA-C")]
+        [TestCase("HLA-DMA")]
+        [TestCase("HLA-DMB")]
+        [TestCase("HLA-DOA")]
+        [TestCase("HLA-DOB")]
+        [TestCase("HLA-DPA1")]
+        [TestCase("HLA-DPB1")]
+        [TestCase("HLA-DQA1")]
+        [TestCase("HLA-DQA2")]
+        [TestCase("HLA-DQB1")]
+        [TestCase("HLA-DQB2")]
+        [TestCase("HLA-DRA")]
+        [TestCase("HLA-DRB1")]
+        [TestCase("HLA-DRB5")]
+        [TestCase("HLA-E")]
+        [TestCase("HLA-F")]
+        [TestCase("HLA-G")]
+        public void GetReadsInRegion(string geneSymbol)
+        {
+            var genePositions = GenePositionStudy.ReadGenePositions(GenePositionFilePath);
+            var genePosition = genePositions.First(x => x.GeneSymbol == geneSymbol);
+            GetReadsInRegion("chr" + genePosition.Chromosome, genePosition.Position.From, genePosition.Position.To, geneSymbol);
+        }
+
+        [Test]
         [TestCase("chr1", 31244000, 31245000)]
         [TestCase("chr7", 117479963, 117668665)]
-        public void GetReadsInRegion(string chromosome, int startIndex, int endIndex)
+        public void GetReadsInRegion(string chromosome, int startIndex, int endIndex, string geneSymbol = null)
         {
-            var cramHeaderReader = new CramHeaderReader(CramHeaderReader.Md5CheckFailureMode.WriteToConsole);
-            var cramHeader = cramHeaderReader.Read(AlignmentFilePath, ReferenceSequenceFilePath);
-            var referenceSequenceMap = ReferenceSequenceMap.FromSamHeaderEntries(cramHeader.SamHeader);
-            using var alignmentAccessor = new CramGenomeSequenceAlignmentAccessor(AlignmentFilePath, ReferenceSequenceFilePath, referenceSequenceMap);
+            var alignmentAccessorFactory = new CramGenomeSequenceAlignmentAccessorFactory(AlignmentFilePath, ReferenceSequenceFilePath);
+            using var alignmentAccessor = alignmentAccessorFactory.Create();
             var alignment = alignmentAccessor.GetAlignment(chromosome, startIndex, endIndex);
             Console.WriteLine($">{alignment.Chromosome}:{alignment.StartIndex}:{alignment.EndIndex}");
             Console.WriteLine($"Read count: {alignment.Reads.Count}");
             Console.WriteLine();
-            GenomeAlignmentPrinter.Print(alignment, GenomeAlignmentPrinter.PrintTarget.File, $@"F:\datasets\mygenome\{chromosome}_{startIndex}_{endIndex}.txt");
+            var outputDirectory = @"F:\datasets\mygenome\Alignments";
+            var outputFilePath = geneSymbol != null
+                ? Path.Combine(outputDirectory, $"{geneSymbol}.txt")
+                : Path.Combine(outputDirectory, $"{chromosome}_{startIndex}_{endIndex}.txt");
+            GenomeAlignmentPrinter.Print(alignment, GenomeAlignmentPrinter.PrintTarget.File, outputFilePath);
         }
 
         [Test]
@@ -335,12 +461,11 @@ namespace GenomeTools.Studies
         }
 
         [Test]
-        [TestCase(@"F:\datasets\mygenome\genome-janscholtyssek.vcf")]
-        public void AnalyzeVariantPositionDistribution(string vcfFilePath)
+        public void AnalyzeVariantPositionDistribution()
         {
-            var vcfLoader = new VcfAccessor(vcfFilePath);
+            var vcfLoader = new VcfAccessor(PersonId, VariantFilePath);
             var variantCounter = new Dictionary<string, uint>();
-            using(var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(vcfFilePath), "variantPositions.csv")))
+            using(var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(VariantFilePath), "variantPositions.csv")))
             {
                 void AnalyzeVariant(VcfVariantEntry variantEntry, List<VcfMetadataEntry> metadata)
                 {
@@ -371,9 +496,9 @@ namespace GenomeTools.Studies
         }
 
         [Test]
-        [TestCase(@"F:\datasets\mygenome\OtherGenomes\genome-1000.vcf")]
-        public void Analyze1000GenomesVariantDistributions(string vcfFilePath)
+        public void Analyze1000GenomesVariantDistributions()
         {
+            var vcfFilePath = @"F:\datasets\mygenome\OtherGenomes\genome-1000.vcf";
             var outputDirectory = Path.Combine(Path.GetDirectoryName(vcfFilePath), "VariantPositions");
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
@@ -382,7 +507,7 @@ namespace GenomeTools.Studies
                 File.Delete(file);
             }
 
-            var vcfLoader = new VcfAccessor(vcfFilePath);
+            var vcfLoader = new VcfAccessor(null, vcfFilePath);
 
             var genomeVariantPositions = new Dictionary<string, List<GenomePosition>>();
             void AnalyzeVariant(VcfVariantEntry variantEntry, List<VcfMetadataEntry> metadata)

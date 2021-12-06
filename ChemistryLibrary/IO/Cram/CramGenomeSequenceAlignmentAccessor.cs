@@ -7,6 +7,25 @@ using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 
 namespace GenomeTools.ChemistryLibrary.IO.Cram
 {
+    public class CramGenomeSequenceAlignmentAccessorFactory
+    {
+        private readonly string alignmentFilePath;
+        private readonly string referenceSequenceFilePath;
+
+        public CramGenomeSequenceAlignmentAccessorFactory(string alignmentFilePath, string referenceSequenceFilePath)
+        {
+            this.alignmentFilePath = alignmentFilePath;
+            this.referenceSequenceFilePath = referenceSequenceFilePath;
+        }
+
+        public CramGenomeSequenceAlignmentAccessor Create()
+        {
+            var cramHeaderReader = new CramHeaderReader(CramHeaderReader.Md5CheckFailureMode.WriteToConsole);
+            var cramHeader = cramHeaderReader.Read(alignmentFilePath, referenceSequenceFilePath);
+            var referenceSequenceMap = ReferenceSequenceMap.FromSamHeaderEntries(cramHeader.SamHeader);
+            return new CramGenomeSequenceAlignmentAccessor(alignmentFilePath, referenceSequenceFilePath, referenceSequenceMap);
+        }
+    }
     public class CramGenomeSequenceAlignmentAccessor : IGenomeAlignmentAccessor, IDisposable
     {
         private readonly string alignmentFilePath;
@@ -31,10 +50,15 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             return referenceSequenceAccessor.GetSequenceByName(chromosome, startIndex, endIndex);
         }
 
-        public IGenomeSequence GetAlignmentSequence(string chromosome, int startIndex, int endIndex)
+        public GenomeConsensusSequence GetAlignmentSequence(string chromosome, int startIndex, int endIndex)
         {
             var alignment = GetAlignment(chromosome, startIndex, endIndex);
             return alignment.AlignmentSequence;
+        }
+
+        public GenomeSequenceAlignment GetAlignment(GenePosition genePosition)
+        {
+            return GetAlignment(genePosition.Chromosome, genePosition.Position.From, genePosition.Position.To);
         }
 
         public GenomeSequenceAlignment GetAlignment(string chromosome, int startIndex, int endIndex)
@@ -42,7 +66,7 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             var referenceSequence = GetReferenceSequence(chromosome, startIndex, endIndex);
             var reads = GetReadsInRange(chromosome, startIndex, endIndex);
             var consensusSequenceBuilder = new GenomeConsensusSequenceBuilder();
-            var consensusSequence = consensusSequenceBuilder.Build(reads, chromosome);
+            var consensusSequence = consensusSequenceBuilder.Build(reads, chromosome, startIndex, endIndex);
             return new GenomeSequenceAlignment(
                 chromosome,
                 startIndex,

@@ -181,15 +181,18 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram
             } while (symbol != 0x0);
 
             frequencyTable.CummulativeFrequency[0] = 0;
-            for (symbol = 0; symbol < byte.MaxValue; symbol++)
+            for (symbol = 0;; symbol++)
             {
                 var previousCummulativeFrequency = frequencyTable.CummulativeFrequency[symbol];
                 var cummulativeFrequency = (ushort)(previousCummulativeFrequency + frequencyTable.SymbolFrequency[symbol]);
-                frequencyTable.CummulativeFrequency[(byte)(symbol + 1)] = cummulativeFrequency;
+                if(symbol < byte.MaxValue)
+                    frequencyTable.CummulativeFrequency[(byte)(symbol + 1)] = cummulativeFrequency;
                 for (int frequency = previousCummulativeFrequency; frequency <= cummulativeFrequency; frequency++)
                 {
                     frequencyTable.InverseCummulativeLookup[frequency] = symbol;
                 }
+                if(symbol == byte.MaxValue)
+                    break;
             }
             return frequencyTable;
         }
