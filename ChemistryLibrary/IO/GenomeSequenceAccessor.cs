@@ -73,7 +73,10 @@ namespace GenomeTools.ChemistryLibrary.IO
                     cachedSequence = LoadWholeSeqeunce(indexEntry);
                     cachedSequenceName = sequenceName;
                 }
-                var length = (endIndex ?? cachedSequence.Length - 1) - startIndex + 1;
+
+                var length = endIndex.HasValue 
+                    ? Math.Min(endIndex.Value, cachedSequence.Length - 1) - startIndex + 1
+                    : cachedSequence.Length - startIndex;
                 return new GenomeSequence(cachedSequence.Substring(startIndex, length), sequenceName, startIndex);
             }
 

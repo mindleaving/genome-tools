@@ -15,32 +15,33 @@ namespace GenomeTools.Studies
                 throw new ArgumentNullException(nameof(filePath), "File path must be specified when printing to file");
             if(printTarget == PrintTarget.File && File.Exists(filePath))
                 File.Delete(filePath);
-            var referenceStartIndex = alignment.Reads.Where(x => x.IsMapped).Min(x => x.ReferenceStartIndex.Value);
-            var referenceEndIndex = alignment.Reads.Where(x => x.IsMapped).Max(x => x.ReferenceEndIndex.Value);
-            var length = referenceEndIndex - referenceStartIndex + 1;
-            var referenceLine = new char[length];
+            var readStartIndex = alignment.Reads.Where(x => x.IsMapped).Min(x => x.ReferenceStartIndex.Value);
+            var readEndIndex = alignment.Reads.Where(x => x.IsMapped).Max(x => x.ReferenceEndIndex.Value);
+            var readLength = readEndIndex - readStartIndex + 1;
+            var referenceLine = new char[readLength];
             Array.Fill(referenceLine, ' ');
-            var consensusLine = new char[length];
+            var consensusLine = new char[readLength];
             Array.Fill(consensusLine, ' ');
-            var secondaryConsensusLine = new char[length];
+            var secondaryConsensusLine = new char[readLength];
             Array.Fill(secondaryConsensusLine, ' ');
-            var diffLine = new char[length];
+            var diffLine = new char[readLength];
             Array.Fill(diffLine, ' ');
             var referenceSequence = alignment.ReferenceSequence.GetSequence();
             var consensusSequence = alignment.AlignmentSequence.PrimarySequence.GetSequence();
-            if (consensusSequence.Length != length)
+            if (consensusSequence.Length != alignment.ReferenceSequence.Length)
                 throw new Exception("Consensus sequence has an unexpected length. Expected length equal to range spanned by all mapped reads");
             var secondaryConsensusSequence = alignment.AlignmentSequence.SecondarySequence.GetSequence();
-            if (secondaryConsensusSequence.Length != length)
+            if (secondaryConsensusSequence.Length != alignment.ReferenceSequence.Length)
                 throw new Exception("Secondary consensus sequence has an unexpected length. Expected length equal to range spanned by all mapped reads");
-            for (int referencePosition = referenceStartIndex; referencePosition <= referenceEndIndex; referencePosition++)
+            for (int referencePosition = readStartIndex; referencePosition <= readEndIndex; referencePosition++)
             {
-                var localIndex = referencePosition - referenceStartIndex;
-                consensusLine[localIndex] = consensusSequence[localIndex];
-                secondaryConsensusLine[localIndex] = secondaryConsensusSequence[localIndex];
+                var localIndex = referencePosition - readStartIndex;
                 if (referencePosition >= alignment.StartIndex && referencePosition <= alignment.EndIndex)
                 {
-                    referenceLine[localIndex] = referenceSequence[referencePosition - alignment.StartIndex];
+                    var localReferenceIndex = referencePosition - alignment.StartIndex;
+                    referenceLine[localIndex] = referenceSequence[localReferenceIndex];
+                    consensusLine[localIndex] = consensusSequence[localReferenceIndex];
+                    secondaryConsensusLine[localIndex] = secondaryConsensusSequence[localReferenceIndex];
                     if (referenceLine[localIndex] != consensusLine[localIndex] 
                         || referenceLine[localIndex] != secondaryConsensusLine[localIndex])
                     {
@@ -57,17 +58,17 @@ namespace GenomeTools.Studies
             foreach (var read in alignment.Reads.Where(x => x.IsMapped))
             {
                 var referenceAlignedSequence = read.GetReferenceAlignedSequence();
-                var readLine = TryFindReadLineWithEnoughSpace(readLines, referenceStartIndex, read.ReferenceStartIndex.Value, read.ReferenceEndIndex.Value);
+                var readLine = TryFindReadLineWithEnoughSpace(readLines, readStartIndex, read.ReferenceStartIndex.Value, read.ReferenceEndIndex.Value);
                 if (readLine == null)
                 {
-                    readLine = new char[length];
+                    readLine = new char[readLength];
                     Array.Fill(readLine, ' ');
                     readLines.Add(readLine);
                 }
-                for (int i = referenceStartIndex; i <= referenceEndIndex; i++)
+                for (int i = readStartIndex; i <= readEndIndex; i++)
                 {
                     if (i >= read.ReferenceStartIndex.Value && i <= read.ReferenceEndIndex.Value)
-                        readLine[i - referenceStartIndex] = referenceAlignedSequence[i - read.ReferenceStartIndex.Value];
+                        readLine[i - readStartIndex] = referenceAlignedSequence[i - read.ReferenceStartIndex.Value];
                 }
             }
 

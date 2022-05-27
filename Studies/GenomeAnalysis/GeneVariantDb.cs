@@ -78,5 +78,19 @@ namespace GenomeTools.Studies.GenomeAnalysis
         {
             return sequenceVariantCollection.Find(x => x.Chromosome == chromosome).SortByDescending(x => x.ReferenceEndIndex).FirstOrDefaultAsync();
         }
+
+        public async IAsyncEnumerable<GenomeSequenceVariant> GetSequenceVariants(Expression<Func<GenomeSequenceVariant,bool>> filter = null)
+        {
+            if (filter == null)
+                filter = x => true;
+            var cursor =  await sequenceVariantCollection.Find(filter).ToCursorAsync();
+            while (await cursor.MoveNextAsync())
+            {
+                foreach (var item in cursor.Current)
+                {
+                    yield return item;
+                }
+            }
+        }
     }
 }

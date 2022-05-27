@@ -47,7 +47,8 @@ namespace GenomeTools.ChemistryLibrary.IO.Cram.Models
                 case 'N':
                     return nSubstituions[substitutionCode];
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(referenceBase), $"Invalid reference base '{referenceBase}' for substitution. Supported: ACGTN.");
+                    return 'N';
+                    //throw new ArgumentOutOfRangeException(nameof(referenceBase), $"Invalid reference base '{referenceBase}' for substitution. Supported: ACGTN.");
             }
         }
 

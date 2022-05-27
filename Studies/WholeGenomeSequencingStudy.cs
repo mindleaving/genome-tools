@@ -25,6 +25,19 @@ namespace GenomeTools.Studies
         private const string GeneVariantDatabaseName = "GenVariantStatistics";
 
         [Test]
+        public async Task ExportSelfExtractedVariantPositions()
+        {
+            var genomeVariantDb = new GeneVariantDb(GeneVariantDatabaseName);
+            var lines = new List<string>();
+            await foreach (var variant in genomeVariantDb.GetSequenceVariants())
+            {
+                var line = $"{variant.Chromosome.Replace("chr","").Replace("X", "23").Replace("Y", "24")};{variant.ReferenceStartIndex}";
+                lines.Add(line);
+            }
+            await File.WriteAllLinesAsync(@"F:\datasets\mygenome\variantPositions_selfExtracted.csv", lines);
+        }
+
+        [Test]
         [TestCase("chr1")]
         [TestCase("chr2")]
         [TestCase("chr3")]
@@ -51,14 +64,14 @@ namespace GenomeTools.Studies
         [TestCase("chrY")]
         public async Task CallVariants(string chromosome)
         {
-            const int ChunkSize = 10_000;
+            const int ChunkSize = 30_000;
             const int VariantLengthSequenceCutoff = 100;
             var chromosomeSize = ChromosomeSizes[chromosome];
             var alignmentAccessorFactory = new CramGenomeSequenceAlignmentAccessorFactory(AlignmentFilePath, ReferenceSequenceFilePath);
             using var alignmentAccessor = alignmentAccessorFactory.Create();
             var genomeVariantDatabase = new GeneVariantDb(GeneVariantDatabaseName);
             var lastAddedVariantForChromosome = await genomeVariantDatabase.GetLastGenomeSequenceVariant(chromosome);
-            var startIndex = lastAddedVariantForChromosome.ReferenceEndIndex + 1;
+            var startIndex = lastAddedVariantForChromosome?.ReferenceEndIndex + 1 ?? 0;
             var isVariantInProgress = false;
             var variantStartIndex = 0;
             StringBuilder variantReferenceSequence = null;
@@ -66,12 +79,16 @@ namespace GenomeTools.Studies
             StringBuilder variantSecondarySequence = null;
             for (int chunkStartIndex = startIndex; chunkStartIndex < chromosomeSize; chunkStartIndex += ChunkSize)
             {
-                var chunkEndIndex = chunkStartIndex + ChunkSize - 1;
+                var chunkEndIndex = Math.Min(chunkStartIndex + ChunkSize - 1, chromosomeSize-1);
                 var alignment = alignmentAccessor.GetAlignment(chromosome, chunkStartIndex, chunkEndIndex);
+                if(alignment.Reads.Count == 0)
+                    continue;
 
                 for (int referenceIndex = alignment.StartIndex; referenceIndex <= alignment.EndIndex; referenceIndex++)
                 {
                     var localIndex = referenceIndex - alignment.StartIndex;
+                    if(localIndex >= alignment.ReferenceSequence.Length || localIndex >= alignment.AlignmentSequence.PrimarySequence.Length)
+                        break;
                     var referenceNucleotide = alignment.ReferenceSequence.GetBaseAtPosition(localIndex);
                     var primaryConsensusNucleotide = alignment.AlignmentSequence.PrimarySequence.GetBaseAtPosition(localIndex);
                     var secondaryConsensusNucleotide = alignment.AlignmentSequence.SecondarySequence.GetBaseAtPosition(localIndex);
@@ -170,8 +187,8 @@ namespace GenomeTools.Studies
         public async Task VariantsByGene()
         {
             var genePositions = GenePositionStudy.ReadGenePositions(GenePositionFilePath);
-            var sequenceNameTranslation = Enumerable.Range(1, 22).Select(x => x.ToString()).Concat(new[] { "X", "Y", "M" }).ToDictionary(x => $"chr{x}", x => x);
-            var vcfAccessor = new VcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
+            //var sequenceNameTranslation = Enumerable.Range(1, 22).Select(x => x.ToString()).Concat(new[] { "X", "Y", "M" }).ToDictionary(x => $"chr{x}", x => x);
+            //var vcfAccessor = new VcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
             var geneVariantDb = new GeneVariantDb(GeneVariantDatabaseName);
             var outputLines = new List<string>
             {
@@ -182,54 +199,86 @@ namespace GenomeTools.Studies
                 + "InsertCount;InsertCountRatio;InsertLength;InsertLengthRatio;"
                 + "SNPCount;SNPRatio"
             };
-            foreach (var genePosition in genePositions.Take(1))
+            var lastChromosome = "";
+            var chromosomeVariants = new List<GenomeSequenceVariant>();
+            foreach (var genePosition in genePositions)
             {
                 var unknownOriginVariants = new GeneVariantStatistics(PersonId, GeneParentalOrigin.Unknown, genePosition);
-                var parent1Variants = new GeneVariantStatistics(PersonId, GeneParentalOrigin.Parent1, genePosition);
-                var parent2Variants = new GeneVariantStatistics(PersonId, GeneParentalOrigin.Parent2, genePosition);
-                void AddVariantToGenes(VcfVariantEntry variant)
+                //var parent1Variants = new GeneVariantStatistics(PersonId, GeneParentalOrigin.Parent1, genePosition);
+                //var parent2Variants = new GeneVariantStatistics(PersonId, GeneParentalOrigin.Parent2, genePosition);
+                //void AddVariantToGenes(VcfVariantEntry variant)
+                //{
+                //    var fieldNames = variant.OtherFields["FORMAT"].Split(':').ToList();
+                //    var genoTypeIndex = fieldNames.FindIndex(x => x == "GT");
+                //    var splittedValues = variant.OtherFields["NG1RLQNK6J"].Split(':');
+                //    if (splittedValues.Length != fieldNames.Count)
+                //        throw new Exception("Genotype and other information was in an unexpected format");
+                //    var genoType = splittedValues[genoTypeIndex];
+                //    var isPhased = genoType[1] == '|';
+                //    var parent1HasVariant = genoType[0] == '1';
+                //    var parent2HasVariant = genoType.Length == 3 && genoType[2] == '1';
+                //    var isHeterogenous = parent1HasVariant != parent2HasVariant;
+                //    if (isPhased || (parent1HasVariant && parent2HasVariant))
+                //    {
+                //        if (parent1HasVariant) 
+                //            PopulationGenomeStudy.AddVariant(parent1Variants, variant, isHeterogenous);
+                //        if (parent2HasVariant) 
+                //            PopulationGenomeStudy.AddVariant(parent2Variants, variant, isHeterogenous);
+                //    }
+                //    else
+                //    {
+                //        PopulationGenomeStudy.AddVariant(unknownOriginVariants, variant, isHeterogenous);
+                //    }
+                //}
+
+                //vcfAccessor.LoadInRange(genePosition, (variant, metadata) => AddVariantToGenes(variant));
+                if (genePosition.Chromosome != lastChromosome)
                 {
-                    var fieldNames = variant.OtherFields["FORMAT"].Split(':').ToList();
-                    var genoTypeIndex = fieldNames.FindIndex(x => x == "GT");
-                    var splittedValues = variant.OtherFields["NG1RLQNK6J"].Split(':');
-                    if (splittedValues.Length != fieldNames.Count)
-                        throw new Exception("Genotype and other information was in an unexpected format");
-                    var genoType = splittedValues[genoTypeIndex];
-                    var isPhased = genoType[1] == '|';
-                    var parent1HasVariant = genoType[0] == '1';
-                    var parent2HasVariant = genoType.Length == 3 && genoType[2] == '1';
-                    var isHeterogenous = parent1HasVariant != parent2HasVariant;
-                    if (isPhased || (parent1HasVariant && parent2HasVariant))
+                    chromosomeVariants.Clear();
+                    var chromosomeVariantIterator = geneVariantDb.GetSequenceVariants(x => x.Chromosome == "chr" + genePosition.Chromosome);
+                    await foreach (var variant in chromosomeVariantIterator)
                     {
-                        if (parent1HasVariant) 
-                            PopulationGenomeStudy.AddVariant(parent1Variants, variant, isHeterogenous);
-                        if (parent2HasVariant) 
-                            PopulationGenomeStudy.AddVariant(parent2Variants, variant, isHeterogenous);
+                        chromosomeVariants.Add(variant);
                     }
-                    else
+                }
+                var geneVariants = chromosomeVariants.Where(x => 
+                         x.ReferenceStartIndex <= genePosition.Position.To
+                         && x.ReferenceEndIndex >= genePosition.Position.From);
+                foreach (var variant in geneVariants)
+                {
+                    unknownOriginVariants.VariantCount++;
+                    unknownOriginVariants.VariantPositions.Add(variant.ReferenceStartIndex);
+                    unknownOriginVariants.TotalVariantLength += variant.ReferenceSequence.Length;
+
+                    if (variant.IsHeterogenous)
+                        unknownOriginVariants.HeterogenousCount++;
+
+                    var isDeletion = variant.PrimaryVariantSequence.Contains("-") || variant.SecondaryVariantSequence.Contains("-");
+                    if(isDeletion)
                     {
-                        PopulationGenomeStudy.AddVariant(unknownOriginVariants, variant, isHeterogenous);
+                        unknownOriginVariants.DeletionCount++;
+                        unknownOriginVariants.DeletionLength += Math.Max(
+                            variant.PrimaryVariantSequence.Count(x => x == '-'),
+                            variant.SecondaryVariantSequence.Count(x => x == '-'));
+                    }
+
+                    var isSNP = variant.ReferenceSequence.Length == 1;
+                    if (isSNP)
+                    {
+                        unknownOriginVariants.SNPCount++;
                     }
                 }
 
-                try
-                {
-                    vcfAccessor.LoadInRange(genePosition, (variant, metadata) => AddVariantToGenes(variant));
-                }
-                catch (KeyNotFoundException)
-                {
-                    continue;
-                }
-
-                foreach (var geneVariantStatistic in new []{ parent1Variants, parent2Variants, unknownOriginVariants })
+                foreach (var geneVariantStatistic in new []{ /*parent1Variants, parent2Variants,*/ unknownOriginVariants })
                 {
                     geneVariantStatistic.UpdateRatios();
                     WriteGeneVariantsToConsole(geneVariantStatistic);
                     outputLines.Add(FormatGeneVariantsAsCsv(geneVariantStatistic));
                     //await geneVariantDb.Store(geneVariantStatistic);
                 }
+                lastChromosome = genePosition.Chromosome;
             }
-            await File.WriteAllLinesAsync(@"F:\datasets\mygenome\geneVariants.csv", outputLines);
+            await File.WriteAllLinesAsync(@"F:\datasets\mygenome\geneVariants_selfExtracted.csv", outputLines);
         }
 
         private string FormatGeneVariantsAsCsv(GeneVariantStatistics geneVariantStatistics)
@@ -316,7 +365,8 @@ namespace GenomeTools.Studies
                     lowQualityVariantCount++;
                     return;
                 }
-                if (IsHeterogenous(variant))
+                var genomeId = variant.GetGenomeIds().Single();
+                if (variant.IsHeterogenous(genomeId))
                     heterogenousCount++;
 
                 foreach (var alternativeBase in variant.AlternateBases)
@@ -369,40 +419,8 @@ namespace GenomeTools.Studies
             Console.WriteLine($"No alternative: {noAltVariantCount}");
         }
 
-        private static bool IsHeterogenous(VcfVariantEntry variant)
-        {
-            var fieldNames = variant.OtherFields["FORMAT"].Split(':').ToList();
-            var genoTypeIndex = fieldNames.FindIndex(x => x == "GT");
-            var splittedValues = variant.OtherFields["NG1RLQNK6J"].Split(':');
-            if (splittedValues.Length != fieldNames.Count)
-                throw new Exception("Genotype and other information was in an unexpected format");
-            var genoType = splittedValues[genoTypeIndex];
-            var isPhased = genoType[1] == '|';
-            var parent1HasVariant = genoType[0] == '1';
-            var parent2HasVariant = genoType.Length == 3 && genoType[2] == '1';
-            return parent1HasVariant != parent2HasVariant;
-        }
-
         [Test]
-        [TestCase("HLA-A")]
-        [TestCase("HLA-B")]
-        [TestCase("HLA-C")]
-        [TestCase("HLA-DMA")]
-        [TestCase("HLA-DMB")]
-        [TestCase("HLA-DOA")]
-        [TestCase("HLA-DOB")]
-        [TestCase("HLA-DPA1")]
-        [TestCase("HLA-DPB1")]
-        [TestCase("HLA-DQA1")]
-        [TestCase("HLA-DQA2")]
-        [TestCase("HLA-DQB1")]
-        [TestCase("HLA-DQB2")]
-        [TestCase("HLA-DRA")]
-        [TestCase("HLA-DRB1")]
-        [TestCase("HLA-DRB5")]
-        [TestCase("HLA-E")]
-        [TestCase("HLA-F")]
-        [TestCase("HLA-G")]
+        [TestCase("COX5A")]
         public void GetReadsInRegion(string geneSymbol)
         {
             var genePositions = GenePositionStudy.ReadGenePositions(GenePositionFilePath);
@@ -477,7 +495,7 @@ namespace GenomeTools.Studies
 
                     writer.WriteLine($"{variantEntry.Chromosome};{variantEntry.Position}");
                 };
-                var result = vcfLoader.Load(AnalyzeVariant);
+                vcfLoader.Load(AnalyzeVariant);
             }
             foreach (var kvp in variantCounter)
             {
@@ -498,8 +516,8 @@ namespace GenomeTools.Studies
         [Test]
         public void Analyze1000GenomesVariantDistributions()
         {
-            var vcfFilePath = @"F:\datasets\mygenome\OtherGenomes\genome-1000.vcf";
-            var outputDirectory = Path.Combine(Path.GetDirectoryName(vcfFilePath), "VariantPositions");
+            const string Vcf1000GenomesFilePath = @"F:\datasets\mygenome\OtherGenomes\genome-1000.vcf";
+            var outputDirectory = Path.Combine(Path.GetDirectoryName(Vcf1000GenomesFilePath), "VariantPositions");
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
             foreach (var file in Directory.GetFiles(outputDirectory, "*.csv"))
@@ -507,7 +525,7 @@ namespace GenomeTools.Studies
                 File.Delete(file);
             }
 
-            var vcfLoader = new VcfAccessor(null, vcfFilePath);
+            var vcfLoader = new VcfAccessor(null, Vcf1000GenomesFilePath);
 
             var genomeVariantPositions = new Dictionary<string, List<GenomePosition>>();
             void AnalyzeVariant(VcfVariantEntry variantEntry, List<VcfMetadataEntry> metadata)
@@ -519,10 +537,9 @@ namespace GenomeTools.Studies
                 //        : variantEntry.Chromosome == "chrY" ? 24
                 //        : int.Parse(variantEntry.Chromosome.Substring(3));
                 var baseNumber = variantEntry.Position;
-                foreach (var kvp in variantEntry.OtherFields.Skip(1)) // Skip 1 for FORMAT column
+                foreach (var genomeId in variantEntry.GetGenomeIds())
                 {
-                    var genomeId = kvp.Key;
-                    var hasGenomeVariant = kvp.Value != "0|0" && Regex.IsMatch(kvp.Value, "([1-9][0-9]*\\|[0-9]+|[0-9]+\\|[1-9][0-9]*)");
+                    var hasGenomeVariant = variantEntry.HasPersonVariant(genomeId);
                     if (hasGenomeVariant)
                     {
                         if(!genomeVariantPositions.ContainsKey(genomeId))
@@ -539,7 +556,7 @@ namespace GenomeTools.Studies
                     }
                 }
             }
-            var result = vcfLoader.Load(AnalyzeVariant);
+            vcfLoader.Load(AnalyzeVariant);
             foreach (var kvp in genomeVariantPositions)
             {
                 var genomeId = kvp.Key;
@@ -550,7 +567,7 @@ namespace GenomeTools.Studies
             }
         }
         
-        private static readonly Dictionary<string,uint> ChromosomeSizes = new()
+        private static readonly Dictionary<string,int> ChromosomeSizes = new()
         {
             { "chr1", 248956422 },
             { "chr2", 242193529 },
