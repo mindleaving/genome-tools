@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>GenomeTools.Studies</AssemblyName>
     <RootNamespace>GenomeTools.Studies</RootNamespace>
@@ -9,12 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Accord.Statistics" Version="3.8.0" />
-    <PackageReference Include="Emgu.CV" Version="4.5.5.4823" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.5.4823" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.16.1" />
+    <PackageReference Include="Emgu.CV" Version="4.7.0.5276" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.7.0.5276" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
   </ItemGroup>
 
   <ItemGroup>

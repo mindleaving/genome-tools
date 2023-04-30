@@ -44,7 +44,7 @@ namespace GenomeTools.Studies
             Console.WriteLine("Gene positions loaded");
 
             var variantFilePath = ThousandGenomeVariantsFilePath.Replace("$$",chromosome);
-            var vcfAccessor = new VcfAccessor(null, variantFilePath);
+            var vcfAccessor = new ParallelizedVcfAccessor(null, variantFilePath);
             var vcfHeader = vcfAccessor.ReadHeader();
             var personIds = vcfHeader.Columns.Skip(9).ToList();
             var genStatisticsDb = new GeneVariantDb(GeneDatabaseName);
@@ -79,7 +79,7 @@ namespace GenomeTools.Studies
                         }
                     }
                 }
-                vcfAccessor.LoadInRange(genePosition, AnalyzeVariant);
+                await vcfAccessor.LoadInRange(genePosition, AnalyzeVariant);
                 foreach (var personGeneStatistic in personGeneStatistics.Values)
                 {
                     personGeneStatistic.UpdateRatios();

@@ -17,9 +17,15 @@ namespace GenomeTools.ChemistryLibrary.IO.Sam
             headerParser = new SamHeaderParser();
         }
 
-        public SamLoaderResult Load(string filePath)
+        public SamLoaderResult Load(
+            string filePath)
         {
-            using var reader = new StreamReader(filePath);
+            return Load(File.OpenRead(filePath));
+        }
+
+        public SamLoaderResult Load(Stream stream)
+        {
+            using var reader = new StreamReader(stream);
             var headerEntries = new List<SamHeaderEntry>();
             var alignmentEntries = new List<SamAlignmentEntry>();
             var hasCheckedHeaders = false;

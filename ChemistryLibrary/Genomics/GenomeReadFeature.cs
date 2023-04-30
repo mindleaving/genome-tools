@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GenomeTools.ChemistryLibrary.Genomics
 {
@@ -35,5 +36,31 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         public IList<char> QualityScores { get; }
         public int? DeletionLength { get; }
         public int? SkipLength { get; }
+
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case GenomeSequencePartType.Bases:
+                case GenomeSequencePartType.BaseWithQualityScore:
+                    return new string(Sequence.ToArray());
+                case GenomeSequencePartType.QualityScores:
+                case GenomeSequencePartType.Substitution:
+                    return Type.ToString();
+                case GenomeSequencePartType.Insertion:
+                case GenomeSequencePartType.SoftClip:
+                    return $"{Type}: {new string(Sequence.ToArray())}";
+                case GenomeSequencePartType.Deletion:
+                    return $"{Type} ({DeletionLength})";
+                case GenomeSequencePartType.ReferenceSkip:
+                    return $"{Type} ({SkipLength})";
+                case GenomeSequencePartType.HardClip:
+                    return $"{Type}";
+                case GenomeSequencePartType.Padding:
+                    return $"{Type}";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }

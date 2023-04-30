@@ -39,10 +39,10 @@ namespace GenomeTools.ChemistryLibrary.IO.Vcf
                     continue;
                 if (line.StartsWith("#"))
                 {
-                    header = VcfAccessor.ParseHeader(line);
+                    header = ParallelizedVcfAccessor.ParseHeader(line);
                     continue;
                 }
-                var variantEntry = VcfAccessor.ParseVariant(line, header, null);
+                var variantEntry = ParallelizedVcfAccessor.ParseVariant(line, header, null);
                 if (variantEntry.Chromosome != lastChromosome) 
                     lineCount = 0;
                 if (lineCount % N == 0)

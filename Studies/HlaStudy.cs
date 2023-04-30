@@ -52,10 +52,10 @@ namespace GenomeTools.Studies
             //using var alignmentAccessor = alignmentAccessorFactory.Create();
             //var alignment = alignmentAccessor.GetAlignment(hlaGenePosition);
             var sequenceNameTranslation = Enumerable.Range(1, 22).Select(x => x.ToString()).Concat(new[] { "X", "Y", "M" }).ToDictionary(x => $"chr{x}", x => x);
-            var variantLoader = new VcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
+            var variantLoader = new ParallelizedVcfAccessor(PersonId, VariantFilePath, sequenceNameTranslation);
             var geneVariantDb = new GeneVariantDb(GeneVariantDatabaseName);
 
-            var myVariants = variantLoader.LoadInRange(hlaGenePosition);
+            var myVariants = await variantLoader.LoadInRange(hlaGenePosition);
             var myVariantPositions = myVariants.Variants.Select(x => x.Position).ToList();
             var hlaVariants = await geneVariantDb.GetGeneVariants(geneSymbol);
             var bestMatches = hlaVariants.Select(hlaVariant => new

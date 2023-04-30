@@ -67,8 +67,10 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             string id = null)
         {
             var insertionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion).Sum(x => x.Sequence.Count);
+            var softClipsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.SoftClip).Sum(x => x.Sequence.Count);
             var deletionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion).Sum(x => x.DeletionLength.Value);
-            var referenceEndIndex = referenceStartIndex + readLength - insertionsLength + deletionsLength - 1;
+            var skipsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.ReferenceSkip).Sum(x => x.SkipLength.Value);
+            var referenceEndIndex = referenceStartIndex + readLength - insertionsLength - softClipsLength + deletionsLength + skipsLength - 1;
             var referenceSequence = referenceAccessor.GetSequenceById(referenceId, referenceStartIndex, referenceEndIndex).GetSequence();
 
             readFeatures.Sort((a,b) => a.InReadPosition.CompareTo(b.InReadPosition));
@@ -92,7 +94,12 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                 mappingQuality);
         }
 
-        public static GenomeRead UnmappedRead(IEnumerable<char> sequence, IEnumerable<char> qualityScores, string id = null, int? referenceId = null, int? referenceStartIndex = null)
+        public static GenomeRead UnmappedRead(
+            IEnumerable<char> sequence,
+            IEnumerable<char> qualityScores,
+            string id = null,
+            int? referenceId = null,
+            int? referenceStartIndex = null)
         {
             var readSequence = new string(sequence.ToArray());
             var readQualityScores = qualityScores != null ? new string(qualityScores.ToArray()) : null;

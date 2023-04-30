@@ -18,7 +18,9 @@ public static class VcfVariantEntry1000GenomesExtensions
         if (!variantEntry.OtherFields.ContainsKey(personId))
             return false;
         var variantFlag = variantEntry.OtherFields[personId];
-        return variantFlag != "0|0" && Regex.IsMatch(variantFlag, "([1-9][0-9]*\\|[0-9]+|[0-9]+\\|[1-9][0-9]*)");
+        if (variantFlag == "1")
+            return true;
+        return variantFlag != "0|0" && Regex.IsMatch(variantFlag, "([1-9][0-9]*(/|\\|)[0-9]+|[0-9]+(/|\\|)[1-9][0-9]*)");
     }
 }
 public static class VcfVariantEntryExtensions

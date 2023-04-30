@@ -12,21 +12,32 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             string referenceSequence)
         {
             var sequence = referenceSequence;
-            var deletions = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion);
-            var insertions = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion);
-            foreach (var insertDelete in insertions.Concat(deletions).OrderBy(x => x.InReadPosition))
+            foreach (var feature in readFeatures.OrderBy(x => x.InReadPosition))
             {
-                switch (insertDelete.Type)
+                switch (feature.Type)
                 {
                     case GenomeSequencePartType.Insertion:
+                    case GenomeSequencePartType.SoftClip:
                     {
-                        var bases = new string(insertDelete.Sequence.ToArray());
-                        sequence = sequence.Insert(insertDelete.InReadPosition, bases);
+                        var bases = new string(feature.Sequence.ToArray());
+                        sequence = sequence.Insert(feature.InReadPosition, bases);
                         break;
                     }
                     case GenomeSequencePartType.Deletion:
-                        sequence = sequence.Remove(insertDelete.InReadPosition, insertDelete.DeletionLength.Value);
+                        sequence = sequence.Remove(feature.InReadPosition, feature.DeletionLength.Value);
                         break;
+                    case GenomeSequencePartType.ReferenceSkip:
+                        sequence = sequence.Remove(feature.InReadPosition, feature.SkipLength.Value);
+                        break;
+                    case GenomeSequencePartType.Bases:
+                    case GenomeSequencePartType.QualityScores:
+                    case GenomeSequencePartType.BaseWithQualityScore:
+                    case GenomeSequencePartType.Substitution:
+                    case GenomeSequencePartType.HardClip:
+                    case GenomeSequencePartType.Padding:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
 
@@ -40,10 +51,8 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                 switch (feature.Type)
                 {
                     case GenomeSequencePartType.Bases:
-                    case GenomeSequencePartType.SoftClip:
                         Copy(feature.Sequence, 0, sequenceArray, feature.InReadPosition, feature.Sequence.Count);
                         break;
-                    case GenomeSequencePartType.ReferenceSkip:
                     case GenomeSequencePartType.HardClip:
                     case GenomeSequencePartType.Padding:
                     case GenomeSequencePartType.QualityScores:
@@ -57,7 +66,9 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                         sequenceArray[feature.InReadPosition] = feature.Sequence[0];
                         break;
                     case GenomeSequencePartType.Insertion:
+                    case GenomeSequencePartType.SoftClip:
                     case GenomeSequencePartType.Deletion:
+                    case GenomeSequencePartType.ReferenceSkip:
                         // Have already been handled
                         break;
                     default:
@@ -72,19 +83,19 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             string referenceSequence)
         {
             var sequence = referenceSequence.ToCharArray();
-            var deletionOffset = 0;
-            var insertionOffset = 0;
+            var deletionAndSkipOffset = 0;
+            var insertionSoftClipOffset = 0;
             foreach (var feature in readFeatures)
             {
-                var referencePosition = feature.InReadPosition + deletionOffset - insertionOffset;
+                var referencePosition = feature.InReadPosition + deletionAndSkipOffset - insertionSoftClipOffset;
                 switch (feature.Type)
                 {
                     case GenomeSequencePartType.Bases:
-                    case GenomeSequencePartType.SoftClip:
                         Copy(feature.Sequence, 0, sequence, referencePosition, feature.Sequence.Count);
                         break;
                     case GenomeSequencePartType.Insertion:
-                        insertionOffset += feature.Sequence.Count;
+                    case GenomeSequencePartType.SoftClip:
+                        insertionSoftClipOffset += feature.Sequence.Count;
                         break;
                     case GenomeSequencePartType.QualityScores:
                         if(feature.Sequence != null)
@@ -103,9 +114,17 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                                 continue;
                             sequence[referencePosition+i] = '-';
                         }
-                        deletionOffset += feature.DeletionLength.Value;
+                        deletionAndSkipOffset += feature.DeletionLength.Value;
                         break;
                     case GenomeSequencePartType.ReferenceSkip:
+                        for (int i = 0; i < feature.SkipLength; i++)
+                        {
+                            if(referencePosition+i < 0 || referencePosition+i >= sequence.Length)
+                                continue;
+                            sequence[referencePosition+i] = '-';
+                        }
+                        deletionAndSkipOffset += feature.SkipLength.Value;
+                        break;
                     case GenomeSequencePartType.HardClip:
                     case GenomeSequencePartType.Padding:
                         if (feature.Sequence != null)
@@ -165,33 +184,37 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         {
             var deletionLength = readFeatures
                 .Where(x => x.Type == GenomeSequencePartType.Deletion)
-                .Select(x => x.DeletionLength.Value)
-                .Sum();
+                .Sum(x => x.DeletionLength.Value);
+            var skipLength = readFeatures
+                .Where(x => x.Type == GenomeSequencePartType.ReferenceSkip)
+                .Sum(x => x.SkipLength.Value);
             var insertionLength = readFeatures
                 .Where(x => x.Type == GenomeSequencePartType.Insertion)
-                .Select(x => x.Sequence.Count)
-                .Sum();
-            var qualityScores = new char[readLength+deletionLength-insertionLength];
+                .Sum(x => x.Sequence.Count);
+            var softClipLength = readFeatures
+                .Where(x => x.Type == GenomeSequencePartType.SoftClip)
+                .Sum(x => x.Sequence.Count);
+            var qualityScores = new char[readLength + deletionLength + skipLength - insertionLength - softClipLength];
             Array.Fill(qualityScores, '!');
-            var deletionOffset = 0;
-            var insertionOffset = 0;
+            var deletionSkipOffset = 0;
+            var insertionSoftClipOffset = 0;
             foreach (var feature in readFeatures)
             {
-                var referencePosition = feature.InReadPosition + deletionOffset - insertionOffset;
+                var referencePosition = feature.InReadPosition + deletionSkipOffset - insertionSoftClipOffset;
                 switch (feature.Type)
                 {
                     case GenomeSequencePartType.QualityScores:
                         Copy(feature.QualityScores, 0, qualityScores, referencePosition, feature.QualityScores.Count);
                         break;
                     case GenomeSequencePartType.Bases:
-                    case GenomeSequencePartType.SoftClip:
                         if(feature.QualityScores != null)
                         {
                             Copy(feature.QualityScores, 0, qualityScores, referencePosition, feature.QualityScores.Count);
                         }
                         break;
                     case GenomeSequencePartType.Insertion:
-                        insertionOffset = feature.Sequence.Count;
+                    case GenomeSequencePartType.SoftClip:
+                        insertionSoftClipOffset = feature.Sequence.Count;
                         break;
                     case GenomeSequencePartType.BaseWithQualityScore:
                         qualityScores[referencePosition] = feature.QualityScores[0];
@@ -203,9 +226,11 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                         }
                         break;
                     case GenomeSequencePartType.Deletion:
-                        deletionOffset += feature.DeletionLength.Value;
+                        deletionSkipOffset += feature.DeletionLength.Value;
                         break;
                     case GenomeSequencePartType.ReferenceSkip:
+                        deletionSkipOffset += feature.SkipLength.Value;
+                        break;
                     case GenomeSequencePartType.HardClip:
                     case GenomeSequencePartType.Padding:
                         if (feature.QualityScores != null)

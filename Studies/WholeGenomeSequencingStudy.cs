@@ -323,9 +323,9 @@ namespace GenomeTools.Studies
         }
 
         [Test]
-        public void VariantRefAltExploration()
+        public async Task VariantRefAltExploration()
         {
-            var variantLoader = new VcfAccessor(PersonId, VariantFilePath);
+            var variantLoader = new ParallelizedVcfAccessor(PersonId, VariantFilePath);
             var nonSnpVariants = new List<string>();
 
             void GetNonSnpVariant(VcfVariantEntry variant, List<VcfMetadataEntry> metadataEntries)
@@ -337,14 +337,14 @@ namespace GenomeTools.Studies
                 nonSnpVariants.Add($"{variant.ReferenceBases}|{variant.AlternateBases}");
             }
 
-            variantLoader.Load(GetNonSnpVariant);
+            await variantLoader.Load(GetNonSnpVariant);
             File.WriteAllLines(@"F:\datasets\mygenome\variantsNonSnpRefAlt.txt", nonSnpVariants);
         }
 
         [Test]
-        public void VariantStatistics()
+        public async Task VariantStatistics()
         {
-            var variantLoader = new VcfAccessor(PersonId, VariantFilePath);
+            var variantLoader = new ParallelizedVcfAccessor(PersonId, VariantFilePath);
 
             var variantCount = 0;
             var deletionCount = 0;
@@ -405,7 +405,7 @@ namespace GenomeTools.Studies
                 else if (genoType[1] != '/')
                     throw new Exception($"Unexpected genoType format: {genoType}");
             }
-            variantLoader.Load(AnalyzeVariant);
+            await variantLoader.Load(AnalyzeVariant);
 
             Console.WriteLine($"Total: {variantCount}");
             Console.WriteLine($"Phased: {phasedCount}");
@@ -479,9 +479,9 @@ namespace GenomeTools.Studies
         }
 
         [Test]
-        public void AnalyzeVariantPositionDistribution()
+        public async Task AnalyzeVariantPositionDistribution()
         {
-            var vcfLoader = new VcfAccessor(PersonId, VariantFilePath);
+            var vcfLoader = new ParallelizedVcfAccessor(PersonId, VariantFilePath);
             var variantCounter = new Dictionary<string, uint>();
             using(var writer = new StreamWriter(Path.Combine(Path.GetDirectoryName(VariantFilePath), "variantPositions.csv")))
             {
@@ -495,7 +495,7 @@ namespace GenomeTools.Studies
 
                     writer.WriteLine($"{variantEntry.Chromosome};{variantEntry.Position}");
                 };
-                vcfLoader.Load(AnalyzeVariant);
+                await vcfLoader.Load(AnalyzeVariant);
             }
             foreach (var kvp in variantCounter)
             {
@@ -514,7 +514,7 @@ namespace GenomeTools.Studies
         }
 
         [Test]
-        public void Analyze1000GenomesVariantDistributions()
+        public async Task Analyze1000GenomesVariantDistributions()
         {
             const string Vcf1000GenomesFilePath = @"F:\datasets\mygenome\OtherGenomes\genome-1000.vcf";
             var outputDirectory = Path.Combine(Path.GetDirectoryName(Vcf1000GenomesFilePath), "VariantPositions");
@@ -525,7 +525,7 @@ namespace GenomeTools.Studies
                 File.Delete(file);
             }
 
-            var vcfLoader = new VcfAccessor(null, Vcf1000GenomesFilePath);
+            var vcfLoader = new ParallelizedVcfAccessor(null, Vcf1000GenomesFilePath);
 
             var genomeVariantPositions = new Dictionary<string, List<GenomePosition>>();
             void AnalyzeVariant(VcfVariantEntry variantEntry, List<VcfMetadataEntry> metadata)
@@ -556,7 +556,7 @@ namespace GenomeTools.Studies
                     }
                 }
             }
-            vcfLoader.Load(AnalyzeVariant);
+            await vcfLoader.Load(AnalyzeVariant);
             foreach (var kvp in genomeVariantPositions)
             {
                 var genomeId = kvp.Key;
