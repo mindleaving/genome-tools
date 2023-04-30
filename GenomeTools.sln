@@ -5,15 +5,17 @@ VisualStudioVersion = 16.0.31112.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{3549FE71-422B-4AB8-809E-491380A5E52C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChemistryLibrary", "ChemistryLibrary\ChemistryLibrary.csproj", "{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChemistryLibrary", "ChemistryLibrary\ChemistryLibrary.csproj", "{FC3C20CD-BC5C-4C63-AB00-C65B034D10BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoleculeViewer", "MoleculeViewer\MoleculeViewer.csproj", "{07EEAA45-49D0-4915-9104-531F1745BA64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoleculeViewer", "MoleculeViewer\MoleculeViewer.csproj", "{07EEAA45-49D0-4915-9104-531F1745BA64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChemistryLibraryTest", "ChemistryLibraryTest\ChemistryLibraryTest.csproj", "{545EB356-3701-48BD-B9A6-2F429DE6162D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChemistryLibraryTest", "ChemistryLibraryTest\ChemistryLibraryTest.csproj", "{545EB356-3701-48BD-B9A6-2F429DE6162D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Studies", "Studies\Studies.csproj", "{73032AAF-A48E-4138-8B83-D56E56EDF0D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Studies", "Studies\Studies.csproj", "{73032AAF-A48E-4138-8B83-D56E56EDF0D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj", "{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tools", "Tools\Tools.csproj", "{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceProfiling", "PerformanceProfiling\PerformanceProfiling.csproj", "{B2F0128E-9CC6-407F-B81A-02136EEBDABF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ACC45E6-55ED-4D6C-B4E1-A7C79C227088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2F0128E-9CC6-407F-B81A-02136EEBDABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2F0128E-9CC6-407F-B81A-02136EEBDABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2F0128E-9CC6-407F-B81A-02136EEBDABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2F0128E-9CC6-407F-B81A-02136EEBDABF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
