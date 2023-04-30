@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Commons.Extensions;
 
 namespace GenomeTools.ChemistryLibrary.Genomics
 {
@@ -9,10 +10,13 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         public string GetReadSequence(
             List<GenomeReadFeature> readFeatures, 
             int readLength,
-            string referenceSequence)
+            string referenceSequence,
+            bool isReadFeaturesSorted = false)
         {
+            if (!isReadFeaturesSorted)
+                readFeatures = SortReadFeatures(readFeatures);
             var sequence = referenceSequence;
-            foreach (var feature in readFeatures.OrderBy(x => x.InReadPosition))
+            foreach (var feature in readFeatures)
             {
                 switch (feature.Type)
                 {
@@ -80,12 +84,15 @@ namespace GenomeTools.ChemistryLibrary.Genomics
 
         public string GetReferenceAlignedSequence(
             List<GenomeReadFeature> readFeatures,
-            string referenceSequence)
+            string referenceSequence,
+            bool isReadFeaturesSorted = false)
         {
+            if (!isReadFeaturesSorted)
+                readFeatures = SortReadFeatures(readFeatures);
             var sequence = referenceSequence.ToCharArray();
             var deletionAndSkipOffset = 0;
             var insertionSoftClipOffset = 0;
-            foreach (var feature in readFeatures)
+            foreach (var feature in readFeatures.OrderBy(x => x.InReadPosition))
             {
                 var referencePosition = feature.InReadPosition + deletionAndSkipOffset - insertionSoftClipOffset;
                 switch (feature.Type)
@@ -94,6 +101,8 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                         Copy(feature.Sequence, 0, sequence, referencePosition, feature.Sequence.Count);
                         break;
                     case GenomeSequencePartType.Insertion:
+                        insertionSoftClipOffset += feature.Sequence.Count;
+                        break;
                     case GenomeSequencePartType.SoftClip:
                         insertionSoftClipOffset += feature.Sequence.Count;
                         break;
@@ -139,8 +148,13 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             return new string(sequence);
         }
 
-        public string GetReadQualityScores(List<GenomeReadFeature> readFeatures, int readLength)
+        public string GetReadQualityScores(
+            List<GenomeReadFeature> readFeatures, 
+            int readLength, 
+            bool isReadFeaturesSorted = false)
         {
+            if (!isReadFeaturesSorted)
+                readFeatures = SortReadFeatures(readFeatures);
             var qualityScores = new char[readLength];
             Array.Fill(qualityScores, '!');
             foreach (var feature in readFeatures)
@@ -180,8 +194,13 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             return new string(qualityScores);
         }
 
-        public string GetReferenceAlignedQualityScores(List<GenomeReadFeature> readFeatures, int readLength)
+        public string GetReferenceAlignedQualityScores(
+            List<GenomeReadFeature> readFeatures, 
+            int readLength,
+            bool isReadFeaturesSorted = false)
         {
+            if (!isReadFeaturesSorted)
+                readFeatures = SortReadFeatures(readFeatures);
             var deletionLength = readFeatures
                 .Where(x => x.Type == GenomeSequencePartType.Deletion)
                 .Sum(x => x.DeletionLength.Value);
@@ -261,5 +280,12 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             }
         }
 
+        public List<GenomeReadFeature> SortReadFeatures(
+            List<GenomeReadFeature> readFeatures)
+        {
+            return readFeatures.OrderBy(x => x.InReadPosition)
+                .ThenByDescending(x => x.Type.InSet(GenomeSequencePartType.Deletion, GenomeSequencePartType.ReferenceSkip) ? 1 : 0)
+                .ToList();
+        }
     }
 }

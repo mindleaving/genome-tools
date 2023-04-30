@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Commons.Extensions;
 using GenomeTools.ChemistryLibrary.IO;
 
 namespace GenomeTools.ChemistryLibrary.Genomics
@@ -11,6 +12,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
         private readonly string referenceAlignedSequence;
         private readonly string readQualityScores;
         private readonly string referenceAlignedQualityScores;
+        private readonly Dictionary<int, int> referenceIndexToReadIndexMap;
 
         public string Id { get; }
         public IReadOnlyList<GenomeReadFeature> ReadFeatures { get; }
@@ -32,6 +34,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             string readQualityScores,
             string referenceAlignedSequence,
             string referenceAlignedQualityScores,
+            Dictionary<int,int> referenceIndexToReadIndexMap,
             int? mappingQuality = null)
         {
             if (isMapped && (!referenceId.HasValue || !referenceStartIndex.HasValue))
@@ -48,6 +51,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             this.readQualityScores = readQualityScores;
             this.referenceAlignedSequence = referenceAlignedSequence;
             this.referenceAlignedQualityScores = referenceAlignedQualityScores;
+            this.referenceIndexToReadIndexMap = referenceIndexToReadIndexMap;
             Id = id;
             IsMapped = isMapped;
             ReferenceId = referenceId;
@@ -66,20 +70,21 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             int mappingQuality,
             string id = null)
         {
+            var readFormatter = new GenomeReadFormatter();
+            readFeatures = readFormatter.SortReadFeatures(readFeatures);
+
             var insertionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Insertion).Sum(x => x.Sequence.Count);
             var softClipsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.SoftClip).Sum(x => x.Sequence.Count);
             var deletionsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.Deletion).Sum(x => x.DeletionLength.Value);
             var skipsLength = readFeatures.Where(x => x.Type == GenomeSequencePartType.ReferenceSkip).Sum(x => x.SkipLength.Value);
             var referenceEndIndex = referenceStartIndex + readLength - insertionsLength - softClipsLength + deletionsLength + skipsLength - 1;
             var referenceSequence = referenceAccessor.GetSequenceById(referenceId, referenceStartIndex, referenceEndIndex).GetSequence();
+            var referenceIndexMap = MapReferenceIndexToReadIndex(readFeatures, referenceStartIndex);
 
-            readFeatures.Sort((a,b) => a.InReadPosition.CompareTo(b.InReadPosition));
-
-            var readFormatter = new GenomeReadFormatter();
-            var readSequence = readFormatter.GetReadSequence(readFeatures, readLength, referenceSequence);
-            var readQualityScores = readFormatter.GetReadQualityScores(readFeatures, readLength);
-            var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, referenceSequence);
-            var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength);
+            var readSequence = readFormatter.GetReadSequence(readFeatures, readLength, referenceSequence, isReadFeaturesSorted: true);
+            var readQualityScores = readFormatter.GetReadQualityScores(readFeatures, readLength, isReadFeaturesSorted: true);
+            var referenceAlignedSequence = readFormatter.GetReferenceAlignedSequence(readFeatures, referenceSequence, isReadFeaturesSorted: true);
+            var referenceAlignedQualityScores = readFormatter.GetReferenceAlignedQualityScores(readFeatures, readLength, isReadFeaturesSorted: true);
             return new GenomeRead(
                 id,
                 true,
@@ -91,6 +96,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                 readQualityScores,
                 referenceAlignedSequence,
                 referenceAlignedQualityScores,
+                referenceIndexMap,
                 mappingQuality);
         }
 
@@ -120,6 +126,7 @@ namespace GenomeTools.ChemistryLibrary.Genomics
                 readSequence,
                 readQualityScores,
                 null,
+                null,
                 null);
         }
 
@@ -133,6 +140,75 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             if(!IsMapped)
                 throw new InvalidOperationException("Reference aligned sequence is not supported for unmapped reads, even if they are placed. Use GetSequence() instead");
             return referenceAlignedSequence;
+        }
+
+        private static Dictionary<int, int> MapReferenceIndexToReadIndex(
+            List<GenomeReadFeature> readFeatures,
+            int referenceStartIndex)
+        {
+            var indexMap = new Dictionary<int, int>();
+            var referenceIndex = referenceStartIndex;
+            foreach (var feature in readFeatures)
+            {
+                switch (feature.Type)
+                {
+                    case GenomeSequencePartType.Bases:
+                        for (int baseIndex = 0; baseIndex < feature.Sequence.Count; baseIndex++)
+                        {
+                            var readIndex = feature.InReadPosition + baseIndex;
+                            indexMap[referenceIndex] = readIndex;
+                            referenceIndex++;
+                        }
+                        break;
+                    case GenomeSequencePartType.QualityScores:
+                        // Do nothing
+                        break;
+                    case GenomeSequencePartType.BaseWithQualityScore:
+                    case GenomeSequencePartType.Substitution:
+                    {
+                        var readIndex = feature.InReadPosition;
+                        indexMap[referenceIndex] = readIndex;
+                        referenceIndex++;
+                        break;
+                    }
+                    case GenomeSequencePartType.Insertion:
+                    {
+                        var readIndex = feature.InReadPosition;
+                        indexMap[referenceIndex] = readIndex;
+                        //referenceIndex++;
+                        break;
+                    }
+                    case GenomeSequencePartType.Deletion:
+                    {
+                        var readIndex = feature.InReadPosition;
+                        for (int deletionIndex = 0; deletionIndex < feature.DeletionLength!.Value; deletionIndex++)
+                        {
+                            indexMap[referenceIndex] = readIndex;
+                            referenceIndex++;
+                        }
+                        break;
+                    }
+                    case GenomeSequencePartType.ReferenceSkip:
+                    {
+                        var readIndex = feature.InReadPosition;
+                        for (int deletionIndex = 0; deletionIndex < feature.SkipLength!.Value; deletionIndex++)
+                        {
+                            indexMap[referenceIndex] = readIndex;
+                            referenceIndex++;
+                        }
+                        break;
+                    }
+                    case GenomeSequencePartType.SoftClip:
+                    case GenomeSequencePartType.HardClip:
+                    case GenomeSequencePartType.Padding:
+                        // Nothing to do
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            return indexMap;
         }
 
         public string GetQualityScores()
@@ -173,6 +249,36 @@ namespace GenomeTools.ChemistryLibrary.Genomics
             if(!IsMapped)
                 throw new InvalidOperationException("Genome read is not mapped to reference");
             return referenceAlignedQualityScores[referencePosition-ReferenceStartIndex.Value];
+        }
+
+        public IEnumerable<GenomeReadFeature> GetFeaturesAtReferencePosition(
+            int referenceIndex)
+        {
+            if (!referenceIndexToReadIndexMap.ContainsKey(referenceIndex))
+                return Enumerable.Empty<GenomeReadFeature>();
+            var readIndex = referenceIndexToReadIndexMap[referenceIndex];
+            return ReadFeatures.Where(
+                x =>
+                {
+                    switch (x.Type)
+                    {
+                        case GenomeSequencePartType.Bases:
+                        case GenomeSequencePartType.QualityScores:
+                        case GenomeSequencePartType.SoftClip:
+                        case GenomeSequencePartType.Padding:
+                            return readIndex.IsBetween(x.InReadPosition, x.InReadPosition + x.Sequence.Count - 1);
+                        case GenomeSequencePartType.BaseWithQualityScore:
+                        case GenomeSequencePartType.Substitution:
+                        case GenomeSequencePartType.Deletion:
+                        case GenomeSequencePartType.ReferenceSkip:
+                        case GenomeSequencePartType.HardClip:
+                            return x.InReadPosition == readIndex;
+                        case GenomeSequencePartType.Insertion:
+                            return x.InReadPosition == readIndex + 1;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                });
         }
     }
 }

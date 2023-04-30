@@ -22,7 +22,7 @@ namespace GenomeTools.ChemistryLibrary.IO
 
         public GenomeSequenceAccessor(
             string sequenceFilePath,
-            ReferenceSequenceMap sequenceNameOrder,
+            ReferenceSequenceMap sequenceNameOrder = null,
             bool useCaching = true)
         {
             this.sequenceFilePath = sequenceFilePath;
