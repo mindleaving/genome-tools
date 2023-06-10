@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Commons.Extensions;
@@ -8,10 +7,7 @@ using Commons.Mathematics;
 using GenomeTools.ChemistryLibrary.Genomics;
 using GenomeTools.ChemistryLibrary.IO;
 using GenomeTools.ChemistryLibrary.IO.Bam;
-using GenomeTools.ChemistryLibrary.IO.Cram.Models;
 using GenomeTools.ChemistryLibrary.IO.Fastq;
-using GenomeTools.ChemistryLibrary.IO.Sam;
-using GenomeTools.Tools;
 using ICSharpCode.SharpZipLib.GZip;
 using NUnit.Framework;
 
@@ -40,9 +36,14 @@ namespace GenomeTools.Studies.Nanopore
         }
 
         [Test]
+        [TestCase(@"F:\datasets\WFT_Nanopore\alignments\18S_IVT_2023-03-28.bam", 0)]
         [TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\18S_IVT_rRNA\18S_IVT_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\alignments\WT_ctrl_2023-03-28.bam", 0)]
         [TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\WT1_14_ctrl_1_rRNA\WT1_14_ctrl_1_rRNA.bam", 0)]
-        [TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\WT1_14_ctrl_1_rRNA\WT1_14_ctrl_1_rRNA.bam", 1)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_A_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_J1_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_V_rRNA.bam", 0)]
+        //[TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\WT1_14_ctrl_1_rRNA\WT1_14_ctrl_1_rRNA.bam", 1)]
         public void ReadLengthStatistics(string bamFilePath, int referenceIndex)
         {
             var referenceFilePath = @"F:\datasets\WFT_Nanopore\references\reference.fasta";
@@ -76,6 +77,9 @@ namespace GenomeTools.Studies.Nanopore
         [Test]
         [TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\18S_IVT_rRNA\18S_IVT_rRNA.bam", 0)]
         [TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\WT1_14_ctrl_1_rRNA\WT1_14_ctrl_1_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_A_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_J1_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_V_rRNA.bam", 0)]
         //[TestCase(@"F:\datasets\WFT_Nanopore\2023-04-13\WT1_14_ctrl_1_rRNA\WT1_14_ctrl_1_rRNA.bam", 1)]
         public void CalculateBaseStatistics(string bamFilePath, int referenceIndex)
         {
@@ -109,6 +113,10 @@ namespace GenomeTools.Studies.Nanopore
                         currentBaseStats.SkipCount++;
                     if (featuresAtPosition.Any(x => x.Type == GenomeSequencePartType.Deletion)) 
                         currentBaseStats.DeletionCount++;
+                    if (read.ReferenceStartIndex.HasValue && read.ReferenceStartIndex == i)
+                        currentBaseStats.ReadStartCount++;
+                    if (read.ReferenceEndIndex.HasValue && read.ReferenceEndIndex == i)
+                        currentBaseStats.ReadEndCount++;
                     switch (currentBase)
                     {
                         case 'A':
@@ -133,12 +141,12 @@ namespace GenomeTools.Studies.Nanopore
                 referenceFilePath,
                 AnalyzeBases);
 
-            Console.WriteLine("Index;Reference;Coverage;A;C;G;T;Insert;Deletion;Skip;SoftClip");
+            Console.WriteLine("Index;Reference;Coverage;A;C;G;T;Insert;Deletion;Skip;SoftClip;ReadStart;ReadEnd");
             for (var i = 0; i < baseStatistics.Count; i++)
             {
                 var baseStatistic = baseStatistics[i];
                 var referenceBase = referenceSequence.GetBaseAtPosition(i);
-                Console.WriteLine($"{i};{referenceBase};{baseStatistic.ReadCount};{baseStatistic.ACount};{baseStatistic.CCount};{baseStatistic.GCount};{baseStatistic.TCount};{baseStatistic.InsertionCount};{baseStatistic.DeletionCount};{baseStatistic.SkipCount};{baseStatistic.SoftClipCount}");
+                Console.WriteLine($"{i};{referenceBase};{baseStatistic.ReadCount};{baseStatistic.ACount};{baseStatistic.CCount};{baseStatistic.GCount};{baseStatistic.TCount};{baseStatistic.InsertionCount};{baseStatistic.DeletionCount};{baseStatistic.SkipCount};{baseStatistic.SoftClipCount};{baseStatistic.ReadStartCount};{baseStatistic.ReadEndCount}");
             }
         }
 
@@ -154,6 +162,60 @@ namespace GenomeTools.Studies.Nanopore
             public int InsertionCount { get; set; }
             public int SkipCount { get; set; }
             public int SoftClipCount { get; set; }
+            public int ReadStartCount { get; set; }
+            public int ReadEndCount { get; set; }
+        }
+
+        [Test]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_A_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_J1_rRNA.bam", 0)]
+        [TestCase(@"F:\datasets\WFT_Nanopore\20230509_WFT_blood_samples\blood_V_rRNA.bam", 0)]
+        public void GetReadStartEndPositions(
+            string bamFilePath,
+            int referenceIndex)
+        {
+            var referenceFilePath = @"F:\datasets\WFT_Nanopore\references\reference.fasta";
+            var bamReader = new BamReader();
+
+            var readSpans = new List<Range<int>>();
+
+            void AnalyzeBases(
+                GenomeRead read)
+            {
+                if (!read.IsMapped) return;
+                if (read.ReferenceId != referenceIndex) return;
+                
+                readSpans.Add(new Range<int>(read.ReferenceStartIndex!.Value, read.ReferenceEndIndex!.Value));
+            }
+
+            bamReader.Load(
+                bamFilePath,
+                referenceFilePath,
+                AnalyzeBases);
+
+            foreach (var readSpan in readSpans.OrderBy(x => x.From))
+            {
+                Console.WriteLine($"{readSpan.From};{readSpan.To}");
+            }
+        }
+
+        [Test]
+        [TestCase(1,7302)]
+        public void GetRandomSequence(int startIndex, int endIndex)
+        {
+            var sequence = Enumerable.Range(1, endIndex - startIndex + 1)
+                .Select(
+                    index => new
+                    {
+                        Index = index,
+                        RandomNumber = Random.Shared.NextDouble()
+                    })
+                .OrderBy(x => x.RandomNumber)
+                .Select(x => x.Index);
+            foreach (var i in sequence)
+            {
+                Console.WriteLine(i);
+            }
         }
     }
 }
